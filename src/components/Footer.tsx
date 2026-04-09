@@ -28,7 +28,7 @@ const Footer: React.FC = () => {
         <div className="md:col-span-2 space-y-6">
           <div className="flex items-center gap-2">
             <Film className="text-netflix-red" size={32} />
-            <Link to="/#" className="text-3xl font-extrabold tracking-tighter text-netflix-red font-outfit uppercase">
+            <Link to="/" className="text-3xl font-extrabold tracking-tighter text-netflix-red font-outfit uppercase">
               {t('app_name')}
             </Link>
           </div>

@@ -53,7 +53,7 @@ const Navbar: React.FC = () => {
         {/* ... logo section omitted ... */}
         <div className="flex items-center gap-8">
           <Link
-            to="/#"
+            to="/"
             className="text-3xl font-extrabold tracking-tighter text-netflix-red cursor-pointer font-outfit"
             onClick={() => setIsOpen(false)}
           >
