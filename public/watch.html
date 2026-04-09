@@ -797,6 +797,33 @@
             letter-spacing: 1px;
         }
 
+        .mobile-card-title {
+            display: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+            margin-top: 10px;
+            padding: 0 4px;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: 'Outfit';
+        }
+
+        @media (max-width: 768px) {
+            .mobile-card-title {
+                display: block;
+            }
+
+            .rec-card {
+                height: auto;
+                background: transparent;
+                border: none;
+                box-shadow: none;
+            }
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -1146,13 +1173,29 @@
                     <i data-lucide="layers"></i>
                     <span class="section-tag">Seasons</span>
                 </div>
-                <div id="season-list" class="season-list"></div>
+                <div class="rec-container" style="margin-bottom: 3rem;">
+                    <button class="nav-btn prev" onclick="scrollArea('season-list', 'prev')">
+                        <i data-lucide="chevron-left"></i>
+                    </button>
+                    <div id="season-list" class="season-list"></div>
+                    <button class="nav-btn next" onclick="scrollArea('season-list', 'next')">
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+                </div>
 
                 <div class="label-group" style="margin-top: 2rem; margin-bottom: 1rem;">
                     <i data-lucide="play-circle"></i>
                     <span class="section-tag">Episodes</span>
                 </div>
-                <div id="episode-grid" class="episode-grid"></div>
+                <div class="rec-container">
+                    <button class="nav-btn prev" onclick="scrollArea('episode-grid', 'prev')">
+                        <i data-lucide="chevron-left"></i>
+                    </button>
+                    <div id="episode-grid" class="episode-grid"></div>
+                    <button class="nav-btn next" onclick="scrollArea('episode-grid', 'next')">
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Enhanced Tips -->
@@ -1192,7 +1235,6 @@
                         <span class="section-tag">Synopsis</span>
                     </div>
                     <p id="movie-synopsis" class="synopsis-text"></p>
-
                     <div class="label-group" style="margin-bottom: 1.5rem;">
                         <i data-lucide="hash"></i>
                         <span class="section-tag">Categories</span>
@@ -1601,11 +1643,12 @@
 
                         return `
                             <div class="rec-card" onclick="window.location.href='/watch.html?id=${m.id}'">
-                                <img src="${poster}" alt="${title}" loading="lazy">
+                                <img src="${poster}" alt="${title}" loading="lazy" style="border-radius: 12px; border: 1px solid var(--glass-border);">
                                 <div class="rec-overlay">
                                     <div class="rec-title">${title}</div>
                                     <div class="rec-meta">${year} • <span style="color: #fbbf24">★ ${rating}</span></div>
                                 </div>
+                                <div class="mobile-card-title">${title}</div>
                             </div>
                         `;
                     }).join('');
@@ -1621,11 +1664,18 @@
 
         window.scrollRecs = (direction) => {
             const grid = document.getElementById('recommendations-grid');
-            // Kita geser sekitar 2-3 card (220px per card + gap)
-            // Biar kerasa "satu-satu" dan masih ada yang kelihatan di pinggir
             const scrollAmount = 440;
             grid.scrollBy({
                 left: direction === 'next' ? scrollAmount : -scrollAmount,
+                behavior: 'smooth'
+            });
+        };
+
+        window.scrollArea = (id, direction) => {
+            const area = document.getElementById(id);
+            const scrollAmount = direction === 'next' ? 400 : -400;
+            area.scrollBy({
+                left: scrollAmount,
                 behavior: 'smooth'
             });
         };
