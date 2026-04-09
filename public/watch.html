@@ -230,12 +230,15 @@
             gap: 10px;
             width: 100%;
             padding-bottom: 5px;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
         }
 
         .server-pills::-webkit-scrollbar {
-            display: none; /* Chrome/Safari */
+            display: none;
+            /* Chrome/Safari */
         }
 
         @media (min-width: 768px) {
@@ -315,6 +318,7 @@
             border: 1px solid var(--glass-border);
             box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
             margin-bottom: 5rem;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @media (max-width: 768px) {
@@ -322,6 +326,50 @@
                 border-radius: 0;
                 width: calc(100% + 3rem);
                 margin-left: -1.5rem;
+            }
+        }
+
+        /* Server Switching Smoothness */
+        #player {
+            width: 100%;
+            height: 100%;
+            border: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .player-frame.changing #player {
+            opacity: 0;
+        }
+
+        .player-loader {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            z-index: 5;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .player-frame.changing .player-loader {
+            opacity: 1;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(229, 9, 20, 0.1);
+            border-top-color: var(--accent-red);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
             }
         }
 
@@ -535,7 +583,10 @@
             </section>
 
             <!-- Video Player -->
-            <div class="player-frame stagger-in delay-4">
+            <div class="player-frame stagger-in delay-4" id="player-wrapper">
+                <div class="player-loader">
+                    <div class="spinner"></div>
+                </div>
                 <iframe id="player" allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *"
                     allowfullscreen webkitallowfullscreen mozallowfullscreen referrerpolicy="no-referrer"
                     loading="lazy"></iframe>
@@ -557,11 +608,16 @@
                 </div>
                 <div class="tip-item">
                     <i data-lucide="alert-circle"></i>
-                    <p><b>INDONESIAN MOVIES:</b> If not found on Servers 1-10, please try <b>Server 11 (Indo)</b>. If still unavailable, we apologize and will add it soon. / <i>Untuk film Indonesia, jika tidak ada di Server 1-10, silakan coba <b>Server 11 (Indo)</b>. Jika tetap tidak ada, mohon maaf, kami akan segera menambahkannya.</i></p>
+                    <p><b>INDONESIAN MOVIES:</b> If not found on Servers 1-10, please try <b>Server 11 (Indo)</b>. If
+                        still unavailable, we apologize and will add it soon. / <i>Untuk film Indonesia, jika tidak ada
+                            di Server 1-10, silakan coba <b>Server 11 (Indo)</b>. Jika tetap tidak ada, mohon maaf, kami
+                            akan segera menambahkannya.</i></p>
                 </div>
                 <div class="tip-item">
                     <i data-lucide="help-circle"></i>
-                    <p><b>STILL MISSING?</b> If the movie is unavailable on ALL servers, we apologize. We are constantly expanding our library. / <i>Jika film tetap tidak ada di SEMUA server, mohon maaf. Kami terus berupaya menambah koleksi film kami.</i></p>
+                    <p><b>STILL MISSING?</b> If the movie is unavailable on ALL servers, we apologize. We are constantly
+                        expanding our library. / <i>Jika film tetap tidak ada di SEMUA server, mohon maaf. Kami terus
+                            berupaya menambah koleksi film kami.</i></p>
                 </div>
             </div>
 
@@ -716,10 +772,23 @@
                     btn.className = `pill-btn ${isActive ? 'active' : ''}`;
                     btn.innerHTML = `<i data-lucide="${s.icon}"></i> <span>${s.name}</span>`;
                     btn.onclick = () => {
+                        if (btn.classList.contains('active')) return;
+
                         document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
-                        console.log("Loading Server:", s.name, "URL:", s.url);
-                        player.src = s.url;
+
+                        // Smooth Transition
+                        const playerWrapper = document.getElementById('player-wrapper');
+                        playerWrapper.classList.add('changing');
+
+                        setTimeout(() => {
+                            console.log("Loading Server:", s.name, "URL:", s.url);
+                            player.src = s.url;
+
+                            player.onload = () => {
+                                playerWrapper.classList.remove('changing');
+                            };
+                        }, 400);
                     };
                     serverList.appendChild(btn);
                 });
