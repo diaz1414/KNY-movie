@@ -8,252 +8,539 @@
     <title>KNY Movie - Watch</title>
     <meta name="description"
         content="Streaming film dan serial favoritmu dengan kualitas terbaik di Kita Nonton Yuk (KNY)." />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
         :root {
-            --bg-primary: #0a0a0d;
-            --bg-secondary: #141419;
-            --netflix-red: #e50914;
-            --text-primary: #ffffff;
-            --text-secondary: #b3b3b3;
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg-black: #020202;
+            --accent-red: #E50914;
+            --accent-red-glow: rgba(229, 9, 20, 0.5);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-highlight: rgba(255, 255, 255, 0.12);
+            --text-main: #FFFFFF;
+            --text-dim: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.35);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
+            background-color: var(--bg-black);
+            color: var(--text-main);
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
             overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
 
+        /* Immersive Backdrop System */
+        #backdrop-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background-color: var(--bg-black);
+        }
+
+        #backdrop-image {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+            filter: blur(60px) brightness(0.25);
+            transform: scale(1.1);
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        .gradient-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.4) 100%),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, transparent 50%, rgba(0, 0, 0, 0.9) 100%);
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 2rem;
+            padding-bottom: 22rem;
+            /* Safety space for mobile bars */
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+                padding-bottom: 25rem;
+            }
+        }
+
+        /* Back Navigation */
+        .back-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 3rem;
+            padding: 12px 20px;
+            border-radius: 100px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            transition: var(--transition);
+        }
+
+        .back-nav:hover {
+            color: white;
+            background: var(--glass-highlight);
+            transform: translateX(-8px);
+        }
+
+        /* Staggered Content Animation */
+        .stagger-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .delay-1 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.3s;
+        }
+
+        .delay-4 {
+            animation-delay: 0.4s;
+        }
+
+        /* Typography */
         h1,
         h2,
+        h3,
         .font-outfit {
             font-family: 'Outfit', sans-serif;
         }
 
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 2rem;
-            padding-bottom: 20rem;
-            /* Huge safety space for mobile browser bars */
+        .movie-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            line-height: 0.95;
+            letter-spacing: -3px;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .back-btn {
-            display: inline-flex;
+        /* Meta Information */
+        .meta-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .meta-pill {
+            display: flex;
             align-items: center;
-            gap: 0.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: bold;
-            margin-bottom: 2rem;
-            transition: color 0.3s;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 14px;
+            border-radius: 8px;
+        }
+
+        .meta-pill i {
+            width: 16px;
+            color: var(--accent-red);
+        }
+
+        /* Server Selection - Apple Style */
+        .server-grid {
+            margin-bottom: 3.5rem;
+        }
+
+        .label-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.25rem;
+        }
+
+        .label-group i {
+            width: 14px;
+            color: var(--accent-red);
+        }
+
+        .section-tag {
+            font-size: 0.7rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--accent-red);
+        }
+
+        .server-pills {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .pill-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+            padding: 14px 24px;
+            border-radius: 100px;
             cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            backdrop-filter: blur(30px);
         }
 
-        .back-btn:hover {
+        .pill-btn i {
+            width: 16px;
+            opacity: 0.6;
+        }
+
+        .pill-btn.active {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
             color: white;
+            box-shadow: 0 0 30px var(--accent-red-glow);
+            transform: scale(1.05);
         }
 
-        .player-container {
+        .pill-btn.active i {
+            opacity: 1;
+        }
+
+        .pill-btn:hover:not(.active) {
+            background: var(--glass-highlight);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Enhanced Player Wrapper */
+        .player-frame {
+            position: relative;
             width: 100%;
             aspect-ratio: 16/9;
             background: #000;
-            margin-bottom: 2rem;
-            position: relative;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
+            margin-bottom: 5rem;
+        }
+
+        @media (max-width: 768px) {
+            .player-frame {
+                border-radius: 0;
+                width: calc(100% + 3rem);
+                margin-left: -1.5rem;
+            }
         }
 
         iframe {
             width: 100%;
             height: 100%;
             border: none;
-            display: block;
         }
 
-        .server-btns {
+        /* Tips Banner */
+        .tips-banner {
             display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
+            flex-direction: column;
+            gap: 12px;
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.1), rgba(0, 0, 0, 0));
+            border-left: 4px solid var(--accent-red);
+            padding: 1.5rem;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin-bottom: 4rem;
+            backdrop-filter: blur(10px);
         }
 
-        .server-btn {
-            background: var(--bg-secondary);
-            border: 1px solid var(--glass-border);
-            color: var(--text-secondary);
-            padding: 0.75rem 1.5rem;
-            border-radius: 9999px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: var(--text-dim);
         }
 
-        .server-btn.active {
-            background: var(--netflix-red);
-            border-color: var(--netflix-red);
-            color: white;
-            box-shadow: 0 10px 15px -3px rgba(229, 9, 20, 0.3);
+        .tip-item i {
+            width: 18px;
+            color: var(--accent-red);
+            flex-shrink: 0;
+            margin-top: 2px;
         }
 
-        .movie-info {
+        /* Info Grid - Disney Depth */
+        .content-grid {
             display: grid;
             grid-template-cols: 1fr;
-            gap: 2rem;
+            gap: 4rem;
         }
 
         @media (min-width: 1024px) {
-            .movie-info {
-                grid-template-cols: 2fr 1fr;
+            .content-grid {
+                grid-template-cols: 2.2fr 1fr;
             }
         }
 
-        .title {
-            font-size: 3rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
+        .synopsis-text {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            line-height: 1.8;
+            margin-bottom: 3rem;
         }
 
-        .meta {
+        .tag-cloud {
             display: flex;
-            gap: 1.5rem;
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .synopsis {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
-
-        .genre-pill {
-            display: inline-block;
-            background: var(--bg-secondary);
+        .tag {
+            background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            padding: 0.4rem 1rem;
-            border-radius: 9999px;
+            padding: 8px 18px;
+            border-radius: 12px;
             font-size: 0.8rem;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
+            font-weight: 700;
+            transition: var(--transition);
         }
 
-        .sidebar-card {
-            background: var(--bg-secondary);
+        .tag:hover {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
+        }
+
+        /* Sidebar Glass Card */
+        .elite-card {
+            background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            padding: 2rem;
-            border-radius: 1.5rem;
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(40px);
+            align-self: start;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
         }
 
-        .sidebar-label {
-            color: var(--netflix-red);
-            font-size: 0.7rem;
-            letter-spacing: 3px;
-            font-weight: 900;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar-value {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 1.5rem;
-        }
-
-        .tips-container {
-            background: var(--bg-secondary);
-            border: 1px solid var(--glass-border);
-            padding: 1.5rem;
-            border-radius: 1rem;
+        .card-row {
             margin-bottom: 2rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
         }
 
-        .loading-overlay {
+        .card-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-label {
+            font-size: 0.7rem;
+            font-weight: 900;
+            color: var(--accent-red);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        /* Loader */
+        .master-loader {
             position: fixed;
             inset: 0;
-            background: var(--bg-primary);
+            background: var(--bg-black);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
         }
 
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .logo-pulse {
+            width: 100px;
+            height: 100px;
+            background: url('/logo.png') center/contain no-repeat;
+            animation: pulse-glow 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                transform: scale(0.9);
+                opacity: 0.6;
+                filter: drop-shadow(0 0 0px var(--accent-red));
             }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+                filter: drop-shadow(0 0 30px var(--accent-red));
+            }
+        }
+
+        .loader-label {
+            margin-top: 3rem;
+            font-family: 'Outfit';
+            font-weight: 900;
+            letter-spacing: 8px;
+            color: white;
+            font-size: 0.75rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-red);
         }
     </style>
 </head>
 
 <body>
-    <div id="loading" class="loading-overlay">
-        <div class="spinner"></div>
+    <div id="backdrop-canvas"></div>
+    <div id="backdrop-image"></div>
+    <div class="gradient-overlay"></div>
+
+    <div id="master-loader" class="master-loader">
+        <div class="logo-pulse"></div>
+        <div class="loader-label">LOADING...</div>
     </div>
 
-    <div class="container">
-        <a href="/" class="back-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-            KEMBALI KE BERANDA
-        </a>
+    <div class="container" id="main-container" style="display: none;">
+        <nav class="stagger-in delay-1">
+            <a href="/" class="back-nav">
+                <i data-lucide="arrow-left"></i>
+                Back to Home
+            </a>
+        </nav>
 
-        <div id="content" style="display: none;">
-            <h1 id="movie-title" class="title"></h1>
+        <div id="content-mount">
+            <!-- Header Section -->
+            <header class="stagger-in delay-2">
+                <h1 id="movie-title" class="movie-title"></h1>
+                <div class="meta-strip" id="movie-meta"></div>
+            </header>
 
-            <div class="server-btns" id="server-list">
-                <!-- Servers will be injected here -->
-            </div>
-
-            <div class="tips-container">
-                <p>💡 <b>Tips:</b> Jika video macet, klik sekali di dalam player untuk menutup iklan rahasia, lalu klik
-                    play lagi.</p>
-                <p style="margin-top: 0.5rem;">🇮🇩 <b>Subtitle:</b> Klik ikon <b>CC</b> di pojok kanan bawah player
-                    untuk menyalakan Bahasa Indonesia.</p>
-            </div>
-
-            <div class="player-container">
-                <iframe id="player" allowfullscreen></iframe>
-            </div>
-
-            <div class="movie-info">
-                <div>
-                    <div class="meta" id="movie-meta"></div>
-                    <p id="movie-synopsis" class="synopsis"></p>
-                    <div id="movie-genres"></div>
+            <!-- Server Section -->
+            <section class="server-grid stagger-in delay-3">
+                <div class="label-group">
+                    <i data-lucide="monitor"></i>
+                    <span class="section-tag">Streaming Servers</span>
                 </div>
-                <div class="sidebar-card">
-                    <div class="sidebar-label">Director</div>
-                    <div id="movie-director" class="sidebar-value"></div>
-                    <div class="sidebar-label">Top Cast</div>
-                    <div id="movie-cast" class="sidebar-value"></div>
+                <div class="server-pills" id="server-list"></div>
+            </section>
+
+            <!-- Video Player -->
+            <div class="player-frame stagger-in delay-4">
+                <iframe id="player" allowfullscreen allow="autoplay; fullscreen"></iframe>
+            </div>
+
+            <!-- Enhanced Tips -->
+            <div class="tips-banner stagger-in">
+                <div class="tip-item">
+                    <i data-lucide="mouse-pointer-click"></i>
+                    <p><b>AD BUFFER:</b> If the player feels locked, click once inside to clear invisible ads, then
+                        press play again.</p>
+                </div>
+                <div class="tip-item">
+                    <i data-lucide="languages"></i>
+                    <p><b>LANGUAGES:</b> Use the <b>CC</b> icon in the bottom-right of the player to enable subtitles.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="content-grid stagger-in">
+                <div class="info-block">
+                    <div class="label-group" style="margin-bottom: 1rem;">
+                        <i data-lucide="file-text"></i>
+                        <span class="section-tag">Synopsis</span>
+                    </div>
+                    <p id="movie-synopsis" class="synopsis-text"></p>
+
+                    <div class="label-group" style="margin-bottom: 1.5rem;">
+                        <i data-lucide="hash"></i>
+                        <span class="section-tag">Categories</span>
+                    </div>
+                    <div id="movie-genres" class="tag-cloud"></div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="elite-card">
+                        <div class="card-row">
+                            <div class="card-label">Production</div>
+                            <div id="movie-director" class="card-value"></div>
+                        </div>
+                        <div class="card-row">
+                            <div class="card-label">Main Cast</div>
+                            <div id="movie-cast" class="card-value"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -270,36 +557,60 @@
 
         async function init() {
             try {
+                // Fetch TMDB Data
                 const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}&append_to_response=credits`);
                 let movie = await response.json();
 
-                // If movie fails, try TV
+                // Check TV if Movie fails
                 if (!movie.title && !movie.name) {
                     const tvResponse = await fetch(`https://api.themoviedb.org/3/tv/${movieId}?api_key=${API_KEY}&append_to_response=credits`);
                     movie = await tvResponse.json();
                 }
 
-                document.title = `${movie.title || movie.name} - Kita Nonton Yuk`;
-                document.getElementById('movie-title').textContent = movie.title || movie.name;
+                if (!movie.id) throw new Error("Item not found");
+
+                // Dynamic UI Polish
+                const movieTitle = movie.original_title || movie.original_name || movie.title || movie.name;
+                document.title = `Watch ${movieTitle} - KNY`;
+
+                // Backdrop handling
+                const backdrop = document.getElementById('backdrop-image');
+                backdrop.style.backgroundImage = `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`;
+                backdrop.onload = () => backdrop.style.opacity = '1';
+                setTimeout(() => backdrop.style.opacity = '1', 100);
+
+                // Populate Fields
+                document.getElementById('movie-title').textContent = movieTitle;
                 document.getElementById('movie-synopsis').textContent = movie.overview;
-                document.getElementById('movie-director').textContent = movie.credits?.crew?.find(c => c.job === 'Director')?.name || 'Various';
-                document.getElementById('movie-cast').innerHTML = movie.credits?.cast?.slice(0, 5).map(c => `<div>• ${c.name}</div>`).join('') || 'Unknown';
 
+                const metaMount = document.getElementById('movie-meta');
                 const meta = [
-                    movie.release_date || movie.first_air_date,
-                    movie.runtime ? `${movie.runtime}m` : (movie.number_of_seasons ? `${movie.number_of_seasons} Seasons` : ''),
-                    movie.vote_average ? `⭐ ${movie.vote_average.toFixed(1)}` : ''
-                ].filter(Boolean);
-                document.getElementById('movie-meta').textContent = meta.join('  •  ');
+                    { icon: 'calendar', val: movie.release_date || movie.first_air_date },
+                    { icon: 'star', val: movie.vote_average ? movie.vote_average.toFixed(1) : 'NR' },
+                    { icon: 'clock', val: movie.runtime ? `${movie.runtime}m` : (movie.number_of_seasons ? `${movie.number_of_seasons} Seasons` : 'N/A') }
+                ];
 
-                document.getElementById('movie-genres').innerHTML = movie.genres.map(g => `<span class="genre-pill">${g.name}</span>`).join('');
+                metaMount.innerHTML = meta.map(m => `
+                    <div class="meta-pill">
+                        <i data-lucide="${m.icon}"></i>
+                        ${m.val}
+                    </div>
+                `).join('');
 
+                // Production Sidebar
+                document.getElementById('movie-director').textContent = movie.credits?.crew?.find(c => c.job === 'Director')?.name || 'Various Production';
+                document.getElementById('movie-cast').innerHTML = movie.credits?.cast?.slice(0, 5).map(c => `<div style="margin-bottom: 0.5rem;">${c.name}</div>`).join('') || 'N/A';
+
+                // Genres
+                document.getElementById('movie-genres').innerHTML = movie.genres.map(g => `<span class="tag">${g.name}</span>`).join('');
+
+                // Server Logic
                 const isTV = !!movie.name;
                 const type = isTV ? 'tv' : 'movie';
                 const servers = [
-                    { name: 'Server 1 (Faster)', url: `https://vidsrcme.su/embed/${type}/${movieId}` },
-                    { name: 'Server 2 (Mirror)', url: `https://vidsrcme.ru/embed/${type}/${movieId}` },
-                    { name: 'Server 3 (Extra Subs)', url: `https://vidsrc-me.ru/embed/${type}/${movieId}` }
+                    { name: 'Server 1', icon: 'zap', url: `https://vidsrcme.su/embed/${type}/${movieId}` },
+                    { name: 'Server 2', icon: 'film', url: `https://vidsrcme.ru/embed/${type}/${movieId}` },
+                    { name: 'Server 3', icon: 'globe', url: `https://vidsrc-me.ru/embed/${type}/${movieId}` }
                 ];
 
                 const serverList = document.getElementById('server-list');
@@ -307,10 +618,10 @@
 
                 servers.forEach((s, idx) => {
                     const btn = document.createElement('button');
-                    btn.className = `server-btn ${idx === 0 ? 'active' : ''}`;
-                    btn.textContent = s.name;
+                    btn.className = `pill-btn ${idx === 0 ? 'active' : ''}`;
+                    btn.innerHTML = `<i data-lucide="${s.icon}"></i> ${s.name}`;
                     btn.onclick = () => {
-                        document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
                         player.src = s.url;
                     };
@@ -319,12 +630,22 @@
 
                 player.src = servers[0].url;
 
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
+                // Finalize Entrance
+                lucide.createIcons(); // Initialize all icons
+
+                setTimeout(() => {
+                    document.getElementById('master-loader').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('master-loader').style.display = 'none';
+                        document.getElementById('main-container').style.display = 'block';
+                    }, 800);
+                }, 1500);
 
             } catch (err) {
                 console.error(err);
-                alert('Gagal memuat detail film.');
+                document.querySelector('.loader-label').textContent = "Cinematic Error: Content Not Found";
+                document.querySelector('.logo-pulse').style.animation = "none";
+                document.querySelector('.logo-pulse').style.filter = "grayscale(1)";
             }
         }
 

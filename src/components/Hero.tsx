@@ -16,16 +16,16 @@ const Hero: React.FC<{ movie?: UnifiedMovie }> = ({ movie }) => {
   if (!movie) return <div className="h-[80vh] w-full bg-[var(--bg-secondary)] rounded-3xl animate-pulse" />;
 
   return (
-    <div className="relative h-[70vh] md:h-[80vh] w-full flex items-center px-[var(--container-padding)] overflow-hidden rounded-3xl group">
+    <div className="relative h-[70vh] md:h-[80vh] w-full flex items-center px-[var(--container-padding)] overflow-hidden rounded-3xl group bg-black">
       {/* Background Image with Gradients */}
-      <div className="absolute inset-0 -z-10 transition-transform duration-700 group-hover:scale-105">
+      <div className="absolute inset-0 z-0 transition-transform duration-700 group-hover:scale-105">
         <img 
           src={movie.backdrop} 
           alt={movie.title}
-          className="w-full h-full object-cover brightness-50"
+          className="w-full h-full object-cover brightness-[0.7] opacity-80"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-transparent to-black/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-primary)] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-transparent to-transparent opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-primary)] via-transparent to-transparent opacity-80" />
       </div>
 
       {/* Content */}

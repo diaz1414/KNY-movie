@@ -27,8 +27,19 @@ const MovieCard: React.FC<{ movie: UnifiedMovie }> = ({ movie }) => {
         loading="lazy"
       />
       
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-5 gap-3">
+      {/* Mobile Title View (Always visible on mobile) */}
+      <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent md:hidden">
+        <h4 className="text-white text-xs font-bold leading-tight line-clamp-2 drop-shadow-lg">
+          {movie.title}
+        </h4>
+        <div className="flex items-center gap-1.5 text-yellow-500 font-bold text-[10px] mt-1">
+          <Star size={10} fill="currentColor" />
+          <span>{movie.rating}</span>
+        </div>
+      </div>
+
+      {/* Desktop Hover Overlay (Hidden on mobile via group-hover logic) */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-0 md:group-hover:opacity-100 transition-all duration-300 hidden md:flex flex-col justify-end p-5 gap-3">
         <h4 className="text-white text-base font-bold leading-tight font-outfit drop-shadow-md">
           {movie.title}
         </h4>

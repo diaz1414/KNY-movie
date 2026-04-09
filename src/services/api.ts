@@ -12,7 +12,9 @@ const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 export interface TMDBMovie {
   id: number;
   title: string;
+  original_title?: string;
   name?: string; // For TV shows
+  original_name?: string;
   poster_path: string;
   backdrop_path: string;
   vote_average: number;
@@ -50,7 +52,7 @@ const getImageUrl = (path: string, size: 'w500' | 'original' | 'w1280' = 'w500')
 
 const normalizeTMDB = (data: TMDBMovie): UnifiedMovie => ({
   id: data.id.toString(),
-  title: data.title || data.name || 'Untitled',
+  title: data.original_title || data.original_name || data.title || data.name || 'Untitled',
   poster: getImageUrl(data.poster_path, 'w500'),
   backdrop: getImageUrl(data.backdrop_path, 'w1280'),
   rating: data.vote_average.toFixed(1),
@@ -69,17 +71,17 @@ const api = axios.create({
 
 export const movieService = {
   getPopularMovies: async (lang: string = 'en-US') => {
-    const res = await api.get('/movie/popular', { params: { language: lang } });
+    const res = await api.get('/movie/popular', { params: { language: lang, region: 'US' } });
     return res.data.results.map(normalizeTMDB);
   },
 
   getRecentMovies: async (lang: string = 'en-US') => {
-    const res = await api.get('/movie/now_playing', { params: { language: lang } });
+    const res = await api.get('/movie/now_playing', { params: { language: lang, region: 'US' } });
     return res.data.results.map(normalizeTMDB);
   },
 
   getPopularSeries: async (lang: string = 'en-US') => {
-    const res = await api.get('/tv/popular', { params: { language: lang } });
+    const res = await api.get('/tv/popular', { params: { language: lang, region: 'US' } });
     return res.data.results.map(normalizeTMDB);
   },
 

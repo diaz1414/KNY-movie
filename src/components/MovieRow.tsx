@@ -4,11 +4,12 @@ import MovieCard from './MovieCard';
 import type { UnifiedMovie } from '../services/api';
 
 interface MovieRowProps {
+  id?: string;
   title: string;
   movies: UnifiedMovie[];
 }
 
-const MovieRow: React.FC<MovieRowProps> = ({ title, movies }) => {
+const MovieRow: React.FC<MovieRowProps> = ({ id, title, movies }) => {
   const rowRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -20,7 +21,7 @@ const MovieRow: React.FC<MovieRowProps> = ({ title, movies }) => {
   };
 
   return (
-    <div className="relative group/row py-4">
+    <div id={id} className="relative group/row py-4 scroll-mt-24">
       <h2 className="text-xl md:text-2xl font-bold mb-6 px-[var(--container-padding)] font-outfit text-[var(--text-primary)]">
         {title}
       </h2>

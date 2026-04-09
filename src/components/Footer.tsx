@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FaInstagram, FaGithub, FaXTwitter, FaEnvelope } from 'react-icons/fa6';
 import { Film } from 'lucide-react';
@@ -14,10 +15,10 @@ const Footer: React.FC = () => {
   ];
 
   const links = [
-    { name: t('about'), path: '#' },
-    { name: t('contact'), path: '#' },
-    { name: t('privacy'), path: '#' },
-    { name: t('terms'), path: '#' },
+    { name: t('about'), path: '/about' },
+    { name: t('contact'), path: '/contact' },
+    { name: t('privacy'), path: '/privacy' },
+    { name: t('terms'), path: '/terms' },
   ];
 
   return (
@@ -27,9 +28,9 @@ const Footer: React.FC = () => {
         <div className="md:col-span-2 space-y-6">
           <div className="flex items-center gap-2">
             <Film className="text-netflix-red" size={32} />
-            <span className="text-3xl font-extrabold tracking-tighter text-netflix-red font-outfit uppercase">
+            <Link to="/" className="text-3xl font-extrabold tracking-tighter text-netflix-red font-outfit uppercase">
               {t('app_name')}
-            </span>
+            </Link>
           </div>
           <p className="text-[var(--text-secondary)] text-lg leading-relaxed max-w-md">
             {t('footer_desc')}
@@ -56,12 +57,12 @@ const Footer: React.FC = () => {
           <ul className="space-y-4">
             {links.map((link) => (
               <li key={link.name}>
-                <a
-                  href={link.path}
+                <Link
+                  to={link.path}
                   className="text-[var(--text-secondary)] hover:text-netflix-red transition-colors duration-200"
                 >
                   {link.name}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
