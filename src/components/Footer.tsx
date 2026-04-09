@@ -8,10 +8,10 @@ const Footer: React.FC = () => {
   const { t } = useTranslation();
 
   const socialLinks = [
-    { icon: <FaInstagram size={20} />, href: 'https://www.instagram.com/', label: 'Instagram' },
-    { icon: <FaXTwitter size={20} />, href: 'https://x.com/', label: 'Twitter' },
-    { icon: <FaGithub size={20} />, href: 'https://github.com/diaz1414/KNY-movie', label: 'GitHub' },
-    { icon: <FaEnvelope size={20} />, href: 'https://mail.google.com/', label: 'Email' },
+    { icon: <FaInstagram size={20} />, href: 'https://www.instagram.com/', target: '_blank', label: 'Instagram' },
+    { icon: <FaXTwitter size={20} />, href: 'https://x.com/', target: '_blank', label: 'Twitter' },
+    { icon: <FaGithub size={20} />, href: 'https://github.com/diaz1414/KNY-movie', target: '_blank', label: 'GitHub' },
+    { icon: <FaEnvelope size={20} />, href: 'https://mail.google.com/', target: '_blank', label: 'Email' },
   ];
 
   const links = [
