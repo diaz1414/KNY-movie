@@ -1,17 +1,21 @@
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigationType } from 'react-router-dom';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
+  const navType = useNavigationType();
 
   useEffect(() => {
-    // Paksa layar ke posisi paling atas setiap kali URL berubah
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'smooth' // Biar efek nanjaknya halus, Bos
-    });
-  }, [pathname]);
+    // Hanya scroll ke atas kalau navigasi BARU (PUSH), 
+    // kalau navigasi BACK/FORWARD (POP), biarkan browser yang atur posisinya.
+    if (navType !== 'POP') {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'instant' // Instant lebih akurat buat navigasi antar page
+      });
+    }
+  }, [pathname, navType]);
 
   return null;
 };

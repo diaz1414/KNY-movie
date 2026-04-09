@@ -21,7 +21,34 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const searchRef = useRef<HTMLDivElement>(null);
 
+  // Restore state on mount
   useEffect(() => {
+    const savedState = sessionStorage.getItem('home_state');
+    if (savedState) {
+      const { 
+        popularMovies: savedPop, 
+        recentMovies: savedRecent, 
+        popularSeries: savedSeries, 
+        scrollY 
+      } = JSON.parse(savedState);
+      
+      setPopularMovies(savedPop);
+      setRecentMovies(savedRecent);
+      setPopularSeries(savedSeries);
+      setLoading(false);
+
+      setTimeout(() => {
+        window.scrollTo({
+          top: scrollY,
+          behavior: 'instant'
+        });
+      }, 100);
+    } else {
+      fetchData();
+    }
+  }, [i18n.language]);
+
+  const fetchData = () => {
     setLoading(true);
     Promise.all([
       movieService.getPopularMovies(i18n.language),
@@ -36,7 +63,36 @@ const Home: React.FC = () => {
       console.error(err);
       setLoading(false);
     });
-  }, [i18n.language]);
+  };
+
+  // Save state
+  useEffect(() => {
+    const handleSaveState = () => {
+      if (popularMovies.length > 0) {
+        sessionStorage.setItem('home_state', JSON.stringify({
+          popularMovies,
+          recentMovies,
+          popularSeries,
+          scrollY: window.scrollY
+        }));
+      }
+    };
+
+    handleSaveState();
+
+    const handleScroll = () => {
+      if (popularMovies.length > 0) {
+        const current = JSON.parse(sessionStorage.getItem('home_state') || '{}');
+        sessionStorage.setItem('home_state', JSON.stringify({
+          ...current,
+          scrollY: window.scrollY
+        }));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [popularMovies, recentMovies, popularSeries]);
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -131,7 +187,7 @@ const Home: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                  <button 
+                  <button
                     type="submit"
                     className="w-full py-4 text-sm font-black text-center text-zinc-400 hover:text-white hover:bg-zinc-800 border-t border-zinc-800 bg-zinc-900/50 transition-all"
                   >

@@ -523,7 +523,7 @@
             border: 1px solid var(--glass-border);
             margin-bottom: 10px;
             transition: var(--transition);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
         }
 
         .season-card.active .season-poster {
@@ -566,6 +566,7 @@
             .ep-card {
                 flex: 0 0 240px;
             }
+
             .season-card {
                 flex: 0 0 110px;
             }
@@ -602,7 +603,7 @@
             font-size: 0.7rem;
             font-weight: 900;
             letter-spacing: 1px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             z-index: 2;
         }
 
@@ -647,7 +648,7 @@
             width: 48px;
             height: 48px;
             color: white;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
         }
 
         /* Loader */
@@ -709,8 +710,386 @@
             border-radius: 10px;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
+        /* Recommendations Section */
+        .recommendations-section {
+            margin-top: 5rem;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        .rec-grid {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 20px 0 40px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .rec-grid::-webkit-scrollbar {
+            display: none;
+        }
+
+        .rec-card {
+            flex: 0 0 160px;
+            position: relative;
+            aspect-ratio: 2/3;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+        }
+
+        @media (min-width: 768px) {
+            .rec-card {
+                flex: 0 0 200px;
+            }
+        }
+
+        .rec-card:hover {
+            transform: scale(1.05) translateY(-10px);
+            border-color: var(--accent-red);
+            box-shadow: 0 20px 40px var(--accent-red-glow);
+        }
+
+        .rec-card img {
+            width: 100%;
+            height: 100%;
+            object-cover: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .rec-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .rec-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 60%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .rec-card:hover .rec-overlay {
+            opacity: 1;
+        }
+
+        .rec-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 4px;
+            font-family: 'Outfit';
+        }
+
+        .rec-meta {
+            font-size: 0.7rem;
+            color: var(--accent-red);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Nav Arrows for Desktop */
+        .rec-container {
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--glass-border);
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        @media (min-width: 1024px) {
+            .nav-btn {
+                display: flex;
+            }
+        }
+
+        .nav-btn:hover {
             background: var(--accent-red);
+            border-color: var(--accent-red);
+            width: 60px;
+        }
+
+        .nav-btn.prev {
+            left: -25px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .nav-btn.next {
+            right: -25px;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .nav-btn i {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* --- PREMIUM CINEMATIC FOOTER --- */
+        footer {
+            margin-top: 8rem;
+            background: #080808;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 5rem 2rem 3rem;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            footer {
+                padding: 4rem 1.5rem 3rem;
+                text-align: center;
+            }
+        }
+
+        .footer-max {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-cols: 1fr;
+            gap: 4rem;
+            margin-bottom: 5rem;
+        }
+
+        @media (min-width: 1024px) {
+            .footer-grid {
+                grid-template-cols: 2.2fr 1fr 1.8fr;
+                gap: 6rem;
+                text-align: left;
+            }
+        }
+
+        .brand-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .brand-section {
+                align-items: center;
+            }
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--accent-red);
+            text-decoration: none;
+            font-size: 1.8rem;
+            font-weight: 900;
+            font-family: 'Outfit';
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            transition: var(--transition);
+        }
+
+        .brand-logo:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .brand-desc {
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.8;
+            max-width: 450px;
+            font-size: 0.9rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+            margin-top: 0.5rem;
+        }
+
+        .social-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .social-btn img, .social-btn i {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .social-btn:hover {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px var(--accent-red-glow);
+        }
+
+        .social-btn:hover img, .social-btn:hover i {
+            opacity: 1;
+            filter: brightness(1.5);
+            transform: scale(1.1);
+        }
+
+        .footer-heading {
+            font-family: 'Inter';
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .footer-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            padding: 0;
+        }
+
+        .footer-list.genres {
+            display: grid;
+            grid-template-cols: 1fr 1fr;
+            gap: 1rem 3rem;
+        }
+
+        .footer-list a {
+            color: rgba(255, 255, 255, 0.45);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .footer-list a:hover {
+            color: var(--accent-red);
+            padding-left: 5px;
+        }
+
+        .footer-bottom-sync {
+            padding-top: 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            .footer-bottom-sync {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .lang-switch span {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lang-switch span:hover {
+            color: white;
+        }
+
+        /* Fixed Navigation Arrows */
+        .nav-btn {
+            background: rgba(0, 0, 0, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: var(--accent-red) !important;
+            width: 45px !important;
+            height: 45px !important;
+            transition: all 0.3s ease !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: var(--accent-red) !important;
+            color: white !important;
+            transform: scale(1.1);
+        }
+
+        /* Scroll To Top Button - Premium Red */
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--accent-red);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(20px);
+            box-shadow: 0 10px 25px var(--accent-red-glow);
+        }
+
+        #back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        #back-to-top:hover {
+            background: white;
+            color: var(--accent-red);
+            transform: translateY(-5px) scale(1.1);
         }
     </style>
 </head>
@@ -727,9 +1106,9 @@
 
     <div class="container" id="main-container" style="display: none;">
         <nav class="stagger-in delay-1">
-            <a href="/" class="back-nav">
+            <a href="/" class="back-nav" onclick="if(window.history.length > 1) { history.back(); return false; }">
                 <i data-lucide="arrow-left"></i>
-                Back to Home
+                Back
             </a>
         </nav>
 
@@ -832,6 +1211,96 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Recommendations Section -->
+            <div class="recommendations-section">
+                <div class="label-group" style="margin-bottom: 0.5rem;">
+                    <i data-lucide="sparkles"></i>
+                    <span class="section-tag">Recommended for You</span>
+                </div>
+                <h2 class="font-outfit" style="font-size: 2rem; font-weight: 900; margin-bottom: 1rem;">More Like This
+                </h2>
+                <div class="rec-container">
+                    <button class="nav-btn prev" onclick="scrollRecs('prev')">
+                        <i data-lucide="chevron-left"></i>
+                    </button>
+                    <div id="recommendations-grid" class="rec-grid">
+                        <div class="loader-label" style="margin: 2rem 0;">FINDING SIMILAR CONTENT...</div>
+                    </div>
+                    <button class="nav-btn next" onclick="scrollRecs('next')">
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-max">
+                <div class="footer-grid">
+                    <div class="brand-section">
+                        <a href="/" class="brand-logo">
+                            <i data-lucide="film" style="stroke-width: 3;"></i>
+                            YKN MOVIES
+                        </a>
+                        <p class="brand-desc">Your ultimate destination for movies and series. Stream the latest hits in
+                            high quality anywhere, anytime with Yuk Kita Nonton.</p>
+                        <div class="social-links">
+                            <a href="https://instagram.com" target="_blank" class="social-btn" title="Instagram">
+                                <img src="https://cdn.simpleicons.org/instagram/white" alt="Instagram">
+                            </a>
+                            <a href="https://x.com" target="_blank" class="social-btn" title="X (Twitter)">
+                                <img src="https://cdn.simpleicons.org/x/white" alt="X">
+                            </a>
+                            <a href="https://github.com/diaz1414/KNY-movie" target="_blank" class="social-btn"
+                                title="GitHub">
+                                <img src="https://cdn.simpleicons.org/github/white" alt="GitHub">
+                            </a>
+                            <a href="mailto:contact@example.com" class="social-btn" title="Email">
+                                <i data-lucide="mail"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="footer-heading">Quick Links</h3>
+                        <ul class="footer-list">
+                            <li><a href="/about">About</a></li>
+                            <li><a href="/contact">Contact</a></li>
+                            <li><a href="/privacy">Privacy Policy</a></li>
+                            <li><a href="/terms">Terms of Service</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="footer-heading">Genres</h3>
+                        <ul class="footer-list genres">
+                            <div>
+                                <li><a href="/genre/28">Action</a></li>
+                                <li style="margin-top: 1rem;"><a href="/genre/27">Horror</a></li>
+                                <li style="margin-top: 1rem;"><a href="/genre/878">Sci-Fi</a></li>
+                            </div>
+                            <div>
+                                <li><a href="/genre/35">Comedy</a></li>
+                                <li style="margin-top: 1rem;"><a href="/genre/10749">Romance</a></li>
+                                <li style="margin-top: 1rem;"><a href="/genre/53">Thriller</a></li>
+                            </div>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-bottom-sync">
+                    <p>&copy; 2026 YKN Movie. All rights reserved.</p>
+                    <div class="lang-switch">
+                        <span>English (US)</span>
+                        <span>Indonesia</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Floating Back To Top -->
+        <div id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <i data-lucide="arrow-up"></i>
         </div>
     </div>
 
@@ -875,7 +1344,7 @@
                 // If the original title is different (e.g. Japanese/Russian), we'll show it as a sub-header later
                 const movieTitle = movie.title || movie.name || movie.original_title || movie.original_name;
                 const originalTitle = movie.original_title || movie.original_name;
-                
+
                 document.title = `Watch ${movieTitle} - YKN`;
 
                 // Backdrop handling
@@ -891,7 +1360,7 @@
                 } else {
                     titleMount.textContent = movieTitle;
                 }
-                
+
                 document.getElementById('movie-synopsis').textContent = movie.overview;
 
                 const metaMount = document.getElementById('movie-meta');
@@ -953,11 +1422,11 @@
                         epGrid.innerHTML = '<div class="loader-label">LOADING COVERS...</div>';
                         const res = await fetch(`https://api.themoviedb.org/3/tv/${movieId}/season/${seasonNum}?api_key=${TMDB_API_KEY}`);
                         const data = await res.json();
-                        
+
                         epGrid.innerHTML = data.episodes.map(ep => {
                             const thumb = ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : 'https://via.placeholder.com/300x169/222/555?text=No+Preview';
                             const isActive = ep.episode_number === currentEp && seasonNum === currentSeason;
-                            
+
                             return `
                                 <div class="ep-card ${isActive ? 'active' : ''}" onclick="changeEpisode(${seasonNum}, ${ep.episode_number}, this)">
                                     <div class="ep-thumb" style="background-image: url('${thumb}')">
@@ -1054,7 +1523,7 @@
                             setTimeout(() => {
                                 player.src = s.url;
                                 player.onload = () => playerWrapper.classList.remove('changing');
-                            }, 400); 
+                            }, 400);
                         };
                         serverList.appendChild(btn);
                     });
@@ -1066,7 +1535,7 @@
                         player.src = servers[0].url;
                         player.onload = () => playerWrapper.classList.remove('changing');
                     }, 400);
-                    
+
                     lucide.createIcons();
                 }
 
@@ -1080,8 +1549,13 @@
                     setTimeout(() => {
                         document.getElementById('master-loader').style.display = 'none';
                         document.getElementById('main-container').style.display = 'block';
+                        // Re-initialize icons after container is visible
+                        lucide.createIcons();
                     }, 800);
                 }, 1500);
+
+                // Load Recommendations
+                loadRecommendations(type);
 
             } catch (err) {
                 console.error(err);
@@ -1096,7 +1570,76 @@
             }
         }
 
+        async function loadRecommendations(type) {
+            const recGrid = document.getElementById('recommendations-grid');
+            try {
+                let allResults = [];
+
+                // Ambil 3 page biar totalnya 60 (20 per page)
+                for (let page = 1; page <= 3; page++) {
+                    const response = await fetch(`https://api.themoviedb.org/3/${type}/${movieId}/recommendations?api_key=${TMDB_API_KEY}&language=en-US&page=${page}`);
+                    const data = await response.json();
+                    if (data.results && data.results.length > 0) {
+                        allResults = allResults.concat(data.results);
+                    } else if (page === 1) {
+                        // Kalau page 1 kosong, coba ambil Similar movies (biasanya lebih banyak variasi)
+                        const simResponse = await fetch(`https://api.themoviedb.org/3/${type}/${movieId}/similar?api_key=${TMDB_API_KEY}&language=en-US&page=1`);
+                        const simData = await simResponse.json();
+                        allResults = simData.results || [];
+                        break;
+                    }
+                }
+
+                if (allResults.length > 0) {
+                    recGrid.innerHTML = allResults.slice(0, 60).map(m => {
+                        const title = m.title || m.name;
+                        const poster = m.poster_path ? `https://image.tmdb.org/t/p/w300${m.poster_path}` : 'https://via.placeholder.com/300x450/222/555?text=No+Poster';
+                        const year = (m.release_date || m.first_air_date || '').split('-')[0];
+                        const rating = m.vote_average ? m.vote_average.toFixed(1) : 'NR';
+
+                        return `
+                            <div class="rec-card" onclick="window.location.href='/watch.html?id=${m.id}'">
+                                <img src="${poster}" alt="${title}" loading="lazy">
+                                <div class="rec-overlay">
+                                    <div class="rec-title">${title}</div>
+                                    <div class="rec-meta">${year} • <span style="color: #fbbf24">★ ${rating}</span></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    lucide.createIcons();
+                } else {
+                    recGrid.innerHTML = '<div class="loader-label">NO RECOMMENDATIONS FOUND</div>';
+                }
+            } catch (err) {
+                console.error("Recs error:", err);
+                recGrid.innerHTML = '<div class="loader-label">COULD NOT LOAD RECOMMENDATIONS</div>';
+            }
+        }
+
+        window.scrollRecs = (direction) => {
+            const grid = document.getElementById('recommendations-grid');
+            // Kita geser sekitar 2-3 card (220px per card + gap)
+            // Biar kerasa "satu-satu" dan masih ada yang kelihatan di pinggir
+            const scrollAmount = 440;
+            grid.scrollBy({
+                left: direction === 'next' ? scrollAmount : -scrollAmount,
+                behavior: 'smooth'
+            });
+        };
+
+        // Handle Scroll To Top Visibility
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('back-to-top');
+            if (window.scrollY > 500) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+
         init();
+        lucide.createIcons();
     </script>
 </body>
 

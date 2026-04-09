@@ -27,11 +27,59 @@ const Genre: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const genreName = getGenreName(id || '');
 
+  // Restore state on mount
   useEffect(() => {
-    setMovies([]);
-    setPage(1);
-    loadMovies(1);
+    const savedState = sessionStorage.getItem(`genre_state_${id}`);
+    if (savedState) {
+      const { movies: savedMovies, page: savedPage, scrollY } = JSON.parse(savedState);
+      setMovies(savedMovies);
+      setPage(savedPage);
+      
+      // Delay sedikit biar render selesai baru scroll
+      setTimeout(() => {
+        window.scrollTo({
+          top: scrollY,
+          behavior: 'instant'
+        });
+      }, 100);
+    } else {
+      setMovies([]);
+      setPage(1);
+      loadMovies(1);
+    }
   }, [id]);
+
+  // Save state whenever movies, page, or scroll changes
+  useEffect(() => {
+    const handleSaveState = () => {
+      if (movies.length > 0) {
+        sessionStorage.setItem(`genre_state_${id}`, JSON.stringify({
+          movies,
+          page,
+          scrollY: window.scrollY
+        }));
+      }
+    };
+
+    // Kita simpan tiap kali ada perubahan penting
+    handleSaveState();
+
+    // Juga dengerin event scroll biar scroll position paling update kesimpen
+    const handleScroll = () => {
+      if (movies.length > 0) {
+        const currentState = JSON.parse(sessionStorage.getItem(`genre_state_${id}`) || '{}');
+        sessionStorage.setItem(`genre_state_${id}`, JSON.stringify({
+          ...currentState,
+          scrollY: window.scrollY
+        }));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [movies, page, id]);
 
   const loadMovies = async (pageNumber: number) => {
     if (!id) return;
