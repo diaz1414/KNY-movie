@@ -48,14 +48,14 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <Navbar />
-      
+
       <main className="pb-20">
         <div className="pt-24 px-[var(--container-padding)] max-w-7xl mx-auto">
           <form onSubmit={handleSearch} className="relative mb-12">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={20} />
             <input
               type="text"
-              placeholder={t('search_placeholder')}
+              placeholder={t('Search Movie')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-full py-4 pl-12 pr-6 outline-none focus:ring-2 focus:ring-netflix-red transition-all text-lg"
@@ -82,22 +82,22 @@ const App: React.FC = () => {
               ) : (
                 <>
                   <Hero movie={popularMovies[0]} onWatch={setSelectedMovieId} />
-                  
+
                   <div className="relative z-10 -mt-20 md:-mt-32 space-y-8">
-                    <MovieRow 
-                      title={t('trending')} 
-                      movies={popularMovies} 
-                      onMovieClick={setSelectedMovieId} 
+                    <MovieRow
+                      title={t('trending')}
+                      movies={popularMovies}
+                      onMovieClick={setSelectedMovieId}
                     />
-                    <MovieRow 
-                      title={t('new_releases')} 
-                      movies={recentMovies} 
-                      onMovieClick={setSelectedMovieId} 
+                    <MovieRow
+                      title={t('new_releases')}
+                      movies={recentMovies}
+                      onMovieClick={setSelectedMovieId}
                     />
-                    <MovieRow 
-                      title={t('popular_series')} 
-                      movies={popularSeries} 
-                      onMovieClick={setSelectedMovieId} 
+                    <MovieRow
+                      title={t('popular_series')}
+                      movies={popularSeries}
+                      onMovieClick={setSelectedMovieId}
                     />
                   </div>
                 </>
@@ -107,9 +107,9 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      <MovieDetail 
-        movieId={selectedMovieId} 
-        onClose={() => setSelectedMovieId(null)} 
+      <MovieDetail
+        movieId={selectedMovieId}
+        onClose={() => setSelectedMovieId(null)}
       />
     </div>
   );
