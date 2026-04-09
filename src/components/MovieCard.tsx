@@ -16,9 +16,9 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick }) => {
       transition={{ type: 'spring', damping: 20, stiffness: 300 }}
       style={{
         position: 'relative',
-        minWidth: '200px',
-        width: '200px',
-        height: '300px',
+        minWidth: 'var(--card-width)',
+        width: 'var(--card-width)',
+        height: 'var(--card-height)',
         borderRadius: '12px',
         overflow: 'hidden',
         cursor: 'pointer',

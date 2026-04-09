@@ -52,7 +52,7 @@ const Navbar: React.FC = () => {
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between', 
-        padding: '0 4%',
+        padding: '0 var(--container-padding)',
         backdropFilter: isScrolled ? 'blur(20px)' : 'none'
       }}
     >
@@ -69,7 +69,7 @@ const Navbar: React.FC = () => {
         </h1>
 
         {/* Desktop Links */}
-        <div style={{ display: 'flex', gap: '1.5rem' }} className="hidden md-flex">
+        <div className="hidden md-flex" style={{ gap: '1.5rem' }}>
           {navLinks.map((link) => (
             <a 
               key={link.name} 
@@ -92,7 +92,7 @@ const Navbar: React.FC = () => {
 
       {/* Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div className="hidden sm-flex" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="hidden md-flex" style={{ alignItems: 'center', gap: '1rem' }}>
           {/* Language Selector */}
           <div className="group relative">
             <Globe size={20} className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity" />
@@ -176,13 +176,11 @@ const Navbar: React.FC = () => {
       </AnimatePresence>
 
       <style>{`
-        .hidden { display: none; }
+        .hidden { display: none !important; }
+        .flex { display: flex !important; }
         @media (min-width: 768px) {
           .md-flex { display: flex !important; }
           .md-hidden { display: none !important; }
-        }
-        @media (min-width: 640px) {
-          .sm-flex { display: flex !important; }
         }
         .group:hover .group-hover\\:block { display: block !important; }
       `}</style>

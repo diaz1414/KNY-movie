@@ -22,13 +22,13 @@ const MovieRow: React.FC<MovieRowProps> = ({ title, movies, onMovieClick }) => {
 
   return (
     <div className="movie-row-container relative group">
-      <h2 className="movie-row-title">{title}</h2>
+      <h2 className="movie-row-title" style={{ padding: '0 var(--container-padding)' }}>{title}</h2>
       
       <div className="relative">
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 top-0 bottom-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 flex items-center"
-          style={{ border: 'none', cursor: 'pointer', color: '#fff' }}
+          className="absolute left-0 top-0 bottom-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 flex items-center md-flex hidden"
+          style={{ border: 'none', cursor: 'pointer', color: 'var(--accent-primary)' }}
         >
           <ChevronLeft size={40} />
         </button>
@@ -40,7 +40,7 @@ const MovieRow: React.FC<MovieRowProps> = ({ title, movies, onMovieClick }) => {
             display: 'flex', 
             gap: '1.5rem', 
             overflowX: 'auto', 
-            padding: '1rem 4%',
+            padding: '1rem var(--container-padding)',
             scrollBehavior: 'smooth'
           }}
         >
@@ -51,8 +51,8 @@ const MovieRow: React.FC<MovieRowProps> = ({ title, movies, onMovieClick }) => {
 
         <button
           onClick={() => scroll('right')}
-          className="absolute right-0 top-0 bottom-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 flex items-center"
-          style={{ border: 'none', cursor: 'pointer', color: '#fff' }}
+          className="absolute right-0 top-0 bottom-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 flex items-center md-flex hidden"
+          style={{ border: 'none', cursor: 'pointer', color: 'var(--accent-primary)' }}
         >
           <ChevronRight size={40} />
         </button>

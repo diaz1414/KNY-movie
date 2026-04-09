@@ -47,7 +47,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '2rem'
+          padding: 'clamp(0.5rem, 5vw, 2rem)'
         }}
         onClick={onClose}
       >

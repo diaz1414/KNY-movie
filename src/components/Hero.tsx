@@ -21,7 +21,7 @@ const Hero: React.FC<HeroProps> = ({ movie, onWatch }) => {
       width: '100%', 
       display: 'flex', 
       alignItems: 'center', 
-      padding: '0 4%',
+      padding: '0 var(--container-padding)',
       overflow: 'hidden'
     }}>
       {/* Background Image with Gradients */}
@@ -68,7 +68,7 @@ const Hero: React.FC<HeroProps> = ({ movie, onWatch }) => {
           Experience the epic journey and captivating story of {movie.title}. Now streaming on KNY.
         </p>
 
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -76,14 +76,15 @@ const Hero: React.FC<HeroProps> = ({ movie, onWatch }) => {
             style={{ 
               background: '#fff', 
               color: '#000', 
-              padding: '0.8rem 2.5rem', 
+              padding: '0.8rem clamp(1.5rem, 4vw, 2.5rem)', 
               borderRadius: '8px', 
               fontWeight: 700, 
               display: 'flex', 
               alignItems: 'center', 
               gap: '0.5rem',
               border: 'none',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontSize: 'clamp(0.9rem, 2vw, 1rem)'
             }}
           >
             <Play fill="#000" size={20} />
