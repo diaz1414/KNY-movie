@@ -45,44 +45,23 @@ const Navbar: React.FC = () => {
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 flex items-center justify-between px-[var(--container-padding)] ${
         isScrolled ? 'glass h-[70px]' : 'bg-transparent h-[90px]'
       }`}
-      style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between', 
-        padding: '0 var(--container-padding)',
-        backdropFilter: isScrolled ? 'blur(20px)' : 'none'
-      }}
     >
-      {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        <h1 style={{ 
-          fontSize: '1.8rem', 
-          fontWeight: 800, 
-          letterSpacing: '-1px',
-          color: 'var(--accent-primary)',
-          cursor: 'pointer'
-        }}>
+      {/* Logo Container */}
+      <div className="flex items-center gap-8">
+        <h1 className="text-3xl font-extrabold tracking-tighter text-netflix-red cursor-pointer font-outfit">
           KNY
         </h1>
 
         {/* Desktop Links */}
-        <div className="hidden md-flex" style={{ gap: '1.5rem' }}>
+        <div className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => (
             <a 
               key={link.name} 
               href={link.path}
-              style={{ 
-                textDecoration: 'none', 
-                color: 'var(--text-primary)', 
-                fontSize: '0.9rem',
-                opacity: 0.8,
-                transition: 'var(--transition-smooth)'
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.8')}
+              className="text-sm font-medium text-[var(--text-primary)] opacity-80 hover:opacity-100 transition-opacity"
             >
               {link.name}
             </a>
@@ -91,99 +70,89 @@ const Navbar: React.FC = () => {
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div className="hidden md-flex" style={{ alignItems: 'center', gap: '1rem' }}>
+      <div className="flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-6 text-[var(--text-primary)]">
           {/* Language Selector */}
           <div className="group relative">
             <Globe size={20} className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity" />
-            <div className="absolute right-0 mt-2 w-48 glass rounded-xl overflow-hidden hidden group-hover:block fade-in">
-              {languages.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => changeLanguage(lang.code)}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-[var(--accent-primary)] hover:text-white transition-colors"
-                  style={{ background: 'transparent', border: 'none', color: 'inherit' }}
-                >
-                  {lang.name}
-                </button>
-              ))}
+            <div className="absolute right-0 mt-2 w-48 glass rounded-xl overflow-hidden hidden group-hover:block animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="py-2">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => changeLanguage(lang.code)}
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-netflix-red hover:text-white transition-colors text-[var(--text-primary)]"
+                  >
+                    {lang.name}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Theme Toggle */}
           <button 
             onClick={toggleTheme}
-            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit' }}
+            className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity p-1"
           >
-            {theme === 'dark' ? <Sun size={20} className="opacity-70 hover:opacity-100" /> : <Moon size={20} className="opacity-70 hover:opacity-100" />}
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </button>
         </div>
 
         {/* Mobile Burger */}
         <button 
-          className="md-hidden"
+          className="md:hidden text-[var(--text-primary)] cursor-pointer"
           onClick={() => setIsOpen(!isOpen)}
-          style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit' }}
         >
           {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 glass z-40 md-hidden"
-            style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              padding: '6rem 4% 2rem',
-              gap: '2rem'
-            }}
+            className="fixed inset-0 glass z-40 flex flex-col p-24 px-[var(--container-padding)] gap-8 md:hidden"
           >
             {navLinks.map((link) => (
               <a 
                 key={link.name} 
                 href={link.path}
                 onClick={() => setIsOpen(false)}
-                style={{ 
-                  textDecoration: 'none', 
-                  color: 'var(--text-primary)', 
-                  fontSize: '1.5rem',
-                  fontWeight: 600
-                }}
+                className="text-3xl font-bold text-[var(--text-primary)] font-outfit"
               >
                 {link.name}
               </a>
             ))}
-            <div style={{ marginTop: 'auto', borderTop: '1px solid var(--glass-border)', paddingTop: '2rem', display: 'flex', justifyContent: 'space-between' }}>
-               <button onClick={toggleTheme} className="flex items-center gap-2">
+            
+            <div className="mt-auto border-t border-[var(--glass-border)] pt-8 flex flex-col gap-6">
+               <button 
+                 onClick={toggleTheme} 
+                 className="flex items-center gap-3 text-xl font-medium text-[var(--text-primary)]"
+               >
                  {theme === 'dark' ? <Sun /> : <Moon />}
                  {theme === 'dark' ? t('light_mode') : t('dark_mode')}
                </button>
-               <div className="flex gap-2 flex-wrap max-w-[200px]">
-                 {languages.slice(0, 5).map(l => (
-                   <button key={l.code} onClick={() => changeLanguage(l.code)} className="text-xs opacity-50">{l.code.toUpperCase()}</button>
+               
+               <div className="flex gap-3 flex-wrap">
+                 {languages.map(l => (
+                   <button 
+                     key={l.code} 
+                     onClick={() => { changeLanguage(l.code); setIsOpen(false); }} 
+                     className="px-3 py-1 rounded-full border border-[var(--glass-border)] text-xs font-bold text-[var(--text-muted)] hover:text-netflix-red hover:border-netflix-red transition-all"
+                   >
+                     {l.code.toUpperCase()}
+                   </button>
                  ))}
                </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      <style>{`
-        .hidden { display: none !important; }
-        .flex { display: flex !important; }
-        @media (min-width: 768px) {
-          .md-flex { display: flex !important; }
-          .md-hidden { display: none !important; }
-        }
-        .group:hover .group-hover\\:block { display: block !important; }
-      `}</style>
     </nav>
   );
 };

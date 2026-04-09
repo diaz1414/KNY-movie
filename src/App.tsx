@@ -6,7 +6,6 @@ import MovieRow from './components/MovieRow';
 import MovieDetail from './components/MovieDetail';
 import type { UnifiedMovie } from './services/api';
 import { movieService } from './services/api';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Search } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -34,7 +33,7 @@ const App: React.FC = () => {
       console.error(err);
       setLoading(false);
     });
-  }, []);
+  }, [i18n.language]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,140 +46,71 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] overflow-x-hidden">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <Navbar />
-
-      <main style={{ paddingTop: 'var(--navbar-height)' }}>
-        {loading && (
-          <div style={{ 
-            position: 'fixed', 
-            inset: 0, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            background: 'var(--bg-primary)',
-            zIndex: 100 
-          }}>
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
-          </div>
-        )}
-        {/* Search Bar - Premium Sticky */}
-        <div style={{ padding: '2rem 4%', display: 'flex', justifyContent: 'center' }}>
-          <form 
-            onSubmit={handleSearch}
-            className="glass"
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              padding: '0.5rem 1.5rem', 
-              borderRadius: '50px', 
-              width: '100%', 
-              maxWidth: '600px',
-              gap: '1rem'
-            }}
-          >
-            <Search size={20} className="text-[var(--text-muted)]" />
-            <input 
-              type="text" 
-              placeholder={t('search')}
+      
+      <main className="pb-20">
+        <div className="pt-24 px-[var(--container-padding)] max-w-7xl mx-auto">
+          <form onSubmit={handleSearch} className="relative mb-12">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={20} />
+            <input
+              type="text"
+              placeholder={t('search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ 
-                background: 'transparent', 
-                border: 'none', 
-                outline: 'none', 
-                color: 'var(--text-primary)', 
-                width: '100%',
-                fontSize: '1rem'
-              }}
+              className="w-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-full py-4 pl-12 pr-6 outline-none focus:ring-2 focus:ring-netflix-red transition-all text-lg"
             />
           </form>
-        </div>
 
-        <AnimatePresence mode="wait">
           {searchResults ? (
-            <motion.div 
-              key="search"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              style={{ paddingBottom: '4rem' }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 4%', marginBottom: '2rem' }}>
-                <h2 style={{ fontSize: '2rem' }}>{t('search_results')}</h2>
-                <button 
-                  onClick={() => { setSearchResults(null); setSearchQuery(''); }}
-                  style={{ background: 'transparent', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer' }}
-                >
-                  Clear
-                </button>
+            <div className="fade-in">
+              <h2 className="text-2xl font-bold mb-8 px-4 font-outfit">{t('search_results')}</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 gap-y-10 px-4 justify-items-center">
+                {searchResults.map(movie => (
+                  <div key={movie.id} className="w-full flex justify-center">
+                    <Hero movie={movie} onWatch={setSelectedMovieId} />
+                  </div>
+                ))}
               </div>
-              {searchResults.length > 0 ? (
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
-                  gap: '2rem', 
-                  padding: '0 4%' 
-                }}>
-                  {searchResults.map(movie => (
-                    <div key={movie.id} className="flex justify-center">
-                      <Hero movie={movie} onWatch={setSelectedMovieId} />
-                    </div>
-                  ))}
+            </div>
+          ) : (
+            <div className="space-y-12">
+              {loading ? (
+                <div className="h-[80vh] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
                 </div>
               ) : (
-                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>{t('no_results')}</div>
+                <>
+                  <Hero movie={popularMovies[0]} onWatch={setSelectedMovieId} />
+                  
+                  <div className="relative z-10 -mt-20 md:-mt-32 space-y-8">
+                    <MovieRow 
+                      title={t('trending')} 
+                      movies={popularMovies} 
+                      onMovieClick={setSelectedMovieId} 
+                    />
+                    <MovieRow 
+                      title={t('new_releases')} 
+                      movies={recentMovies} 
+                      onMovieClick={setSelectedMovieId} 
+                    />
+                    <MovieRow 
+                      title={t('popular_series')} 
+                      movies={popularSeries} 
+                      onMovieClick={setSelectedMovieId} 
+                    />
+                  </div>
+                </>
               )}
-            </motion.div>
-          ) : (
-            <motion.div 
-              key="content"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <Hero movie={popularMovies[0]} onWatch={setSelectedMovieId} />
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '-10vh', position: 'relative', zIndex: 10 }}>
-                <MovieRow 
-                  title={t('trending')} 
-                  movies={popularMovies} 
-                  onMovieClick={setSelectedMovieId} 
-                />
-                <MovieRow 
-                  title={t('recommended')} 
-                  movies={recentMovies} 
-                  onMovieClick={setSelectedMovieId} 
-                />
-                <MovieRow 
-                  title={t('series')} 
-                  movies={popularSeries} 
-                  onMovieClick={setSelectedMovieId} 
-                />
-              </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </div>
       </main>
 
-      {/* Detail Modal */}
       <MovieDetail 
         movieId={selectedMovieId} 
         onClose={() => setSelectedMovieId(null)} 
       />
-
-      {/* Footer */}
-      <footer style={{ padding: '4rem 4%', textAlign: 'center', borderTop: '1px solid var(--glass-border)', marginTop: '4rem', color: 'var(--text-muted)' }}>
-        <h2 style={{ color: 'var(--accent-primary)', marginBottom: '1rem' }}>KNY</h2>
-        <p>&copy; 2026 Kita Nonton Yuk. Premium Movie Streaming.</p>
-      </footer>
-
-      <style>{`
-        .min-h-screen { min-height: 100vh; }
-        .justify-center { justify-content: center; }
-        .animate-spin { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      `}</style>
     </div>
   );
 };

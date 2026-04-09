@@ -1,141 +1,82 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
 
-:root {
-  /* Colors - Dark Mode (Default) */
-  --bg-primary: #000000;
-  --bg-secondary: #141414;
-  --bg-tertiary: #1f1f1f;
-  
-  --accent-primary: #E50914; /* Netflix Red */
-  --accent-secondary: #007AFF; /* Apple Blue */
-  --accent-disney: #113CCF; /* Disney Blue */
-  
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --text-muted: rgba(255, 255, 255, 0.4);
-  
-  --glass-bg: rgba(20, 20, 20, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-blur: blur(20px);
-  
-  --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  --transition-smooth: all 0.4s cubic-bezier(0.2, 0, 0, 1);
-  
-  --navbar-height: 80px;
-  --container-padding: 4%;
-  --card-width: 220px;
-  --card-height: 330px;
-}
-
-@media (max-width: 1024px) {
+@layer base {
   :root {
-    --card-width: 180px;
-    --card-height: 270px;
+    --bg-primary: #000000;
+    --bg-secondary: #141414;
+    --bg-tertiary: #1f1f1f;
+    
+    --accent-primary: #E50914;
+    --accent-secondary: #007AFF;
+    
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    
+    --glass-bg: rgba(20, 20, 20, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    
+    --navbar-height: 80px;
+    --container-padding: 4%;
+    --card-width: 220px;
+    --card-height: 330px;
+  }
+
+  [data-theme='light'] {
+    --bg-primary: #f5f5f7;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #eaeaec;
+    
+    --text-primary: #1d1d1f;
+    --text-secondary: rgba(0, 0, 0, 0.7);
+    --text-muted: rgba(0, 0, 0, 0.4);
+    
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.05);
+  }
+
+  @media (max-width: 1024px) {
+    :root {
+      --card-width: 180px;
+      --card-height: 270px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --navbar-height: 60px;
+      --container-padding: 6%;
+      --card-width: 160px;
+      --card-height: 240px;
+    }
+  }
+
+  body {
+    @apply bg-[var(--bg-primary)] text-[var(--bg-primary)] transition-colors duration-500 overflow-x-hidden font-sans;
   }
 }
 
-@media (max-width: 768px) {
-  :root {
-    --navbar-height: 60px;
-    --container-padding: 6%;
-    --card-width: 160px;
-    --card-height: 240px;
+@theme {
+  --color-netflix-red: #E50914;
+  --color-glass: var(--glass-bg);
+  --font-outfit: "Outfit", sans-serif;
+}
+
+@layer components {
+  .glass {
+    @apply bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl;
   }
-}
 
-[data-theme='light'] {
-  --bg-primary: #f5f5f7; /* Apple Style Light */
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #eaeaec;
-  
-  --text-primary: #1d1d1f;
-  --text-secondary: rgba(0, 0, 0, 0.7);
-  --text-muted: rgba(0, 0, 0, 0.4);
-  
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.05);
-  
-  --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-}
+  .premium-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-netflix-red) transparent;
+  }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+  .premium-scroll::-webkit-scrollbar {
+    @apply h-1 w-1;
+  }
 
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  transition: background-color 0.5s ease;
-  overflow-x: hidden;
-  line-height: 1.5;
-}
-
-h1, h2, h3, h4 {
-  font-family: 'Outfit', sans-serif;
-  font-weight: 700;
-}
-
-/* Glassmorphism Utilities */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-}
-
-.premium-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent-primary) transparent;
-}
-
-.premium-scroll::-webkit-scrollbar {
-  height: 4px;
-  width: 4px;
-}
-
-.premium-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.premium-scroll::-webkit-scrollbar-thumb {
-  background: var(--accent-primary);
-  border-radius: 10px;
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-in {
-  animation: fadeIn 0.8s cubic-bezier(0.2, 0, 0, 1) forwards;
-}
-
-/* Netfliy / Disney style rows */
-.movie-row-container {
-  padding: 2rem 0;
-  overflow: visible;
-}
-
-.movie-row-title {
-  padding: 0 4%;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-  color: var(--text-primary);
-}
-
-/* RTL Support */
-[dir='rtl'] {
-  font-family: system-ui, -apple-system, sans-serif;
-}
-
-/* Responsive fixes */
-@media (max-width: 768px) {
-  :root {
-    --navbar-height: 60px;
+  .premium-scroll::-webkit-scrollbar-thumb {
+    @apply bg-netflix-red rounded-full;
   }
 }

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, Calendar, Clock, Film } from 'lucide-react';
+import { X, Star, Calendar, Clock } from 'lucide-react';
 import { movieService } from '../services/api';
 import type { UnifiedMovieDetail as MovieDetailType } from '../services/api';
+
 interface MovieDetailProps {
   movieId: string | null;
   onClose: () => void;
@@ -29,7 +30,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
         setLoading(false);
       });
     }
-  }, [movieId]);
+  }, [movieId, i18n.language]);
 
   if (!movieId) return null;
 
@@ -39,161 +40,121 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 100,
-          background: 'rgba(0,0,0,0.85)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 'clamp(0.5rem, 5vw, 2rem)'
-        }}
+        className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-8"
         onClick={onClose}
       >
         <motion.div
           initial={{ scale: 0.9, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.9, y: 20 }}
-          className="glass premium-scroll"
-          style={{
-            width: '100%',
-            maxWidth: '1000px',
-            maxHeight: '90vh',
-            borderRadius: '24px',
-            overflowY: 'auto',
-            position: 'relative'
-          }}
+          className="glass w-full max-w-5xl max-h-[90vh] rounded-3xl overflow-y-auto relative no-scrollbar"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
           <button 
             onClick={onClose}
-            style={{ 
-              position: 'absolute', 
-              top: '1.5rem', 
-              right: '1.5rem', 
-              zIndex: 10,
-              background: 'rgba(255,255,255,0.1)',
-              border: 'none',
-              borderRadius: '50%',
-              padding: '8px',
-              cursor: 'pointer',
-              color: '#fff'
-            }}
+            className="absolute top-6 right-6 z-50 bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-colors backdrop-blur-md text-white border border-white/10 cursor-pointer"
           >
             <X size={24} />
           </button>
 
           {loading ? (
-            <div style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="h-[500px] flex items-center justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
             </div>
           ) : movie ? (
-            <div>
-              {movie.streamSources && movie.streamSources.length > 0 && (
-                <div style={{ padding: '0 2rem' }}>
-                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-                    {movie.streamSources.map((source, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setStreamUrl(source.url)}
-                        className={streamUrl === source.url ? 'glass' : ''}
-                        style={{
-                          padding: '0.5rem 1.5rem',
-                          borderRadius: '30px',
-                          border: streamUrl === source.url ? '1px solid var(--accent-primary)' : '1px solid var(--glass-border)',
-                          background: streamUrl === source.url ? 'rgba(255,255,255,0.1)' : 'transparent',
-                          color: streamUrl === source.url ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                          cursor: 'pointer',
-                          whiteSpace: 'nowrap',
-                          transition: 'all 0.3s ease'
-                        }}
-                      >
-                        {source.name}
-                      </button>
-                    ))}
-                  </div>
-                  
-                  {/* Tips for users */}
-                  <div style={{ 
-                    background: 'rgba(255,255,255,0.05)', 
-                    padding: '1rem', 
-                    borderRadius: '12px', 
-                    fontSize: '0.85rem', 
-                    color: 'var(--text-muted)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.5rem',
-                    marginBottom: '1.5rem',
-                    border: '1px solid var(--glass-border)'
-                  }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <span style={{ color: 'var(--accent-primary)' }}>💡 Tips:</span>
-                      <span>Jika "terkunci" atau tidak berputar, klik sekali di player untuk membuka (mungkin ada iklan muncul sekali), lalu tutup iklannya dan klik play lagi.</span>
+            <div className="flex flex-col">
+              {/* Desktop Header Backdrop */}
+              <div className="relative w-full aspect-[21/9] hidden md:block">
+                 <img src={movie.backdrop} className="w-full h-full object-cover brightness-50" alt={movie.title} />
+                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-secondary)] to-transparent" />
+                 <div className="absolute bottom-8 left-10">
+                    <h2 className="text-5xl font-black font-outfit mb-2">{movie.title}</h2>
+                    <div className="flex items-center gap-4 text-yellow-400 font-bold">
+                       <Star fill="currentColor" size={20} />
+                       <span className="text-2xl">{movie.rating}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <span style={{ color: 'var(--accent-primary)' }}>🇮🇩 Subtitle:</span>
-                      <span>Klik ikon <b>CC</b> atau roda gigi di dalam player untuk mengaktifkan <b>Subtitle Indonesia</b>. Jika tidak ada, coba ganti Server lain di atas.</span>
+                 </div>
+              </div>
+
+              {/* Player and Controls */}
+              <div className="p-6 md:p-10 space-y-8">
+                {movie.streamSources && movie.streamSources.length > 0 && (
+                  <div className="space-y-6">
+                    <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+                      {movie.streamSources.map((source, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setStreamUrl(source.url)}
+                          className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all border shrink-0 cursor-pointer ${
+                            streamUrl === source.url 
+                            ? 'bg-netflix-red border-netflix-red text-white shadow-lg shadow-red-600/20' 
+                            : 'bg-white/5 border-white/10 text-[var(--text-secondary)] hover:bg-white/10'
+                          }`}
+                        >
+                          {source.name}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    {/* Tips */}
+                    <div className="bg-white/5 rounded-2xl p-5 border border-white/10 flex flex-col gap-4 text-sm text-[var(--text-secondary)]">
+                      <div className="flex gap-3">
+                        <span className="text-netflix-red font-bold shrink-0">💡 Tips:</span>
+                        <p>Jika video macet, klik sekali di dalam player untuk menutup iklan rahasia, lalu klik play lagi.</p>
+                      </div>
+                      <div className="flex gap-3">
+                        <span className="text-netflix-red font-bold shrink-0">🇮🇩 Subtitle:</span>
+                        <p>Klik ikon <b>CC</b> di pojok kanan bawah player untuk menyalakan Bahasa Indonesia.</p>
+                      </div>
+                    </div>
+
+                    {streamUrl && (
+                      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl ring-1 ring-white/10 group/player">
+                        <iframe
+                          src={streamUrl}
+                          className="w-full h-full"
+                          allowFullScreen
+                          title={movie.title}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Info Text */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="flex items-center gap-6 text-sm text-[var(--text-muted)] font-medium">
+                      <div className="flex items-center gap-2"><Calendar size={18} /> {movie.releaseDate}</div>
+                      <div className="flex items-center gap-2"><Clock size={18} /> {movie.duration}</div>
+                      <div className="flex items-center gap-2 font-bold text-netflix-red uppercase tracking-wider">{movie.type}</div>
+                    </div>
+
+                    <p className="text-lg leading-relaxed text-[var(--text-secondary)]">
+                      {movie.synopsis}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2">
+                       {movie.genres.map(g => (
+                         <span key={g} className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-[var(--text-muted)]">{g}</span>
+                       ))}
                     </div>
                   </div>
-                </div>
-              )}
 
-              {streamUrl && (
-                <div 
-                  className="glass"
-                  style={{ 
-                    width: 'calc(100% - 4rem)', 
-                    margin: '0 2rem',
-                    aspectRatio: '16/9', 
-                    borderRadius: '12px', 
-                    overflow: 'hidden',
-                    background: '#000',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-                    border: '1px solid var(--glass-border)'
-                  }}
-                >
-                  <iframe
-                    src={streamUrl}
-                    style={{ width: '100%', height: '100%', border: 'none' }}
-                    allowFullScreen
-                    title="Movie Player"
-                  />
-                </div>
-              )}
-
-              {/* Info Section */}
-              <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-                  <h2 style={{ fontSize: '2rem' }}>{movie.title}</h2>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#FFD700' }}>
-                    <Star fill="#FFD700" size={20} />
-                    <span style={{ fontSize: '1.2rem', fontWeight: 600 }}>{movie.rating}</span>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={16} /> {movie.releaseDate}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={16} /> {movie.duration}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Film size={16} /> {movie.genres.join(', ')}</div>
-                </div>
-
-                <p style={{ lineHeight: 1.8, fontSize: '1.05rem', color: 'var(--text-secondary)' }}>
-                  {movie.synopsis}
-                </p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Director</div>
-                  <div style={{ fontSize: '1rem' }}>{movie.director}</div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Cast</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {movie.cast.map(c => (
-                      <span key={c} className="glass" style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.9rem' }}>{c}</span>
-                    ))}
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-[10px] uppercase tracking-[3px] text-netflix-red font-black mb-2">Director</h4>
+                      <p className="text-lg font-bold">{movie.director}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] uppercase tracking-[3px] text-netflix-red font-black mb-2">Top Cast</h4>
+                      <div className="flex flex-col gap-2">
+                        {movie.cast.map(c => (
+                          <p key={c} className="text-[var(--text-secondary)] font-medium">• {c}</p>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -21,28 +21,22 @@ const MovieRow: React.FC<MovieRowProps> = ({ title, movies, onMovieClick }) => {
   };
 
   return (
-    <div className="movie-row-container relative group">
-      <h2 className="movie-row-title" style={{ padding: '0 var(--container-padding)' }}>{title}</h2>
+    <div className="relative group/row py-4">
+      <h2 className="text-xl md:text-2xl font-bold mb-6 px-[var(--container-padding)] font-outfit text-[var(--text-primary)]">
+        {title}
+      </h2>
       
       <div className="relative">
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 top-0 bottom-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 flex items-center md-flex hidden"
-          style={{ border: 'none', cursor: 'pointer', color: 'var(--accent-primary)' }}
+          className="absolute left-0 top-0 bottom-0 z-20 hidden md:flex items-center justify-center w-12 bg-black/60 opacity-0 group-hover/row:opacity-100 transition-opacity hover:bg-black/80 text-netflix-red cursor-pointer"
         >
-          <ChevronLeft size={40} />
+          <ChevronLeft size={44} strokeWidth={3} />
         </button>
 
         <div 
           ref={rowRef}
-          className="premium-scroll"
-          style={{ 
-            display: 'flex', 
-            gap: '1.5rem', 
-            overflowX: 'auto', 
-            padding: '1rem var(--container-padding)',
-            scrollBehavior: 'smooth'
-          }}
+          className="premium-scroll flex gap-6 overflow-x-auto px-[var(--container-padding)] pb-4 scroll-smooth no-scrollbar"
         >
           {movies.map((movie) => (
             <MovieCard key={movie.id} movie={movie} onClick={onMovieClick} />
@@ -51,22 +45,15 @@ const MovieRow: React.FC<MovieRowProps> = ({ title, movies, onMovieClick }) => {
 
         <button
           onClick={() => scroll('right')}
-          className="absolute right-0 top-0 bottom-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 flex items-center md-flex hidden"
-          style={{ border: 'none', cursor: 'pointer', color: 'var(--accent-primary)' }}
+          className="absolute right-0 top-0 bottom-0 z-20 hidden md:flex items-center justify-center w-12 bg-black/60 opacity-0 group-hover/row:opacity-100 transition-opacity hover:bg-black/80 text-netflix-red cursor-pointer"
         >
-          <ChevronRight size={40} />
+          <ChevronRight size={44} strokeWidth={3} />
         </button>
       </div>
 
       <style>{`
-        .relative { position: relative; }
-        .absolute { position: absolute; }
-        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-        .z-10 { z-index: 10; }
-        .flex { display: flex; }
-        .items-center { align-items: center; }
-        .justify-center { justify-content: center; }
-        .cursor-pointer { cursor: pointer; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );
