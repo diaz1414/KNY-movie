@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PageLayout from '../components/PageLayout';
-import { motion } from 'framer-motion';
-import { Send, MessageCircle, Mail, MapPin } from 'lucide-react';
+import { MessageCircle, Mail } from 'lucide-react';
 
 const Contact: React.FC = () => {
   return (
