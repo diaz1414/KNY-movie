@@ -483,6 +483,173 @@
             line-height: 1.4;
         }
 
+        /* TV Series Selectors - Visual Season Posters */
+        .season-list {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding-bottom: 25px;
+            scrollbar-width: none;
+        }
+
+        .season-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .season-card {
+            flex: 0 0 140px;
+            cursor: pointer;
+            transition: var(--transition);
+            opacity: 0.6;
+            transform: scale(0.95);
+        }
+
+        .season-card:hover {
+            opacity: 0.9;
+            transform: scale(1);
+        }
+
+        .season-card.active {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .season-poster {
+            width: 100%;
+            aspect-ratio: 2/3;
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 10px;
+            transition: var(--transition);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .season-card.active .season-poster {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 25px var(--accent-red-glow);
+        }
+
+        .season-name {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-align: center;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-family: 'Outfit';
+        }
+
+        /* Episode Cards Styling */
+        .episode-grid {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 20px 0 40px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-red) transparent;
+        }
+
+        .ep-card {
+            flex: 0 0 300px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .ep-card {
+                flex: 0 0 240px;
+            }
+            .season-card {
+                flex: 0 0 110px;
+            }
+        }
+
+        .ep-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .ep-card.active {
+            border-color: var(--accent-red);
+            background: rgba(229, 9, 20, 0.08);
+            box-shadow: 0 20px 40px -15px var(--accent-red-glow);
+        }
+
+        .ep-thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .ep-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: var(--accent-red);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        .ep-content {
+            padding: 15px;
+        }
+
+        .ep-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ep-meta {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .ep-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(229, 9, 20, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--transition);
+            backdrop-filter: blur(2px);
+        }
+
+        .ep-card:hover .ep-overlay {
+            opacity: 1;
+        }
+
+        .ep-overlay i {
+            width: 48px;
+            height: 48px;
+            color: white;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+        }
+
         /* Loader */
         .master-loader {
             position: fixed;
@@ -592,6 +759,21 @@
                     loading="lazy"></iframe>
             </div>
 
+            <!-- TV Series Controls (Hidden for movies) -->
+            <div id="tv-controls" class="stagger-in" style="display: none; margin-bottom: 3rem;">
+                <div class="label-group" style="margin-bottom: 1.5rem;">
+                    <i data-lucide="layers"></i>
+                    <span class="section-tag">Seasons</span>
+                </div>
+                <div id="season-list" class="season-list"></div>
+
+                <div class="label-group" style="margin-top: 2rem; margin-bottom: 1rem;">
+                    <i data-lucide="play-circle"></i>
+                    <span class="section-tag">Episodes</span>
+                </div>
+                <div id="episode-grid" class="episode-grid"></div>
+            </div>
+
             <!-- Enhanced Tips -->
             <div class="tips-banner stagger-in">
                 <div class="tip-item">
@@ -672,13 +854,14 @@
 
         async function init() {
             try {
-                // Fetch TMDB Data with better error checking
-                let movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}&append_to_response=credits`);
+                // Force English language for titles and overview
+                const lang = 'en-US';
+                let movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}&language=${lang}&append_to_response=credits`);
                 let movie = await movieResponse.json();
 
                 // If not found in movies, check TV shows
                 if (!movieResponse.ok || (!movie.title && !movie.name)) {
-                    const tvResponse = await fetch(`https://api.themoviedb.org/3/tv/${movieId}?api_key=${TMDB_API_KEY}&append_to_response=credits`);
+                    const tvResponse = await fetch(`https://api.themoviedb.org/3/tv/${movieId}?api_key=${TMDB_API_KEY}&language=${lang}&append_to_response=credits`);
                     if (tvResponse.ok) {
                         movie = await tvResponse.json();
                     } else if (!movieResponse.ok) {
@@ -688,8 +871,11 @@
 
                 if (!movie.id) throw new Error("Could not find content for this ID");
 
-                // Dynamic UI Polish
-                const movieTitle = movie.original_title || movie.original_name || movie.title || movie.name;
+                // Title Logic: Prioritize English Title (movie.title or movie.name)
+                // If the original title is different (e.g. Japanese/Russian), we'll show it as a sub-header later
+                const movieTitle = movie.title || movie.name || movie.original_title || movie.original_name;
+                const originalTitle = movie.original_title || movie.original_name;
+                
                 document.title = `Watch ${movieTitle} - YKN`;
 
                 // Backdrop handling
@@ -699,7 +885,13 @@
                 setTimeout(() => backdrop.style.opacity = '1', 100);
 
                 // Populate Fields
-                document.getElementById('movie-title').textContent = movieTitle;
+                const titleMount = document.getElementById('movie-title');
+                if (originalTitle && originalTitle !== movieTitle) {
+                    titleMount.innerHTML = `${movieTitle} <span style="display: block; font-size: 1rem; opacity: 0.5; margin-top: 10px; font-weight: 600; letter-spacing: 2px;">${originalTitle}</span>`;
+                } else {
+                    titleMount.textContent = movieTitle;
+                }
+                
                 document.getElementById('movie-synopsis').textContent = movie.overview;
 
                 const metaMount = document.getElementById('movie-meta');
@@ -726,6 +918,75 @@
                 // Server Logic
                 const isTV = !!movie.name;
                 const type = isTV ? 'tv' : 'movie';
+                let currentSeason = 1;
+                let currentEp = 1;
+
+                // TV UI Population
+                if (isTV) {
+                    const tvControls = document.getElementById('tv-controls');
+                    const seasonMount = document.getElementById('season-list');
+                    const epGrid = document.getElementById('episode-grid');
+                    tvControls.style.display = 'block';
+
+                    // Populate Seasons with Posters
+                    seasonMount.innerHTML = movie.seasons
+                        .filter(s => s.season_number > 0)
+                        .map(s => {
+                            const poster = s.poster_path ? `https://image.tmdb.org/t/p/w200${s.poster_path}` : 'https://via.placeholder.com/200x300/222/555?text=Poster';
+                            return `
+                                <div class="season-card ${s.season_number === 1 ? 'active' : ''}" 
+                                     data-season="${s.season_number}"
+                                     onclick="changeSeason(${s.season_number}, this)">
+                                    <div class="season-poster" style="background-image: url('${poster}')"></div>
+                                    <div class="season-name">${s.name}</div>
+                                </div>
+                            `;
+                        }).join('');
+
+                    window.changeSeason = (sNum, el) => {
+                        document.querySelectorAll('.season-card').forEach(c => c.classList.remove('active'));
+                        el.classList.add('active');
+                        loadEpisodes(sNum);
+                    };
+
+                    async function loadEpisodes(seasonNum) {
+                        epGrid.innerHTML = '<div class="loader-label">LOADING COVERS...</div>';
+                        const res = await fetch(`https://api.themoviedb.org/3/tv/${movieId}/season/${seasonNum}?api_key=${TMDB_API_KEY}`);
+                        const data = await res.json();
+                        
+                        epGrid.innerHTML = data.episodes.map(ep => {
+                            const thumb = ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : 'https://via.placeholder.com/300x169/222/555?text=No+Preview';
+                            const isActive = ep.episode_number === currentEp && seasonNum === currentSeason;
+                            
+                            return `
+                                <div class="ep-card ${isActive ? 'active' : ''}" onclick="changeEpisode(${seasonNum}, ${ep.episode_number}, this)">
+                                    <div class="ep-thumb" style="background-image: url('${thumb}')">
+                                        <div class="ep-badge">EP ${ep.episode_number}</div>
+                                        <div class="ep-overlay"><i data-lucide="play"></i></div>
+                                    </div>
+                                    <div class="ep-content">
+                                        <div class="ep-title">${ep.name || `Episode ${ep.episode_number}`}</div>
+                                        <div class="ep-meta">
+                                            <span>${ep.air_date || 'TBA'}</span>
+                                            <span>${ep.runtime ? ep.runtime + 'm' : ''}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                        lucide.createIcons();
+                    }
+
+                    window.changeEpisode = (s, e, el) => {
+                        currentSeason = s;
+                        currentEp = e;
+                        document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
+                        el.classList.add('active');
+                        updatePlayerUrls();
+                    };
+
+                    loadEpisodes(1); // Default load
+                }
 
                 // --- CUSTOM SUPABASE CHECK ---
                 let customServer = null;
@@ -740,61 +1001,76 @@
                     }
                 } catch (e) { console.log("No custom server found in Supabase"); }
 
-                const servers = [
-                    { name: 'Server 1 (Primary)', icon: 'play-circle', url: `https://vidsrcme.su/embed/${type}/${movieId}` },
-                    { name: 'Server 2 (Backup)', icon: 'play-circle', url: `https://vidsrcme.ru/embed/${type}/${movieId}` },
-                    { name: 'Server 3 (Mirror)', icon: 'play-circle', url: `https://vidsrc-me.ru/embed/${type}/${movieId}` },
-                    { name: 'Server 4 (HD Stream)', icon: 'play-circle', url: `https://vidlink.pro/${type}/${movieId}` },
-                    { name: 'Server 5 (Regional)', icon: 'play-circle', url: `https://autoembed.co/${type}/tmdb/${movieId}` },
-                    { name: 'Server 6 (Global)', icon: 'play-circle', url: `https://vidsrc.cc/v2/embed/${type}/${movieId}` },
-                    { name: 'Server 7 (Super)', icon: 'play-circle', url: `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1` },
-                    { name: 'Server 8 (Extended)', icon: 'play-circle', url: `https://embed.warezcdn.com/${type}/${movieId}` },
-                    { name: 'Server 9 (Direct)', icon: 'play-circle', url: `https://www.nontongo.win/embed/movie/${movieId}` },
-                    { name: 'Server 10 (Alternative)', icon: 'play-circle', url: `https://www.2embed.cc/embed/${movieId}` }
-                ];
-
-                // Add custom server at the end as Server 11
-                if (customServer) {
-                    customServer.name = "Server 11 (Indo)";
-                    customServer.icon = "play-circle";
-                    servers.push(customServer);
+                function getPlayerUrl(serverBase, sNum, eNum) {
+                    if (serverBase.includes('vidsrcme.su')) return `https://vidsrcme.su/embed/tv/${movieId}/${sNum}/${eNum}`;
+                    if (serverBase.includes('vidsrcme.ru')) return `https://vidsrcme.ru/embed/tv/${movieId}/${sNum}/${eNum}`;
+                    if (serverBase.includes('vidsrc-me.ru')) return `https://vidsrc-me.ru/embed/tv/${movieId}/${sNum}/${eNum}`;
+                    if (serverBase.includes('vidlink.pro')) return `https://vidlink.pro/tv/${movieId}/${sNum}/${eNum}`;
+                    if (serverBase.includes('autoembed.co')) return `https://autoembed.co/tv/tmdb/${movieId}-${sNum}-${eNum}`;
+                    if (serverBase.includes('vidsrc.cc')) return `https://vidsrc.cc/v2/embed/tv/${movieId}/${sNum}/${eNum}`;
+                    if (serverBase.includes('multiembed.mov')) return `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1&s=${sNum}&e=${eNum}`;
+                    if (serverBase.includes('warezcdn.com')) return `https://embed.warezcdn.com/tv/${movieId}/${sNum}/${eNum}`;
+                    if (serverBase.includes('nontongo.win')) return `https://www.nontongo.win/embed/tv/${movieId}/${sNum}/${eNum}`;
+                    if (serverBase.includes('2embed.cc')) return `https://www.2embed.cc/embedtv/${movieId}&s=${sNum}&e=${eNum}`;
+                    return serverBase; // Fallback
                 }
 
-                const serverList = document.getElementById('server-list');
-                const player = document.getElementById('player');
+                let servers = [];
+                function updatePlayerUrls() {
+                    const type = isTV ? 'tv' : 'movie';
+                    servers = [
+                        { name: 'Server 1 (Primary)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrcme.su', currentSeason, currentEp) : `https://vidsrcme.su/embed/movie/${movieId}` },
+                        { name: 'Server 2 (Backup)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrcme.ru', currentSeason, currentEp) : `https://vidsrcme.ru/embed/movie/${movieId}` },
+                        { name: 'Server 3 (Mirror)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrc-me.ru', currentSeason, currentEp) : `https://vidsrc-me.ru/embed/movie/${movieId}` },
+                        { name: 'Server 4 (HD Stream)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidlink.pro', currentSeason, currentEp) : `https://vidlink.pro/movie/${movieId}` },
+                        { name: 'Server 5 (Regional)', icon: 'play-circle', url: isTV ? getPlayerUrl('autoembed.co', currentSeason, currentEp) : `https://autoembed.co/movie/tmdb/${movieId}` },
+                        { name: 'Server 6 (Global)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrc.cc', currentSeason, currentEp) : `https://vidsrc.cc/v2/embed/movie/${movieId}` },
+                        { name: 'Server 7 (Super)', icon: 'play-circle', url: isTV ? getPlayerUrl('multiembed.mov', currentSeason, currentEp) : `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1` },
+                        { name: 'Server 8 (Extended)', icon: 'play-circle', url: isTV ? getPlayerUrl('warezcdn.com', currentSeason, currentEp) : `https://embed.warezcdn.com/movie/${movieId}` },
+                        { name: 'Server 9 (Direct)', icon: 'play-circle', url: isTV ? getPlayerUrl('nontongo.win', currentSeason, currentEp) : `https://www.nontongo.win/embed/movie/${movieId}` },
+                        { name: 'Server 10 (Alternative)', icon: 'play-circle', url: isTV ? getPlayerUrl('2embed.cc', currentSeason, currentEp) : `https://www.2embed.cc/embed/${movieId}` }
+                    ];
 
-                // Always start with Server 1 (Primary) regardless of custom server presence
-                const defaultServer = servers[0];
+                    if (customServer) {
+                        customServer.name = "Server 11 (Indo)";
+                        customServer.icon = "play-circle";
+                        servers.push(customServer);
+                    }
 
-                servers.forEach((s, idx) => {
-                    const btn = document.createElement('button');
-                    const isActive = idx === 0;
-                    btn.className = `pill-btn ${isActive ? 'active' : ''}`;
-                    btn.innerHTML = `<i data-lucide="${s.icon}"></i> <span>${s.name}</span>`;
-                    btn.onclick = () => {
-                        if (btn.classList.contains('active')) return;
+                    // Render Servers
+                    const serverList = document.getElementById('server-list');
+                    serverList.innerHTML = '';
+                    servers.forEach((s, idx) => {
+                        const btn = document.createElement('button');
+                        const isActive = idx === 0;
+                        btn.className = `pill-btn ${isActive ? 'active' : ''}`;
+                        btn.innerHTML = `<i data-lucide="${s.icon}"></i> <span>${s.name}</span>`;
+                        btn.onclick = () => {
+                            if (btn.classList.contains('active')) return;
+                            document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            const playerWrapper = document.getElementById('player-wrapper');
+                            playerWrapper.classList.add('changing');
+                            setTimeout(() => {
+                                player.src = s.url;
+                                player.onload = () => playerWrapper.classList.remove('changing');
+                            }, 400); 
+                        };
+                        serverList.appendChild(btn);
+                    });
 
-                        document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
+                    // Update Player
+                    const playerWrapper = document.getElementById('player-wrapper');
+                    playerWrapper.classList.add('changing');
+                    setTimeout(() => {
+                        player.src = servers[0].url;
+                        player.onload = () => playerWrapper.classList.remove('changing');
+                    }, 400);
+                    
+                    lucide.createIcons();
+                }
 
-                        // Smooth Transition
-                        const playerWrapper = document.getElementById('player-wrapper');
-                        playerWrapper.classList.add('changing');
-
-                        setTimeout(() => {
-                            console.log("Loading Server:", s.name, "URL:", s.url);
-                            player.src = s.url;
-
-                            player.onload = () => {
-                                playerWrapper.classList.remove('changing');
-                            };
-                        }, 400);
-                    };
-                    serverList.appendChild(btn);
-                });
-
-                console.log("Initial Server:", defaultServer.name, "URL:", defaultServer.url);
-                player.src = defaultServer.url;
+                updatePlayerUrls(); // Initial call
 
                 // Finalize Entrance
                 lucide.createIcons(); // Initialize all icons

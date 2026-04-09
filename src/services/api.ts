@@ -52,7 +52,7 @@ const getImageUrl = (path: string, size: 'w500' | 'original' | 'w1280' = 'w500')
 
 const normalizeTMDB = (data: TMDBMovie): UnifiedMovie => ({
   id: data.id.toString(),
-  title: data.original_title || data.original_name || data.title || data.name || 'Untitled',
+  title: data.title || data.name || data.original_title || data.original_name || 'Untitled',
   poster: getImageUrl(data.poster_path, 'w500'),
   backdrop: getImageUrl(data.backdrop_path, 'w1280'),
   rating: data.vote_average.toFixed(1),
