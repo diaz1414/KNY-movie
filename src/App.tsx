@@ -4,7 +4,6 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import MovieCard from './components/MovieCard';
 import MovieRow from './components/MovieRow';
-import MovieDetail from './components/MovieDetail';
 import Footer from './components/Footer';
 import type { UnifiedMovie } from './services/api';
 import { movieService } from './services/api';
@@ -15,7 +14,6 @@ const App: React.FC = () => {
   const [popularMovies, setPopularMovies] = useState<UnifiedMovie[]>([]);
   const [recentMovies, setRecentMovies] = useState<UnifiedMovie[]>([]);
   const [popularSeries, setPopularSeries] = useState<UnifiedMovie[]>([]);
-  const [selectedMovieId, setSelectedMovieId] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<UnifiedMovie[] | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -90,7 +88,7 @@ const App: React.FC = () => {
               {searchResults.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 gap-y-12">
                   {searchResults.map(movie => (
-                    <MovieCard key={movie.id} movie={movie} onClick={setSelectedMovieId} />
+                    <MovieCard key={movie.id} movie={movie} />
                   ))}
                 </div>
               ) : (
@@ -111,23 +109,20 @@ const App: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <Hero movie={popularMovies[0]} onWatch={setSelectedMovieId} />
+                  <Hero movie={popularMovies[0]} />
 
                   <div className="relative z-10 -mt-20 md:-mt-32 space-y-8">
                     <MovieRow
                       title={t('trending')}
                       movies={popularMovies}
-                      onMovieClick={setSelectedMovieId}
                     />
                     <MovieRow
                       title={t('new_releases')}
                       movies={recentMovies}
-                      onMovieClick={setSelectedMovieId}
                     />
                     <MovieRow
                       title={t('popular_series')}
                       movies={popularSeries}
-                      onMovieClick={setSelectedMovieId}
                     />
                   </div>
                 </>
@@ -136,11 +131,6 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
-
-      <MovieDetail
-        movieId={selectedMovieId}
-        onClose={() => setSelectedMovieId(null)}
-      />
 
       <Footer />
     </div>

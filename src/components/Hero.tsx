@@ -4,13 +4,14 @@ import { motion } from 'framer-motion';
 import { Play, Info } from 'lucide-react';
 import type { UnifiedMovie } from '../services/api';
 
-interface HeroProps {
-  movie?: UnifiedMovie;
-  onWatch: (id: string) => void;
-}
-
-const Hero: React.FC<HeroProps> = ({ movie, onWatch }) => {
+const Hero: React.FC<{ movie?: UnifiedMovie }> = ({ movie }) => {
   const { t } = useTranslation();
+
+  const handleWatch = () => {
+    if (movie) {
+      window.location.href = `/watch.html?id=${movie.id}`;
+    }
+  };
 
   if (!movie) return <div className="h-[80vh] w-full bg-[var(--bg-secondary)] rounded-3xl animate-pulse" />;
 
@@ -58,7 +59,7 @@ const Hero: React.FC<HeroProps> = ({ movie, onWatch }) => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onWatch(movie.id)}
+            onClick={handleWatch}
             className="bg-white text-black px-8 py-3.5 rounded-xl font-bold flex items-center gap-2 hover:bg-white/90 transition-colors shadow-lg shadow-white/10"
           >
             <Play fill="currentColor" size={20} />

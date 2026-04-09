@@ -3,12 +3,11 @@ import { motion } from 'framer-motion';
 import { Star, Play } from 'lucide-react';
 import type { UnifiedMovie } from '../services/api';
 
-interface MovieCardProps {
-  movie: UnifiedMovie;
-  onClick: (id: string) => void;
-}
+const MovieCard: React.FC<{ movie: UnifiedMovie }> = ({ movie }) => {
+  const handleClick = () => {
+    window.location.href = `/watch.html?id=${movie.id}`;
+  };
 
-const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick }) => {
   return (
     <motion.div
       whileHover={{ scale: 1.08, y: -8 }}
@@ -19,7 +18,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick }) => {
         width: 'var(--card-width)',
         height: 'var(--card-height)',
       }}
-      onClick={() => onClick(movie.id)}
+      onClick={handleClick}
     >
       <img
         src={movie.poster}

@@ -26,7 +26,11 @@ const resources = {
       "about": "About",
       "contact": "Contact",
       "privacy": "Privacy Policy",
-      "terms": "Terms of Service"
+      "terms": "Terms of Service",
+      "back_to_home": "Back to Home",
+      "results": "results",
+      "new_releases": "New Releases",
+      "popular_series": "Popular Series"
     }
   },
   id: {
@@ -53,7 +57,11 @@ const resources = {
       "about": "Tentang",
       "contact": "Kontak",
       "privacy": "Kebijakan Privasi",
-      "terms": "Syarat & Ketentuan"
+      "terms": "Syarat & Ketentuan",
+      "back_to_home": "Kembali ke Beranda",
+      "results": "hasil",
+      "new_releases": "Rilisan Terbaru",
+      "popular_series": "Serial Populer"
     }
   },
   ja: {

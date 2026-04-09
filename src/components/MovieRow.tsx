@@ -6,10 +6,9 @@ import type { UnifiedMovie } from '../services/api';
 interface MovieRowProps {
   title: string;
   movies: UnifiedMovie[];
-  onMovieClick: (id: string) => void;
 }
 
-const MovieRow: React.FC<MovieRowProps> = ({ title, movies, onMovieClick }) => {
+const MovieRow: React.FC<MovieRowProps> = ({ title, movies }) => {
   const rowRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -39,7 +38,7 @@ const MovieRow: React.FC<MovieRowProps> = ({ title, movies, onMovieClick }) => {
           className="premium-scroll flex gap-6 overflow-x-auto px-[var(--container-padding)] pb-4 scroll-smooth no-scrollbar"
         >
           {movies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} onClick={onMovieClick} />
+            <MovieCard key={movie.id} movie={movie} />
           ))}
         </div>
 

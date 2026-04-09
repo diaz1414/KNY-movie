@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNY Movie - Watch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0d;
+            --bg-secondary: #141419;
+            --netflix-red: #e50914;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1, h2, .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            color: white;
+        }
+
+        .player-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .server-btns {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .server-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .server-btn.active {
+            background: var(--netflix-red);
+            border-color: var(--netflix-red);
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(229, 9, 20, 0.3);
+        }
+
+        .movie-info {
+            display: grid;
+            grid-template-cols: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .movie-info {
+                grid-template-cols: 2fr 1fr;
+            }
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .meta {
+            display: flex;
+            gap: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .synopsis {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .genre-pill {
+            display: inline-block;
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            padding: 2rem;
+            border-radius: 1.5rem;
+        }
+
+        .sidebar-label {
+            color: var(--netflix-red);
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        .tips-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <a href="/" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            KEMBALI KE BERANDA
+        </a>
+
+        <div id="content" style="display: none;">
+            <h1 id="movie-title" class="title"></h1>
+            
+            <div class="server-btns" id="server-list">
+                <!-- Servers will be injected here -->
+            </div>
+
+            <div class="tips-container">
+                <p>💡 <b>Tips:</b> Jika video macet, klik sekali di dalam player untuk menutup iklan rahasia, lalu klik play lagi.</p>
+                <p style="margin-top: 0.5rem;">🇮🇩 <b>Subtitle:</b> Klik ikon <b>CC</b> di pojok kanan bawah player untuk menyalakan Bahasa Indonesia.</p>
+            </div>
+
+            <div class="player-container">
+                <iframe id="player" allowfullscreen></iframe>
+            </div>
+
+            <div class="movie-info">
+                <div>
+                    <div class="meta" id="movie-meta"></div>
+                    <p id="movie-synopsis" class="synopsis"></p>
+                    <div id="movie-genres"></div>
+                </div>
+                <div class="sidebar-card">
+                    <div class="sidebar-label">Director</div>
+                    <div id="movie-director" class="sidebar-value"></div>
+                    <div class="sidebar-label">Top Cast</div>
+                    <div id="movie-cast" class="sidebar-value"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'f76f5f908dd164d45ec92431b0517a3a';
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieId = urlParams.get('id');
+
+        if (!movieId) {
+            window.location.href = '/';
+        }
+
+        async function init() {
+            try {
+                const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}&append_to_response=credits`);
+                let movie = await response.json();
+
+                // If movie fails, try TV
+                if (!movie.title && !movie.name) {
+                    const tvResponse = await fetch(`https://api.themoviedb.org/3/tv/${movieId}?api_key=${API_KEY}&append_to_response=credits`);
+                    movie = await tvResponse.json();
+                }
+
+                document.title = `${movie.title || movie.name} - Kita Nonton Yuk`;
+                document.getElementById('movie-title').textContent = movie.title || movie.name;
+                document.getElementById('movie-synopsis').textContent = movie.overview;
+                document.getElementById('movie-director').textContent = movie.credits?.crew?.find(c => c.job === 'Director')?.name || 'Various';
+                document.getElementById('movie-cast').innerHTML = movie.credits?.cast?.slice(0, 5).map(c => `<div>• ${c.name}</div>`).join('') || 'Unknown';
+                
+                const meta = [
+                    movie.release_date || movie.first_air_date,
+                    movie.runtime ? `${movie.runtime}m` : (movie.number_of_seasons ? `${movie.number_of_seasons} Seasons` : ''),
+                    movie.vote_average ? `⭐ ${movie.vote_average.toFixed(1)}` : ''
+                ].filter(Boolean);
+                document.getElementById('movie-meta').textContent = meta.join('  •  ');
+
+                document.getElementById('movie-genres').innerHTML = movie.genres.map(g => `<span class="genre-pill">${g.name}</span>`).join('');
+
+                const isTV = !!movie.name;
+                const type = isTV ? 'tv' : 'movie';
+                const servers = [
+                    { name: 'Server 1 (Faster)', url: `https://vidsrcme.su/embed/${type}/${movieId}` },
+                    { name: 'Server 2 (Mirror)', url: `https://vidsrcme.ru/embed/${type}/${movieId}` },
+                    { name: 'Server 3 (Extra Subs)', url: `https://vidsrc-me.ru/embed/${type}/${movieId}` }
+                ];
+
+                const serverList = document.getElementById('server-list');
+                const player = document.getElementById('player');
+
+                servers.forEach((s, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = `server-btn ${idx === 0 ? 'active' : ''}`;
+                    btn.textContent = s.name;
+                    btn.onclick = () => {
+                        document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        player.src = s.url;
+                    };
+                    serverList.appendChild(btn);
+                });
+
+                player.src = servers[0].url;
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+            } catch (err) {
+                console.error(err);
+                alert('Gagal memuat detail film.');
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
