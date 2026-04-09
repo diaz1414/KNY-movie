@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
@@ -19,6 +19,7 @@ const Home: React.FC = () => {
   const [suggestions, setSuggestions] = useState<UnifiedMovie[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(true);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -52,8 +53,19 @@ const Home: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchQuery, i18n.language]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
+    setShowSuggestions(false);
     if (!searchQuery.trim()) {
       setSearchResults(null);
       return;
@@ -67,7 +79,7 @@ const Home: React.FC = () => {
       <Navbar />
 
       <main className="pb-20">
-        <div className="pt-24 px-[var(--container-padding)] max-w-7xl mx-auto">
+        <div className="pt-24 px-[var(--container-padding)] max-w-7xl mx-auto" ref={searchRef}>
           <form onSubmit={handleSearch} className="relative mb-16 group">
             <div className={`absolute -inset-1 bg-gradient-to-r from-netflix-red to-red-800 rounded-full blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200`}></div>
             <div className="relative flex items-center">
