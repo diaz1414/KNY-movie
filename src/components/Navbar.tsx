@@ -25,7 +25,7 @@ const Navbar: React.FC = () => {
   };
 
   const navLinks = [
-    { name: t('home'), path: '/' },
+    { name: t('home'), path: '/#' },
     { name: t('movies'), path: '/#movies' },
     { name: t('series'), path: '/#series' },
     { name: t('popular'), path: '/#popular' },
@@ -53,7 +53,7 @@ const Navbar: React.FC = () => {
         {/* ... logo section omitted ... */}
         <div className="flex items-center gap-8">
           <Link
-            to="/"
+            to="/#"
             className="text-3xl font-extrabold tracking-tighter text-netflix-red cursor-pointer font-outfit"
             onClick={() => setIsOpen(false)}
           >
