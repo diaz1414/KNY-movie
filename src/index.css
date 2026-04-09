@@ -52,7 +52,7 @@
   }
 
   body {
-    @apply bg-[var(--bg-primary)] text-[var(--bg-primary)] transition-colors duration-500 overflow-x-hidden font-sans;
+    @apply bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-500 overflow-x-hidden font-sans;
   }
 }
 

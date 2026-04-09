@@ -51,7 +51,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
-          <button 
+          <button
             onClick={onClose}
             className="absolute top-6 right-6 z-50 bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-colors backdrop-blur-md text-white border border-white/10 cursor-pointer"
           >
@@ -66,15 +66,15 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
             <div className="flex flex-col">
               {/* Desktop Header Backdrop */}
               <div className="relative w-full aspect-[21/9] hidden md:block">
-                 <img src={movie.backdrop} className="w-full h-full object-cover brightness-50" alt={movie.title} />
-                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-secondary)] to-transparent" />
-                 <div className="absolute bottom-8 left-10">
-                    <h2 className="text-5xl font-black font-outfit mb-2">{movie.title}</h2>
-                    <div className="flex items-center gap-4 text-yellow-400 font-bold">
-                       <Star fill="currentColor" size={20} />
-                       <span className="text-2xl">{movie.rating}</span>
-                    </div>
-                 </div>
+                <img src={movie.backdrop} className="w-full h-full object-cover brightness-50" alt={movie.title} />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-secondary)] to-transparent" />
+                <div className="absolute bottom-8 left-10">
+                  <h2 className="text-5xl font-black font-outfit mb-2">{movie.title}</h2>
+                  <div className="flex items-center gap-4 text-yellow-400 font-bold">
+                    <Star fill="currentColor" size={20} />
+                    <span className="text-2xl">{movie.rating}</span>
+                  </div>
+                </div>
               </div>
 
               {/* Player and Controls */}
@@ -86,17 +86,16 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
                         <button
                           key={index}
                           onClick={() => setStreamUrl(source.url)}
-                          className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all border shrink-0 cursor-pointer ${
-                            streamUrl === source.url 
-                            ? 'bg-netflix-red border-netflix-red text-white shadow-lg shadow-red-600/20' 
+                          className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all border shrink-0 cursor-pointer ${streamUrl === source.url
+                            ? 'bg-netflix-red border-netflix-red text-white shadow-lg shadow-red-600/20'
                             : 'bg-white/5 border-white/10 text-[var(--text-secondary)] hover:bg-white/10'
-                          }`}
+                            }`}
                         >
                           {source.name}
                         </button>
                       ))}
                     </div>
-                    
+
                     {/* Tips */}
                     <div className="bg-white/5 rounded-2xl p-5 border border-white/10 flex flex-col gap-4 text-sm text-[var(--text-secondary)]">
                       <div className="flex gap-3">
@@ -110,11 +109,12 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
                     </div>
 
                     {streamUrl && (
-                      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl ring-1 ring-white/10 group/player">
+                      <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl ring-1 ring-white/10 transition-all duration-500">
                         <iframe
                           src={streamUrl}
                           className="w-full h-full"
                           allowFullScreen
+                          allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope"
                           title={movie.title}
                         />
                       </div>
@@ -136,9 +136,9 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
                     </p>
 
                     <div className="flex flex-wrap gap-2">
-                       {movie.genres.map(g => (
-                         <span key={g} className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-[var(--text-muted)]">{g}</span>
-                       ))}
+                      {movie.genres.map(g => (
+                        <span key={g} className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-[var(--text-muted)]">{g}</span>
+                      ))}
                     </div>
                   </div>
 

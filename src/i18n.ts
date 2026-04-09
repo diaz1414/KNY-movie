@@ -18,7 +18,15 @@ const resources = {
       "recommended": "Recommended for You",
       "top_rated": "Top Rated",
       "search_results": "Search Results",
-      "no_results": "No results found"
+      "no_results": "No results found",
+      "footer_desc": "Your ultimate destination for movies and series. Stream the latest hits in high quality anywhere, anytime.",
+      "quick_links": "Quick Links",
+      "follow_us": "Follow Us",
+      "copyright": "© 2024 KNY Movie. All rights reserved.",
+      "about": "About",
+      "contact": "Contact",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
     }
   },
   id: {
@@ -37,7 +45,15 @@ const resources = {
       "recommended": "Direkomendasikan Untuk Anda",
       "top_rated": "Rating Tertinggi",
       "search_results": "Hasil Pencarian",
-      "no_results": "Tidak ada hasil ditemukan"
+      "no_results": "Tidak ada hasil ditemukan",
+      "footer_desc": "Destinasi utama Anda untuk film dan serial. Streaming hits terbaru dalam kualitas tinggi di mana saja, kapan saja.",
+      "quick_links": "Tautan Cepat",
+      "follow_us": "Ikuti Kami",
+      "copyright": "© 2024 KNY Movie. Hak cipta dilindungi undang-undang.",
+      "about": "Tentang",
+      "contact": "Kontak",
+      "privacy": "Kebijakan Privasi",
+      "terms": "Syarat & Ketentuan"
     }
   },
   ja: {
