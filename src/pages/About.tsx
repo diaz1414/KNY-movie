@@ -5,7 +5,7 @@ import { Shield, Zap, Globe, Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const About: React.FC = () => {
-  const { t } = useTranslation();
+  useTranslation();
 
   const features = [
     {
