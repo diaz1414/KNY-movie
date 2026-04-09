@@ -18,7 +18,7 @@
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
+
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -224,10 +224,18 @@
         }
 
         .server-pills {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            display: flex;
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            gap: 10px;
             width: 100%;
+            padding-bottom: 5px;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+        }
+
+        .server-pills::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
         }
 
         @media (min-width: 768px) {
@@ -235,6 +243,7 @@
                 display: flex;
                 gap: 12px;
                 flex-wrap: wrap;
+                overflow-x: visible;
                 width: auto;
             }
         }
@@ -246,16 +255,16 @@
             gap: 8px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            color: var(--text-dim);
-            padding: 10px 12px;
-            border-radius: 12px;
+            color: var(--text-main);
+            padding: 12px 20px;
+            border-radius: 100px;
             cursor: pointer;
             font-weight: 700;
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             transition: var(--transition);
             backdrop-filter: blur(30px);
-            min-width: 0;
-            /* Allow shrinking */
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .pill-btn span {
@@ -527,15 +536,9 @@
 
             <!-- Video Player -->
             <div class="player-frame stagger-in delay-4">
-                <iframe 
-                    id="player" 
-                    allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *"
-                    allowfullscreen
-                    webkitallowfullscreen
-                    mozallowfullscreen
-                    referrerpolicy="no-referrer"
-                    loading="lazy"
-                ></iframe>
+                <iframe id="player" allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *"
+                    allowfullscreen webkitallowfullscreen mozallowfullscreen referrerpolicy="no-referrer"
+                    loading="lazy"></iframe>
             </div>
 
             <!-- Enhanced Tips -->
@@ -554,9 +557,7 @@
                 </div>
                 <div class="tip-item">
                     <i data-lucide="alert-circle"></i>
-                    <p><b>NOT FOUND?</b> If the movie is not available on any server, we apologize. We update our
-                        collection regularly. / <i>Jika film tidak ada di semua server, mohon maaf. Kami memperbarui
-                            koleksi kami secara berkala.</i></p>
+                    <p><b>INDONESIAN MOVIES:</b> If not found on Servers 1-10, please try <b>Server 11 (Indo)</b>. If still unavailable, we apologize and will add it soon. / <i>Untuk film Indonesia, jika tidak ada di Server 1-10, silakan coba <b>Server 11 (Indo)</b>. Jika tetap tidak ada, mohon maaf, kami akan segera menambahkannya.</i></p>
                 </div>
             </div>
 
@@ -665,7 +666,7 @@
                 // Server Logic
                 const isTV = !!movie.name;
                 const type = isTV ? 'tv' : 'movie';
-                
+
                 // --- CUSTOM SUPABASE CHECK ---
                 let customServer = null;
                 try {
@@ -680,29 +681,35 @@
                 } catch (e) { console.log("No custom server found in Supabase"); }
 
                 const servers = [
-                    { name: 'Server 1 (Primary)', icon: 'zap', url: `https://vidsrcme.su/embed/${type}/${movieId}` },
-                    { name: 'Server 2 (Backup)', icon: 'film', url: `https://vidsrcme.ru/embed/${type}/${movieId}` },
-                    { name: 'Server 3 (Mirror)', icon: 'globe', url: `https://vidsrc-me.ru/embed/${type}/${movieId}` },
-                    { name: 'Server 4 (HD Stream)', icon: 'monitor-play', url: `https://vidlink.pro/${type}/${movieId}` },
-                    { name: 'Server 5 (Regional)', icon: 'clapperboard', url: `https://autoembed.co/${type}/tmdb/${movieId}` },
-                    { name: 'Server 6 (Global)', icon: 'layers', url: `https://vidsrc.cc/v2/embed/${type}/${movieId}` },
-                    { name: 'Server 7 (SuperEmbed)', icon: 'clapperboard', url: `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1` },
-                    { name: 'Server 8 (WarezCDN)', icon: 'layers', url: `https://embed.warezcdn.com/${type}/${movieId}` }, 
-                    { name: 'Server 9 (NontonGo)', icon: 'clapperboard', url: `https://www.nontongo.win/embed/movie/${movieId}` },
-                    { name: 'Server 10 (2Embed)', icon: 'layers', url: `https://www.2embed.cc/embed/${movieId}` }
+                    { name: 'Server 1 (Primary)', icon: 'play-circle', url: `https://vidsrcme.su/embed/${type}/${movieId}` },
+                    { name: 'Server 2 (Backup)', icon: 'play-circle', url: `https://vidsrcme.ru/embed/${type}/${movieId}` },
+                    { name: 'Server 3 (Mirror)', icon: 'play-circle', url: `https://vidsrc-me.ru/embed/${type}/${movieId}` },
+                    { name: 'Server 4 (HD Stream)', icon: 'play-circle', url: `https://vidlink.pro/${type}/${movieId}` },
+                    { name: 'Server 5 (Regional)', icon: 'play-circle', url: `https://autoembed.co/${type}/tmdb/${movieId}` },
+                    { name: 'Server 6 (Global)', icon: 'play-circle', url: `https://vidsrc.cc/v2/embed/${type}/${movieId}` },
+                    { name: 'Server 7 (Super)', icon: 'play-circle', url: `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1` },
+                    { name: 'Server 8 (Extended)', icon: 'play-circle', url: `https://embed.warezcdn.com/${type}/${movieId}` },
+                    { name: 'Server 9 (Direct)', icon: 'play-circle', url: `https://www.nontongo.win/embed/movie/${movieId}` },
+                    { name: 'Server 10 (Alternative)', icon: 'play-circle', url: `https://www.2embed.cc/embed/${movieId}` }
                 ];
 
-                // Add custom server if exists
+                // Add custom server at the end as Server 11
                 if (customServer) {
-                    servers.unshift(customServer);
+                    customServer.name = "Server 11 (Indo)";
+                    customServer.icon = "play-circle";
+                    servers.push(customServer);
                 }
 
                 const serverList = document.getElementById('server-list');
                 const player = document.getElementById('player');
 
+                // Always start with Server 1 (Primary) regardless of custom server presence
+                const defaultServer = servers[0];
+
                 servers.forEach((s, idx) => {
                     const btn = document.createElement('button');
-                    btn.className = `pill-btn ${idx === 0 ? 'active' : ''}`;
+                    const isActive = idx === 0;
+                    btn.className = `pill-btn ${isActive ? 'active' : ''}`;
                     btn.innerHTML = `<i data-lucide="${s.icon}"></i> <span>${s.name}</span>`;
                     btn.onclick = () => {
                         document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
@@ -713,8 +720,8 @@
                     serverList.appendChild(btn);
                 });
 
-                console.log("Initial Server:", servers[0].name, "URL:", servers[0].url);
-                player.src = servers[0].url;
+                console.log("Initial Server:", defaultServer.name, "URL:", defaultServer.url);
+                player.src = defaultServer.url;
 
                 // Finalize Entrance
                 lucide.createIcons(); // Initialize all icons
