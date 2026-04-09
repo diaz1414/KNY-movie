@@ -25,7 +25,7 @@ const Navbar: React.FC = () => {
   };
 
   const navLinks = [
-    { name: t('home'), path: '/#' },
+    { name: t('home'), path: '/' },
     { name: t('movies'), path: '/#movies' },
     { name: t('series'), path: '/#series' },
     { name: t('popular'), path: '/#popular' },
@@ -205,8 +205,8 @@ const Navbar: React.FC = () => {
                         key={l.code}
                         onClick={() => { changeLanguage(l.code); setIsOpen(false); }}
                         className={`px-4 py-4 rounded-xl border text-xs font-black transition-all ${i18n.language === l.code
-                            ? 'bg-netflix-red border-netflix-red text-white shadow-xl shadow-red-900/40'
-                            : 'bg-white/5 border-white/10 text-zinc-400'
+                          ? 'bg-netflix-red border-netflix-red text-white shadow-xl shadow-red-900/40'
+                          : 'bg-white/5 border-white/10 text-zinc-400'
                           }`}
                       >
                         {l.name}
