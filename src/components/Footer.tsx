@@ -8,10 +8,10 @@ const Footer: React.FC = () => {
   const { t } = useTranslation();
 
   const socialLinks = [
-    { icon: <FaInstagram size={20} />, href: '#', label: 'Instagram' },
-    { icon: <FaXTwitter size={20} />, href: '#', label: 'Twitter' },
-    { icon: <FaGithub size={20} />, href: '#', label: 'GitHub' },
-    { icon: <FaEnvelope size={20} />, href: '#', label: 'Email' },
+    { icon: <FaInstagram size={20} />, href: 'https://www.instagram.com/', label: 'Instagram' },
+    { icon: <FaXTwitter size={20} />, href: 'https://x.com/', label: 'Twitter' },
+    { icon: <FaGithub size={20} />, href: 'https://github.com/diaz1414/KNY-movie', label: 'GitHub' },
+    { icon: <FaEnvelope size={20} />, href: 'https://mail.google.com/', label: 'Email' },
   ];
 
   const links = [
@@ -37,8 +37,8 @@ const Footer: React.FC = () => {
         <div className="md:col-span-2 space-y-6">
           <div className="flex items-center gap-2">
             <Film className="text-netflix-red" size={32} />
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="text-3xl font-extrabold tracking-tighter text-netflix-red font-outfit uppercase"
             >
