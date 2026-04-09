@@ -612,9 +612,12 @@
                 const isTV = !!movie.name;
                 const type = isTV ? 'tv' : 'movie';
                 const servers = [
-                    { name: 'Server 1', icon: 'zap', url: `https://vidsrcme.su/embed/${type}/${movieId}` },
-                    { name: 'Server 2', icon: 'film', url: `https://vidsrcme.ru/embed/${type}/${movieId}` },
-                    { name: 'Server 3', icon: 'globe', url: `https://vidsrc-me.ru/embed/${type}/${movieId}` }
+                    { name: 'Server 1 (Primary)', icon: 'zap', url: `https://vidsrcme.su/embed/${type}/${movieId}` },
+                    { name: 'Server 2 (Backup)', icon: 'film', url: `https://vidsrcme.ru/embed/${type}/${movieId}` },
+                    { name: 'Server 3 (Mirror)', icon: 'globe', url: `https://vidsrc-me.ru/embed/${type}/${movieId}` },
+                    { name: 'Server 4 (HD Stream)', icon: 'monitor-play', url: `https://vidlink.pro/${type}/${movieId}` },
+                    { name: 'Server 5 (Regional)', icon: 'clapperboard', url: `https://autoembed.co/${type}/tmdb/${movieId}` },
+                    { name: 'Server 6 (Global)', icon: 'layers', url: `https://vidsrc.cc/v2/embed/${type}/${movieId}` }
                 ];
 
                 const serverList = document.getElementById('server-list');

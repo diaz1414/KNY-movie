@@ -111,9 +111,12 @@ export const movieService = {
         releaseDate: movie.release_date,
         voteCount: movie.vote_count,
         streamSources: [
-          { name: 'Server 1 (Faster)', url: `https://vidsrcme.su/embed/movie/${id}` },
-          { name: 'Server 2 (Mirror)', url: `https://vidsrcme.ru/embed/movie/${id}` },
-          { name: 'Server 3 (Extra Subs)', url: `https://vidsrc-me.ru/embed/movie/${id}` }
+          { name: 'Server 1 (Primary)', url: `https://vidsrcme.su/embed/movie/${id}` },
+          { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/movie/${id}` },
+          { name: 'Server 3 (Mirror)', url: `https://vidsrc-me.ru/embed/movie/${id}` },
+          { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/movie/${id}` },
+          { name: 'Server 5 (Regional)', url: `https://autoembed.co/movie/tmdb/${id}` },
+          { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/movie/${id}` }
         ]
       };
     } catch (e) {
@@ -134,9 +137,12 @@ export const movieService = {
           releaseDate: tv.first_air_date,
           voteCount: tv.vote_count,
           streamSources: [
-            { name: 'Server 1', url: `https://vidsrcme.su/embed/tv/${id}` },
-            { name: 'Server 2', url: `https://vidsrcme.ru/embed/tv/${id}` },
-            { name: 'Server 3', url: `https://vidsrc-me.ru/embed/tv/${id}` }
+            { name: 'Server 1 (Primary)', url: `https://vidsrcme.su/embed/tv/${id}` },
+            { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/tv/${id}` },
+            { name: 'Server 3 (Mirror)', url: `https://vidsrc-me.ru/embed/tv/${id}` },
+            { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/tv/${id}` },
+            { name: 'Server 5 (Regional)', url: `https://autoembed.co/tv/tmdb/${id}` },
+            { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/tv/${id}` }
           ]
         };
       } catch (err) {

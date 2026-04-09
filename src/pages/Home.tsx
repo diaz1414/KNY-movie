@@ -16,6 +16,8 @@ const Home: React.FC = () => {
   const [popularSeries, setPopularSeries] = useState<UnifiedMovie[]>([]);
   const [searchResults, setSearchResults] = useState<UnifiedMovie[] | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<UnifiedMovie[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,6 +36,21 @@ const Home: React.FC = () => {
       setLoading(false);
     });
   }, [i18n.language]);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (searchQuery.trim().length > 1) {
+        const results = await movieService.search(searchQuery, i18n.language);
+        setSuggestions(results.slice(0, 8));
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, i18n.language]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,11 +82,50 @@ const Home: React.FC = () => {
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => { setSearchQuery(''); setSearchResults(null); }}
+                  onClick={() => { setSearchQuery(''); setSearchResults(null); setSuggestions([]); }}
                   className="absolute right-6 text-[var(--text-muted)] hover:text-netflix-red transition-colors"
                 >
                   <X size={24} />
                 </button>
+              )}
+              {/* Suggestions Dropdown - Simple Solid UI */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-3 bg-[#111111] border border-zinc-800 rounded-2xl overflow-hidden z-[100] shadow-[0_20px_50px_rgba(0,0,0,0.8)] animate-in fade-in zoom-in-95 duration-200">
+                  <div className="max-h-[480px] overflow-y-auto custom-scrollbar">
+                    {suggestions.map((movie) => (
+                      <div
+                        key={movie.id}
+                        onClick={() => {
+                          setSearchQuery(movie.title);
+                          setSearchResults([movie]);
+                          setShowSuggestions(false);
+                        }}
+                        className="flex items-center gap-4 px-5 py-3 hover:bg-zinc-800 transition-colors border-b border-zinc-900 last:border-none cursor-pointer group"
+                      >
+                        <div className="relative shrink-0">
+                          <img src={movie.poster} alt="" className="w-12 h-16 object-cover rounded shadow-md group-hover:scale-105 transition-transform" />
+                          <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded"></div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-white text-base truncate group-hover:text-netflix-red transition-colors">{movie.title}</h4>
+                          <div className="flex items-center gap-3 mt-1.5">
+                            <span className="text-[10px] font-black bg-netflix-red text-white px-2 py-0.5 rounded-sm tracking-tighter">{movie.type.toUpperCase()}</span>
+                            <span className="text-xs text-zinc-500 font-bold flex items-center gap-1">
+                              <svg className="w-3 h-3 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                              {movie.rating}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button 
+                    type="submit"
+                    className="w-full py-4 text-sm font-black text-center text-zinc-400 hover:text-white hover:bg-zinc-800 border-t border-zinc-800 bg-zinc-900/50 transition-all"
+                  >
+                    SEARCH FOR "{searchQuery.toUpperCase()}"
+                  </button>
+                </div>
               )}
             </div>
           </form>
