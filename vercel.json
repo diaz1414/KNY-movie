@@ -22,7 +22,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://image.tmdb.org https://images.ctfassets.net; frame-src 'self' https://vidsrcme.su https://vidsrcme.ru https://vidsrc-me.ru https://vidsrc.to https://vidsrc.me https://vidsrc.icu; connect-src 'self' https://api.themoviedb.org;"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://image.tmdb.org https://images.ctfassets.net https://*.tmdb.org; frame-src 'self' https://vidsrcme.su https://vidsrcme.ru https://vidsrc-me.ru https://vidsrc.to https://vidsrc.me https://vidsrc.icu; connect-src 'self' https://api.themoviedb.org https://*.themoviedb.org;"
         }
       ]
     }
