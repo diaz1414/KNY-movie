@@ -116,7 +116,12 @@ export const movieService = {
           { name: 'Server 3 (Mirror)', url: `https://vidsrc-me.ru/embed/movie/${id}` },
           { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/movie/${id}` },
           { name: 'Server 5 (Regional)', url: `https://autoembed.co/movie/tmdb/${id}` },
-          { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/movie/${id}` }
+          { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/movie/${id}` },
+          { name: 'Server 7 (SuperEmbed)', url: `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1` },
+          { name: 'Server 8 (WarezCDN)', url: `https://embed.warezcdn.com/serie/${id}` }, // Coba ganti /movie/ kalau film
+          { name: 'Server 9 (NontonGo)', url: `https://www.nontongo.win/embed/movie/${id}` },
+          { name: 'Server 10 (2Embed)', url: `https://www.2embed.cc/embed/${id}` },
+          { name: 'Server Indo (Mino)', url: `https://minochinos.com/embed/${id}` }
         ]
       };
     } catch (e) {
@@ -153,13 +158,13 @@ export const movieService = {
   },
 
   getMoviesByGenre: async (genreId: string, page: number = 1, lang: string = 'en-US') => {
-    const res = await api.get('/discover/movie', { 
-      params: { 
-        with_genres: genreId, 
-        language: lang, 
+    const res = await api.get('/discover/movie', {
+      params: {
+        with_genres: genreId,
+        language: lang,
         page: page,
         sort_by: 'popularity.desc'
-      } 
+      }
     });
     return res.data.results.map(normalizeTMDB);
   }

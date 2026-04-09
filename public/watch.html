@@ -18,6 +18,9 @@
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
@@ -222,7 +225,7 @@
 
         .server-pills {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             width: 100%;
         }
@@ -251,7 +254,8 @@
             font-size: 0.7rem;
             transition: var(--transition);
             backdrop-filter: blur(30px);
-            min-width: 0; /* Allow shrinking */
+            min-width: 0;
+            /* Allow shrinking */
         }
 
         .pill-btn span {
@@ -523,22 +527,36 @@
 
             <!-- Video Player -->
             <div class="player-frame stagger-in delay-4">
-                <iframe id="player" allowfullscreen allow="autoplay; fullscreen"></iframe>
+                <iframe 
+                    id="player" 
+                    allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *"
+                    allowfullscreen
+                    webkitallowfullscreen
+                    mozallowfullscreen
+                    referrerpolicy="no-referrer"
+                    loading="lazy"
+                ></iframe>
             </div>
 
             <!-- Enhanced Tips -->
             <div class="tips-banner stagger-in">
                 <div class="tip-item">
                     <i data-lucide="mouse-pointer-click"></i>
-                    <p><b>AD BUFFER:</b> If the player feels locked, click once inside to clear invisible ads. / <i>Jika player terasa terkunci, klik sekali di dalam untuk membersihkan iklan, lalu tekan play kembali.</i></p>
+                    <p><b>AD BUFFER:</b> If the player feels locked, click once inside to clear invisible ads. / <i>Jika
+                            player terasa terkunci, klik sekali di dalam untuk membersihkan iklan, lalu tekan play
+                            kembali.</i></p>
                 </div>
                 <div class="tip-item">
                     <i data-lucide="languages"></i>
-                    <p><b>LANGUAGES:</b> Use the <b>CC</b> icon in the bottom-right of the player to enable subtitles. / <i>Gunakan ikon <b>CC</b> di pojok kanan bawah player untuk mengaktifkan subtitle.</i></p>
+                    <p><b>LANGUAGES:</b> Use the <b>CC</b> icon in the bottom-right of the player to enable subtitles. /
+                        <i>Gunakan ikon <b>CC</b> di pojok kanan bawah player untuk mengaktifkan subtitle.</i>
+                    </p>
                 </div>
                 <div class="tip-item">
                     <i data-lucide="alert-circle"></i>
-                    <p><b>NOT FOUND?</b> If the movie is not available on any server, we apologize. We update our collection regularly. / <i>Jika film tidak ada di semua server, mohon maaf. Kami memperbarui koleksi kami secara berkala.</i></p>
+                    <p><b>NOT FOUND?</b> If the movie is not available on any server, we apologize. We update our
+                        collection regularly. / <i>Jika film tidak ada di semua server, mohon maaf. Kami memperbarui
+                            koleksi kami secara berkala.</i></p>
                 </div>
             </div>
 
@@ -575,9 +593,17 @@
     </div>
 
     <script>
-        const API_KEY = 'f76f5f908dd164d45ec92431b0517a3a';
+        // --- CONFIGURATION ---
+        const SUPABASE_URL = 'https://ymdaacydpsznzbobppvk.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltZGFhY3lkcHN6bnpib2JwcHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzcwNzcsImV4cCI6MjA5MTMxMzA3N30.DAvImMrafbZiPp-GDDMwvxyL8qKXRzrpMHaCG58Q-ic';
+        const TMDB_API_KEY = 'f76f5f908dd164d45ec92431b0517a3a';
         const urlParams = new URLSearchParams(window.location.search);
         const movieId = urlParams.get('id');
+
+        // Supabase Init (Replace with your actual keys)
+        const supabaseUrl = SUPABASE_URL;
+        const supabaseKey = SUPABASE_KEY;
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         if (!movieId) {
             window.location.href = '/';
@@ -586,12 +612,12 @@
         async function init() {
             try {
                 // Fetch TMDB Data with better error checking
-                let movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}&append_to_response=credits`);
+                let movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}&append_to_response=credits`);
                 let movie = await movieResponse.json();
 
                 // If not found in movies, check TV shows
                 if (!movieResponse.ok || (!movie.title && !movie.name)) {
-                    const tvResponse = await fetch(`https://api.themoviedb.org/3/tv/${movieId}?api_key=${API_KEY}&append_to_response=credits`);
+                    const tvResponse = await fetch(`https://api.themoviedb.org/3/tv/${movieId}?api_key=${TMDB_API_KEY}&append_to_response=credits`);
                     if (tvResponse.ok) {
                         movie = await tvResponse.json();
                     } else if (!movieResponse.ok) {
@@ -639,14 +665,37 @@
                 // Server Logic
                 const isTV = !!movie.name;
                 const type = isTV ? 'tv' : 'movie';
+                
+                // --- CUSTOM SUPABASE CHECK ---
+                let customServer = null;
+                try {
+                    const { data: supaData } = await supabaseClient
+                        .from('indo_movies')
+                        .select('iframe_url')
+                        .eq('tmdb_id', movieId)
+                        .single();
+                    if (supaData) {
+                        customServer = { name: 'Server VIP (Indo)', icon: 'award', url: supaData.iframe_url };
+                    }
+                } catch (e) { console.log("No custom server found in Supabase"); }
+
                 const servers = [
                     { name: 'Server 1 (Primary)', icon: 'zap', url: `https://vidsrcme.su/embed/${type}/${movieId}` },
                     { name: 'Server 2 (Backup)', icon: 'film', url: `https://vidsrcme.ru/embed/${type}/${movieId}` },
                     { name: 'Server 3 (Mirror)', icon: 'globe', url: `https://vidsrc-me.ru/embed/${type}/${movieId}` },
                     { name: 'Server 4 (HD Stream)', icon: 'monitor-play', url: `https://vidlink.pro/${type}/${movieId}` },
                     { name: 'Server 5 (Regional)', icon: 'clapperboard', url: `https://autoembed.co/${type}/tmdb/${movieId}` },
-                    { name: 'Server 6 (Global)', icon: 'layers', url: `https://vidsrc.cc/v2/embed/${type}/${movieId}` }
+                    { name: 'Server 6 (Global)', icon: 'layers', url: `https://vidsrc.cc/v2/embed/${type}/${movieId}` },
+                    { name: 'Server 7 (SuperEmbed)', icon: 'clapperboard', url: `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1` },
+                    { name: 'Server 8 (WarezCDN)', icon: 'layers', url: `https://embed.warezcdn.com/${type}/${movieId}` }, 
+                    { name: 'Server 9 (NontonGo)', icon: 'clapperboard', url: `https://www.nontongo.win/embed/movie/${movieId}` },
+                    { name: 'Server 10 (2Embed)', icon: 'layers', url: `https://www.2embed.cc/embed/${movieId}` }
                 ];
+
+                // Add custom server if exists
+                if (customServer) {
+                    servers.unshift(customServer);
+                }
 
                 const serverList = document.getElementById('server-list');
                 const player = document.getElementById('player');
@@ -658,11 +707,13 @@
                     btn.onclick = () => {
                         document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
+                        console.log("Loading Server:", s.name, "URL:", s.url);
                         player.src = s.url;
                     };
                     serverList.appendChild(btn);
                 });
 
+                console.log("Initial Server:", servers[0].name, "URL:", servers[0].url);
                 player.src = servers[0].url;
 
                 // Finalize Entrance
