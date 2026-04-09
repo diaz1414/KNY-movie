@@ -9,7 +9,7 @@ const Hero: React.FC<{ movie?: UnifiedMovie }> = ({ movie }) => {
 
   const handleWatch = () => {
     if (movie) {
-      window.location.href = `/watch?id=${movie.id}`;
+      window.location.href = `/watch.html?id=${movie.id}`;
     }
   };
 
@@ -19,8 +19,8 @@ const Hero: React.FC<{ movie?: UnifiedMovie }> = ({ movie }) => {
     <div className="relative h-[70vh] md:h-[80vh] w-full flex items-center px-[var(--container-padding)] overflow-hidden rounded-3xl group bg-black">
       {/* Background Image with Gradients */}
       <div className="absolute inset-0 z-0 transition-transform duration-700 group-hover:scale-105">
-        <img 
-          src={movie.backdrop} 
+        <img
+          src={movie.backdrop}
           alt={movie.title}
           className="w-full h-full object-cover brightness-[0.7] opacity-80"
         />
@@ -29,18 +29,18 @@ const Hero: React.FC<{ movie?: UnifiedMovie }> = ({ movie }) => {
       </div>
 
       {/* Content */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="max-w-2xl flex flex-col gap-6 z-10"
       >
-        <motion.h1 
+        <motion.h1
           className="text-4xl md:text-6xl lg:text-7xl font-bold font-outfit leading-tight tracking-tight text-[var(--text-primary)]"
         >
           {movie.title}
         </motion.h1>
-        
+
         <div className="flex items-center gap-4 text-sm font-medium">
           <span className="border border-white/20 px-3 py-1 rounded-md text-xs backdrop-blur-sm text-[var(--text-secondary)]">
             {movie.quality}

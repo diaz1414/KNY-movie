@@ -5,7 +5,7 @@ import type { UnifiedMovie } from '../services/api';
 
 const MovieCard: React.FC<{ movie: UnifiedMovie }> = ({ movie }) => {
   const handleClick = () => {
-    window.location.href = `/watch?id=${movie.id}`;
+    window.location.href = `/watch.html?id=${movie.id}`;
   };
 
   return (
@@ -26,7 +26,7 @@ const MovieCard: React.FC<{ movie: UnifiedMovie }> = ({ movie }) => {
         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         loading="lazy"
       />
-      
+
       {/* Mobile Title View (Always visible on mobile) */}
       <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent md:hidden">
         <h4 className="text-white text-xs font-bold leading-tight line-clamp-2 drop-shadow-lg">
@@ -43,7 +43,7 @@ const MovieCard: React.FC<{ movie: UnifiedMovie }> = ({ movie }) => {
         <h4 className="text-white text-base font-bold leading-tight font-outfit drop-shadow-md">
           {movie.title}
         </h4>
-        
+
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-1.5 text-yellow-400 font-bold text-sm">
             <Star size={14} fill="currentColor" />
@@ -53,10 +53,10 @@ const MovieCard: React.FC<{ movie: UnifiedMovie }> = ({ movie }) => {
             {movie.quality}
           </span>
         </div>
-        
+
         <div className="flex items-center gap-2 pt-1">
           <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-black shadow-lg">
-             <Play size={14} fill="currentColor" className="ml-0.5" />
+            <Play size={14} fill="currentColor" className="ml-0.5" />
           </div>
           <span className="text-xs font-bold text-white uppercase tracking-wider">{movie.type}</span>
         </div>
