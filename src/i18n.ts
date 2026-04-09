@@ -4,7 +4,7 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   en: {
     translation: {
-      "app_name": "YKN",
+      "app_name": "YKN Movies",
       "home": "Home",
       "movies": "Movies",
       "series": "Series",
