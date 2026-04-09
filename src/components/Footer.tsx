@@ -21,6 +21,15 @@ const Footer: React.FC = () => {
     { name: t('terms'), path: '/terms' },
   ];
 
+  const genres = [
+    { name: 'Action', path: '/genre/28' },
+    { name: 'Comedy', path: '/genre/35' },
+    { name: 'Horror', path: '/genre/27' },
+    { name: 'Romance', path: '/genre/10749' },
+    { name: 'Sci-Fi', path: '/genre/878' },
+    { name: 'Thriller', path: '/genre/53' },
+  ];
+
   return (
     <footer className="bg-[var(--bg-secondary)] border-t border-[var(--glass-border)] pt-16 pb-8 px-[var(--container-padding)]">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
@@ -72,24 +81,24 @@ const Footer: React.FC = () => {
           </ul>
         </div>
 
-        {/* Newsletter/Action Section */}
+        {/* Genres Section */}
         <div className="space-y-6">
           <h3 className="text-xl font-bold font-outfit text-[var(--text-primary)]">
-            {t('follow_us')}
+            Genres
           </h3>
-          <p className="text-[var(--text-muted)] text-sm">
-            Stay updated with the latest releases and news from YKN Movie.
-          </p>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="your@email.com"
-              className="bg-[var(--bg-primary)] border border-[var(--glass-border)] rounded-lg px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-netflix-red w-full"
-            />
-            <button className="bg-netflix-red text-white p-2 rounded-lg hover:brightness-110 transition-all">
-              <FaEnvelope size={20} />
-            </button>
-          </div>
+          <ul className="grid grid-cols-2 gap-4">
+            {genres.map((genre) => (
+              <li key={genre.name}>
+                <Link
+                  to={genre.path}
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="text-[var(--text-secondary)] hover:text-netflix-red transition-colors duration-200"
+                >
+                  {genre.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 

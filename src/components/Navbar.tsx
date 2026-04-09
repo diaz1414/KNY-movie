@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Sun, Moon, Globe, X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -44,6 +45,16 @@ const Navbar: React.FC = () => {
     { code: 'ru', name: 'Русский' },
   ];
 
+  const genres = [
+    { name: 'Action', path: '/genre/28' },
+    { name: 'Comedy', path: '/genre/35' },
+    { name: 'Horror', path: '/genre/27' },
+    { name: 'Romance', path: '/genre/10749' },
+    { name: 'Sci-Fi', path: '/genre/878' },
+    { name: 'Thriller', path: '/genre/53' },
+  ];
+
+
   return (
     <>
       <nav
@@ -80,6 +91,26 @@ const Navbar: React.FC = () => {
         {/* Actions */}
         <div className="flex items-center gap-6">
           <div className="hidden md:flex items-center gap-6 text-[var(--text-primary)]">
+            {/* Genres Dropdown */}
+            <div className="group relative">
+              <span className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity font-medium text-sm flex items-center gap-1">
+                Genres
+              </span>
+              <div className="absolute right-0 top-full pt-2 w-48 hidden group-hover:block transition-all duration-300">
+                <div className="glass rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 py-2">
+                  {genres.map((genre) => (
+                    <Link
+                      key={genre.name}
+                      to={genre.path}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-netflix-red hover:text-white transition-colors text-[var(--text-primary)]"
+                    >
+                      {genre.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Language Selector */}
             <div className="group relative">
               <Globe size={20} className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity" />
@@ -105,6 +136,27 @@ const Navbar: React.FC = () => {
             >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
+          </div>
+
+          {/* Genre Selector Mobile (Next to Burger) */}
+          <div className="md:hidden relative z-[1001]">
+            <select
+              className="appearance-none bg-white/10 glass border border-white/10 text-[var(--text-primary)] text-xs font-bold py-2 pl-4 pr-8 rounded-full outline-none shadow-lg cursor-pointer"
+              onChange={(e) => {
+                if(e.target.value) navigate(e.target.value);
+              }}
+              value=""
+            >
+              <option value="" disabled>Genres</option>
+              {genres.map((g) => (
+                <option key={g.name} value={g.path} className="text-black">
+                  {g.name}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-primary)]">
+               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
           </div>
 
           {/* Mobile Burger */}
