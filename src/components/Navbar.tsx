@@ -55,9 +55,12 @@ const Navbar: React.FC = () => {
           <Link
             to="/"
             className="text-3xl font-extrabold tracking-tighter text-netflix-red cursor-pointer font-outfit"
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           >
-            KNY
+            {t('app_name')}
           </Link>
 
           {/* Desktop Links */}

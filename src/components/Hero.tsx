@@ -52,7 +52,7 @@ const Hero: React.FC<{ movie?: UnifiedMovie }> = ({ movie }) => {
         </div>
 
         <p className="text-[var(--text-secondary)] text-base md:text-lg leading-relaxed line-clamp-3 md:line-clamp-none max-w-xl">
-          Experience the epic journey and captivating story of {movie.title}. Now streaming on KNY with high definition quality and immersive sound.
+          Experience the epic journey and captivating story of {movie.title}. Now streaming on YKN with high definition quality and immersive sound.
         </p>
 
         <div className="flex flex-wrap gap-4 pt-2">

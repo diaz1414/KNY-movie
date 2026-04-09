@@ -11,7 +11,7 @@ const Privacy: React.FC = () => {
         <section className="space-y-4">
           <h2 className="text-2xl font-bold">1. Data Collection</h2>
           <p className="text-[var(--text-secondary)] leading-relaxed">
-            KNY Movie is designed to be as private as possible. We do not require users to create accounts or provide personal identification. However, we may collect minimal data such as:
+            YKN Movie is designed to be as private as possible. We do not require users to create accounts or provide personal identification. However, we may collect minimal data such as:
           </p>
           <ul className="list-disc pl-6 space-y-2 text-[var(--text-secondary)]">
             <li>Language preferences to optimize your UI experience.</li>

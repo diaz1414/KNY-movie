@@ -33,18 +33,18 @@ const About: React.FC = () => {
   return (
     <PageLayout
       title="Our Vision"
-      subtitle="KNY Movie is more than just a streaming platform. It's a gateway to limitless stories, powered by cutting-edge technology and a passion for cinema."
+      subtitle="YKN Movie is more than just a streaming platform. It's a gateway to limitless stories, powered by cutting-edge technology and a passion for cinema."
     >
       <div className="space-y-20">
         {/* Story Section */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <h2 className="text-4xl font-black font-outfit tracking-tighter">The KNY Story</h2>
+            <h2 className="text-4xl font-black font-outfit tracking-tighter">The YKN Story</h2>
             <p className="text-[var(--text-secondary)] leading-relaxed">
-              Founded in 2026, Kita Nonton Yuk (KNY) began with a simple mission: to democratize high-quality entertainment. We believed that everyone deserves access to the world's best cinematic experiences without compromise.
+              Founded in 2026, Yuk Kita Nonton (YKN) began with a simple mission: to democratize high-quality entertainment. We believed that everyone deserves access to the world's best cinematic experiences without compromise.
             </p>
             <p className="text-[var(--text-secondary)] leading-relaxed">
-              Today, KNY serves millions of users globally, delivering a premium standalone player experience that rivals the industry giants. We don't just host movies; we celebrate the art of storytelling.
+              Today, YKN serves millions of users globally, delivering a premium standalone player experience that rivals the industry giants. We don't just host movies; we celebrate the art of storytelling.
             </p>
           </div>
           <div className="relative group">
@@ -60,7 +60,7 @@ const About: React.FC = () => {
         {/* Features Grid */}
         <section>
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-black font-outfit tracking-tighter mb-4">Why KNY Stands Out</h2>
+            <h2 className="text-4xl font-black font-outfit tracking-tighter mb-4">Why YKN Stands Out</h2>
             <div className="w-24 h-1 bg-netflix-red mx-auto" />
           </div>
 

@@ -44,13 +44,13 @@ const Contact: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <p className="text-xs font-black uppercase tracking-[6px] text-blue-400">Live Chat</p>
-                <p className="text-2xl font-bold font-outfit">@KNYMovies</p>
+                <p className="text-2xl font-bold font-outfit">@YKNMovies</p>
               </div>
               <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                 Faster response via Telegram. Our admin team is active 24/7 for you.
               </p>
               <a
-                href="https://t.me/KNYMovies"
+                href="https://t.me/YKNMovies"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-blue-600 text-white font-bold text-sm hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-blue-900/40"

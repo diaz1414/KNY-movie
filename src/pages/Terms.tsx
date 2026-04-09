@@ -11,14 +11,14 @@ const Terms: React.FC = () => {
         <section className="space-y-4">
           <h2 className="text-2xl font-bold">1. Agreement to Terms</h2>
           <p className="text-[var(--text-secondary)] leading-relaxed">
-            By accessing or using KNY Movie, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use our platform.
+            By accessing or using YKN Movie, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use our platform.
           </p>
         </section>
 
         <section className="space-y-4">
           <h2 className="text-2xl font-bold">2. Use of Service</h2>
           <p className="text-[var(--text-secondary)] leading-relaxed">
-            KNY Movie provides a platform for streaming movies and series using third-party embedding services. You agree to use the service only for lawful purposes and in accordance with these terms.
+            YKN Movie provides a platform for streaming movies and series using third-party embedding services. You agree to use the service only for lawful purposes and in accordance with these terms.
           </p>
           <ul className="list-disc pl-6 space-y-2 text-[var(--text-secondary)]">
             <li>You must be at least 13 years old to use this service.</li>
@@ -30,14 +30,14 @@ const Terms: React.FC = () => {
         <section className="space-y-4">
           <h2 className="text-2xl font-bold">3. Intellectual Property</h2>
           <p className="text-[var(--text-secondary)] leading-relaxed">
-            The platform's interface, logo, and brand are the exclusive property of KNY Movie. All movie content and metadata are provided by third-party APIs (TMDB) and streaming servers; KNY Movie does not claim ownership of the movies streamed.
+            The platform's interface, logo, and brand are the exclusive property of YKN Movie. All movie content and metadata are provided by third-party APIs (TMDB) and streaming servers; YKN Movie does not claim ownership of the movies streamed.
           </p>
         </section>
 
         <section className="space-y-4">
           <h2 className="text-2xl font-bold">4. Disclaimer of Liability</h2>
           <p className="text-[var(--text-secondary)] leading-relaxed">
-            KNY Movie is provided "as is" without any warranties. We are not responsible for the content of third-party streaming servers or any technical issues arising from their use.
+            YKN Movie is provided "as is" without any warranties. We are not responsible for the content of third-party streaming servers or any technical issues arising from their use.
           </p>
         </section>
 

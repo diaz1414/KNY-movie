@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   :root {
     --bg-primary: #000000;
     --bg-secondary: #141414;
