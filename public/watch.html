@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KNY Movie - Watch</title>
+    <meta name="description"
+        content="Streaming film dan serial favoritmu dengan kualitas terbaik di Kita Nonton Yuk (KNY)." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg-primary: #0a0a0d;
@@ -31,7 +37,9 @@
             overflow-x: hidden;
         }
 
-        h1, h2, .font-outfit {
+        h1,
+        h2,
+        .font-outfit {
             font-family: 'Outfit', sans-serif;
         }
 
@@ -39,7 +47,8 @@
             max-width: 1280px;
             margin: 0 auto;
             padding: 2rem;
-            padding-bottom: 20rem; /* Huge safety space for mobile browser bars */
+            padding-bottom: 20rem;
+            /* Huge safety space for mobile browser bars */
         }
 
         .back-btn {
@@ -187,17 +196,20 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 3px solid rgba(255,255,255,0.1);
+            border: 3px solid rgba(255, 255, 255, 0.1);
             border-top: 3px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body>
     <div id="loading" class="loading-overlay">
         <div class="spinner"></div>
@@ -205,20 +217,26 @@
 
     <div class="container">
         <a href="/" class="back-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
             KEMBALI KE BERANDA
         </a>
 
         <div id="content" style="display: none;">
             <h1 id="movie-title" class="title"></h1>
-            
+
             <div class="server-btns" id="server-list">
                 <!-- Servers will be injected here -->
             </div>
 
             <div class="tips-container">
-                <p>💡 <b>Tips:</b> Jika video macet, klik sekali di dalam player untuk menutup iklan rahasia, lalu klik play lagi.</p>
-                <p style="margin-top: 0.5rem;">🇮🇩 <b>Subtitle:</b> Klik ikon <b>CC</b> di pojok kanan bawah player untuk menyalakan Bahasa Indonesia.</p>
+                <p>💡 <b>Tips:</b> Jika video macet, klik sekali di dalam player untuk menutup iklan rahasia, lalu klik
+                    play lagi.</p>
+                <p style="margin-top: 0.5rem;">🇮🇩 <b>Subtitle:</b> Klik ikon <b>CC</b> di pojok kanan bawah player
+                    untuk menyalakan Bahasa Indonesia.</p>
             </div>
 
             <div class="player-container">
@@ -266,7 +284,7 @@
                 document.getElementById('movie-synopsis').textContent = movie.overview;
                 document.getElementById('movie-director').textContent = movie.credits?.crew?.find(c => c.job === 'Director')?.name || 'Various';
                 document.getElementById('movie-cast').innerHTML = movie.credits?.cast?.slice(0, 5).map(c => `<div>• ${c.name}</div>`).join('') || 'Unknown';
-                
+
                 const meta = [
                     movie.release_date || movie.first_air_date,
                     movie.runtime ? `${movie.runtime}m` : (movie.number_of_seasons ? `${movie.number_of_seasons} Seasons` : ''),
@@ -300,7 +318,7 @@
                 });
 
                 player.src = servers[0].url;
-                
+
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
 
@@ -313,4 +331,5 @@
         init();
     </script>
 </body>
+
 </html>
