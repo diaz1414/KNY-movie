@@ -321,22 +321,6 @@
             transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* YKN Armor: Protection Overlay */
-        .ykn-armor-protection {
-            position: absolute;
-            inset: 0;
-            z-index: 20;
-            background: transparent;
-            cursor: pointer;
-            display: block;
-            touch-action: manipulation;
-        }
-
-        .ykn-armor-protection.disengaged {
-            display: none;
-            pointer-events: none;
-        }
-
         @media (max-width: 768px) {
             .player-frame {
                 border-radius: 0;
@@ -723,8 +707,15 @@
         }
 
         @keyframes status-pulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
         }
 
         @keyframes netflix-zoom {
@@ -733,16 +724,19 @@
                 filter: blur(15px);
                 opacity: 0;
             }
+
             20% {
                 transform: scale(1);
                 filter: blur(0);
                 opacity: 1;
             }
+
             80% {
                 transform: scale(1.1);
                 opacity: 1;
                 filter: blur(0);
             }
+
             100% {
                 transform: scale(1.5);
                 filter: blur(20px);
@@ -751,8 +745,17 @@
         }
 
         @keyframes text-pulse {
-            0%, 100% { opacity: 0.3; transform: scale(0.95); }
-            50% { opacity: 0.8; transform: scale(1); }
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(0.95);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
         }
 
         /* Scrollbar */
@@ -1221,7 +1224,6 @@
 
             <!-- Video Player -->
             <div class="player-frame stagger-in delay-4" id="player-wrapper">
-                <div class="ykn-armor-protection" id="armor-shield"></div>
                 <div class="player-loader">
                     <div class="spinner"></div>
                 </div>
@@ -1752,49 +1754,6 @@
                 btn.classList.remove('visible');
             }
         });
-
-        // --- YKN ARMOR: AD & REDIRECT BLOCKER ---
-        (function() {
-            const armorShield = document.getElementById('armor-shield');
-            
-            // 1. Popup Interceptor
-            const originalOpen = window.open;
-            window.open = function(url, name, specs) {
-                console.warn("YKN Armor: Blocked attempted popup to", url);
-                return null;
-            };
-
-            // 2. Shield Logic (Caps first interaction)
-            if (armorShield) {
-                armorShield.addEventListener('click', function(e) {
-                    this.classList.add('disengaged');
-                    console.log("YKN Armor: Shield disengaged. Player ready.");
-                }, { once: true });
-            }
-
-            // 3. Redirect Counter-Measure
-            let lastFocusTime = Date.now();
-            window.onblur = function() {
-                lastFocusTime = Date.now();
-            };
-
-            window.onfocus = function() {
-                if (Date.now() - lastFocusTime < 1000) {
-                    // If focus was lost and regained very quickly, it might be an attempted redirect/popup window
-                    console.log("YKN Armor: Potential redirect detected and neutralized.");
-                }
-            };
-
-            // 4. Navigation Lock (Silent)
-            window.onbeforeunload = function() {
-                // This will only trigger if the iframe tries to redirect the top-level window.
-                // We keep it silent unless a navigation is actually happening.
-                setTimeout(() => {
-                    // If the user is still here after 500ms, the navigation was blocked or canceled
-                }, 500);
-                // Return nothing by default to keep it silent unless the redirect is aggressive
-            };
-        })();
 
         init();
         lucide.createIcons();
