@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Sun, Moon, Globe, X, Film } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -197,26 +196,7 @@ const Navbar: React.FC = () => {
             </button>
           </div>
 
-          {/* Genre Selector Mobile (Next to Burger) */}
-          <div className="md:hidden relative z-[1001]">
-            <select
-              className="appearance-none bg-black/40 backdrop-blur-xl border border-white/10 text-white text-[10px] font-black py-2 pl-4 pr-8 rounded-full outline-none shadow-lg cursor-pointer uppercase tracking-widest"
-              onChange={(e) => {
-                if (e.target.value) navigate(e.target.value);
-              }}
-              value=""
-            >
-              <option value="" disabled>Genres</option>
-              {genres.map((g) => (
-                <option key={g.name} value={g.path} className="text-black">
-                  {g.name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/60">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-          </div>
+          {/* Removed old select menu for a better experience in the mobile overlay */}
 
           {/* Mobile Burger */}
           <button
@@ -272,7 +252,7 @@ const Navbar: React.FC = () => {
 
             <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center">
               {/* Main Links */}
-              <div className="flex flex-col gap-10 mb-16">
+              <div className="flex flex-col gap-6 mb-12">
                 {navLinks.map((link, i) => (
                   <motion.a
                     key={link.name}
@@ -281,11 +261,64 @@ const Navbar: React.FC = () => {
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.1 + i * 0.1 }}
                     onClick={() => setIsOpen(false)}
-                    className="text-5xl font-black text-white hover:text-netflix-red transition-colors font-outfit tracking-tighter"
+                    className="text-4xl font-black text-white hover:text-netflix-red transition-colors font-outfit tracking-tighter"
                   >
                     {link.name}
                   </motion.a>
                 ))}
+              </div>
+
+              {/* Genres Section Mobile */}
+              <div className="w-full max-w-sm mb-16 space-y-10">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center gap-3 justify-center">
+                    <div className="h-px flex-1 bg-white/10" />
+                    <p className="text-[10px] font-black text-netflix-red uppercase tracking-[4px]">🎬 Movies Genres</p>
+                    <div className="h-px flex-1 bg-white/10" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {genres.map((g) => (
+                      <Link
+                        key={g.name}
+                        to={g.path}
+                        onClick={() => setIsOpen(false)}
+                        className="p-4 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold text-zinc-400 hover:bg-netflix-red hover:text-white transition-all uppercase tracking-widest"
+                      >
+                        {g.name}
+                      </Link>
+                    ))}
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center gap-3 justify-center">
+                    <div className="h-px flex-1 bg-white/10" />
+                    <p className="text-[10px] font-black text-netflix-red uppercase tracking-[4px]">📺 Series Genres</p>
+                    <div className="h-px flex-1 bg-white/10" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {seriesGenres.map((g) => (
+                      <Link
+                        key={g.name}
+                        to={g.path}
+                        onClick={() => setIsOpen(false)}
+                        className="p-4 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold text-zinc-400 hover:bg-netflix-red hover:text-white transition-all uppercase tracking-widest"
+                      >
+                        {g.name}
+                      </Link>
+                    ))}
+                  </div>
+                </motion.div>
               </div>
 
               {/* Bottom Controls */}
