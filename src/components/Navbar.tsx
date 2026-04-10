@@ -168,7 +168,7 @@ const Navbar: React.FC = () => {
             <select
               className="appearance-none bg-black/40 backdrop-blur-xl border border-white/10 text-white text-[10px] font-black py-2 pl-4 pr-8 rounded-full outline-none shadow-lg cursor-pointer uppercase tracking-widest"
               onChange={(e) => {
-                if(e.target.value) navigate(e.target.value);
+                if (e.target.value) navigate(e.target.value);
               }}
               value=""
             >
@@ -180,7 +180,7 @@ const Navbar: React.FC = () => {
               ))}
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/60">
-               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </div>
           </div>
 
