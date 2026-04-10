@@ -321,6 +321,42 @@
             transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        /* Anti-Ad Overlay Layer */
+        .player-protection-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            background: rgba(0,0,0,0.01);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .player-protection-layer::after {
+            content: 'CLICK TO START PLAYER';
+            font-family: 'Outfit';
+            font-weight: 900;
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: var(--accent-red);
+            padding: 10px 20px;
+            border-radius: 100px;
+        }
+
+        .player-protection-layer:hover::after {
+            opacity: 1;
+        }
+
+        .player-protection-layer.hidden {
+            display: none;
+            pointer-events: none;
+        }
+
         @media (max-width: 768px) {
             .player-frame {
                 border-radius: 0;
@@ -1205,11 +1241,12 @@
 
             <!-- Video Player -->
             <div class="player-frame stagger-in delay-4" id="player-wrapper">
+                <div class="player-protection-layer" id="ad-protector" title="Click to start player"></div>
                 <div class="player-loader">
                     <div class="spinner"></div>
                 </div>
                 <iframe id="player" allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *"
-                    allowfullscreen webkitallowfullscreen mozallowfullscreen referrerpolicy="no-referrer"
+                    allowfullscreen webkitallowfullscreen mozallowfullscreen referrerpolicy="origin"
                     loading="lazy"></iframe>
             </div>
 
@@ -1735,6 +1772,22 @@
                 btn.classList.remove('visible');
             }
         });
+
+        // --- Anti-Ad Protector Logic ---
+        const adProtector = document.getElementById('ad-protector');
+        if (adProtector) {
+            adProtector.addEventListener('click', function() {
+                // Swallow the first click to prevent initial popups
+                this.classList.add('hidden');
+                console.log("Ad protection triggered: first click swallowed.");
+                
+                // Optional: Prevent top-level redirect for a short window
+                window.onbeforeunload = function() {
+                    setTimeout(() => { window.onbeforeunload = null; }, 1000);
+                    return "Redirect blocked. Stay on YKN?";
+                };
+            });
+        }
 
         init();
         lucide.createIcons();
