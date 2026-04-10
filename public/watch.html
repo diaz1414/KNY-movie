@@ -307,6 +307,137 @@
             transform: translateY(-2px);
         }
 
+        /* Redesigned Player Controls Bar */
+        .player-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: -3rem;
+            margin-bottom: 4rem;
+            z-index: 10;
+            position: relative;
+        }
+
+        .control-pill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 10px 22px;
+            border-radius: 100px;
+            backdrop-filter: blur(40px);
+            transition: var(--transition);
+        }
+
+        .control-pill:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .control-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        .next-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 100px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 10px 25px var(--accent-red-glow);
+            font-family: 'Outfit';
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 15px 35px var(--accent-red-glow);
+        }
+
+        .next-btn:active {
+            transform: scale(0.98);
+        }
+
+        .next-btn i {
+            width: 18px;
+            stroke-width: 3;
+        }
+
+        @media (max-width: 768px) {
+            .player-controls {
+                margin: -2rem 0 3rem;
+                padding: 0 1rem;
+                justify-content: space-between;
+                gap: 10px;
+            }
+
+            .control-pill {
+                padding: 10px 16px;
+                flex: 1;
+                justify-content: space-between;
+            }
+
+            .next-btn {
+                flex: 1;
+                justify-content: center;
+                padding: 10px 16px;
+            }
+
+            .control-label {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Switch Toggle Fixes */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 20px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.15);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--accent-red); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
         /* Enhanced Player Wrapper */
         .player-frame {
             position: relative;
@@ -1213,7 +1344,7 @@
                 <div class="meta-strip" id="movie-meta"></div>
             </header>
 
-            <!-- Server Section -->
+            <!-- Server Section (Cleaned up) -->
             <section class="server-grid stagger-in delay-3">
                 <div class="label-group">
                     <i data-lucide="monitor"></i>
@@ -1230,6 +1361,25 @@
                 <iframe id="player" allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *"
                     allowfullscreen webkitallowfullscreen mozallowfullscreen referrerpolicy="no-referrer"
                     loading="lazy"></iframe>
+            </div>
+
+            <!-- Player Controls (Redesigned) -->
+            <div id="autonext-toggle-wrapper" class="player-controls stagger-in delay-4" style="display: none;">
+                <div class="control-pill">
+                    <div class="toggle-info" style="display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="fast-forward" style="width: 16px; color: var(--accent-red);"></i>
+                        <span class="control-label">Auto Next</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autonext-switch" onchange="toggleAutoNext(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <button class="next-btn" onclick="playNextEpisode()">
+                    <span>Next Episode</span>
+                    <i data-lucide="skip-forward"></i>
+                </button>
             </div>
 
             <!-- TV Series Controls (Hidden for movies) -->
@@ -1498,6 +1648,20 @@
                 const type = isTV ? 'tv' : 'movie';
                 let currentSeason = 1;
                 let currentEp = 1;
+                let currentSeasonData = null; // Store episodes for auto-next logic
+
+                // --- AUTO NEXT SETTINGS ---
+                let isAutoNextEnabled = localStorage.getItem('ykn_autonext') === 'true';
+                const autonextSwitch = document.getElementById('autonext-switch');
+                if (isAutoNextEnabled && autonextSwitch) autonextSwitch.checked = true;
+
+                if (isTV) document.getElementById('autonext-toggle-wrapper').style.display = 'flex';
+
+                window.toggleAutoNext = (enabled) => {
+                    isAutoNextEnabled = enabled;
+                    localStorage.setItem('ykn_autonext', enabled);
+                    updatePlayerUrls();
+                };
 
                 // TV UI Population
                 if (isTV) {
@@ -1531,13 +1695,14 @@
                         epGrid.innerHTML = '<div class="loader-label">LOADING COVERS...</div>';
                         const res = await fetch(`https://api.themoviedb.org/3/tv/${movieId}/season/${seasonNum}?api_key=${TMDB_API_KEY}`);
                         const data = await res.json();
+                        currentSeasonData = data; // Cache for auto-next
 
                         epGrid.innerHTML = data.episodes.map(ep => {
                             const thumb = ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : 'https://via.placeholder.com/300x169/222/555?text=No+Preview';
                             const isActive = ep.episode_number === currentEp && seasonNum === currentSeason;
 
                             return `
-                                <div class="ep-card ${isActive ? 'active' : ''}" onclick="changeEpisode(${seasonNum}, ${ep.episode_number}, this)">
+                                <div class="ep-card ${isActive ? 'active' : ''}" data-ep="${ep.episode_number}" onclick="changeEpisode(${seasonNum}, ${ep.episode_number}, this)">
                                     <div class="ep-thumb" style="background-image: url('${thumb}')">
                                         <div class="ep-badge">EP ${ep.episode_number}</div>
                                         <div class="ep-overlay"><i data-lucide="play"></i></div>
@@ -1580,18 +1745,53 @@
                 } catch (e) { console.log("No custom server found in Supabase"); }
 
                 function getPlayerUrl(serverBase, sNum, eNum) {
-                    if (serverBase.includes('vidsrcme.su')) return `https://vidsrcme.su/embed/tv/${movieId}/${sNum}/${eNum}`;
-                    if (serverBase.includes('vidsrcme.ru')) return `https://vidsrcme.ru/embed/tv/${movieId}/${sNum}/${eNum}`;
-                    if (serverBase.includes('vidsrc-me.ru')) return `https://vidsrc-me.ru/embed/tv/${movieId}/${sNum}/${eNum}`;
-                    if (serverBase.includes('vidlink.pro')) return `https://vidlink.pro/tv/${movieId}/${sNum}/${eNum}`;
-                    if (serverBase.includes('autoembed.co')) return `https://autoembed.co/tv/tmdb/${movieId}-${sNum}-${eNum}`;
-                    if (serverBase.includes('vidsrc.cc')) return `https://vidsrc.cc/v2/embed/tv/${movieId}/${sNum}/${eNum}`;
-                    if (serverBase.includes('multiembed.mov')) return `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1&s=${sNum}&e=${eNum}`;
-                    if (serverBase.includes('warezcdn.com')) return `https://embed.warezcdn.com/tv/${movieId}/${sNum}/${eNum}`;
-                    if (serverBase.includes('nontongo.win')) return `https://www.nontongo.win/embed/tv/${movieId}/${sNum}/${eNum}`;
-                    if (serverBase.includes('2embed.cc')) return `https://www.2embed.cc/embedtv/${movieId}&s=${sNum}&e=${eNum}`;
+                    const extra = isAutoNextEnabled ? (serverBase.includes('vidlink') ? '&autonext=true' : '?autonext=1') : '';
+                    if (serverBase.includes('vidsrcme.su')) return `https://vidsrcme.su/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
+                    if (serverBase.includes('vidsrcme.ru')) return `https://vidsrcme.ru/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
+                    if (serverBase.includes('vidsrc-me.ru')) return `https://vidsrc-me.ru/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
+                    if (serverBase.includes('vidlink.pro')) return `https://vidlink.pro/tv/${movieId}/${sNum}/${eNum}${extra}`;
+                    if (serverBase.includes('autoembed.co')) return `https://autoembed.co/tv/tmdb/${movieId}-${sNum}-${eNum}${extra}`;
+                    if (serverBase.includes('vidsrc.cc')) return `https://vidsrc.cc/v2/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
+                    if (serverBase.includes('multiembed.mov')) return `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1&s=${sNum}&e=${eNum}${extra}`;
+                    if (serverBase.includes('warezcdn.com')) return `https://embed.warezcdn.com/tv/${movieId}/${sNum}/${eNum}${extra}`;
+                    if (serverBase.includes('nontongo.win')) return `https://www.nontongo.win/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
+                    if (serverBase.includes('2embed.cc')) return `https://www.2embed.cc/embedtv/${movieId}&s=${sNum}&e=${eNum}${extra}`;
                     return serverBase; // Fallback
                 }
+
+                // --- SYNC UI AUTO NEXT LOGIC ---
+                window.playNextEpisode = () => {
+                    if (!isAutoNextEnabled || !isTV || !currentSeasonData) return;
+                    
+                    const nextEpNum = currentEp + 1;
+                    const nextEp = currentSeasonData.episodes.find(e => e.episode_number === nextEpNum);
+                    
+                    if (nextEp) {
+                        const epEl = document.querySelector(`.ep-card[data-ep="${nextEpNum}"]`);
+                        changeEpisode(currentSeason, nextEpNum, epEl);
+                        if (epEl) epEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    } else {
+                        // Check for next season
+                        const nextSeasonNum = currentSeason + 1;
+                        const nextSeasonEl = document.querySelector(`.season-card[data-season="${nextSeasonNum}"]`);
+                        if (nextSeasonEl) {
+                            currentEp = 1; // Reset to ep 1 for next season
+                            changeSeason(nextSeasonNum, nextSeasonEl);
+                            // Note: updatePlayerUrls will be called by loadEpisodes default behavior or manual call
+                        }
+                    }
+                };
+
+                window.addEventListener('message', (e) => {
+                    // Supported event patterns from various providers
+                    const data = e.data;
+                    const isEnded = (data.event === 'ended' || data.type === 'ended' || data === 'vidlink_ended' || data === 'vidsrc_ended');
+                    
+                    if (isEnded && isAutoNextEnabled) {
+                        console.log("Auto Next triggered by player event");
+                        playNextEpisode();
+                    }
+                });
 
                 let servers = [];
                 function updatePlayerUrls() {
