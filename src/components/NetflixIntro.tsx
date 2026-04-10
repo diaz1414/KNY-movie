@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 
 const NetflixIntro: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [isAudioBlocked, setIsAudioBlocked] = useState(false);
   const audioObj = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -20,10 +19,8 @@ const NetflixIntro: React.FC = () => {
         if (!audioObj.current) return;
         try {
           await audioObj.current.play();
-          setIsAudioBlocked(false);
         } catch (err) {
           console.warn("Autoplay blocked. User interaction required.");
-          setIsAudioBlocked(true);
         }
       };
 
@@ -31,7 +28,6 @@ const NetflixIntro: React.FC = () => {
         if (audioObj.current) {
           try {
             await audioObj.current.play();
-            setIsAudioBlocked(false);
             cleanupListeners();
           } catch (e) {
             console.error("Interaction play failed:", e);
@@ -93,19 +89,6 @@ const NetflixIntro: React.FC = () => {
         >
           Yuk Kita Nonton
         </p>
-
-        {isAudioBlocked && (
-          <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center animate-bounce">
-               <svg className="w-6 h-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-               </svg>
-            </div>
-            <p className="text-[10px] text-white/30 uppercase tracking-[0.4em] font-black">
-              Click to Unmute
-            </p>
-          </div>
-        )}
       </div>
 
       <div className="absolute inset-0 bg-white/5 pointer-events-none animate-netflix-flash" />
