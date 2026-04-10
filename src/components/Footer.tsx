@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FaInstagram, FaGithub, FaXTwitter, FaEnvelope } from 'react-icons/fa6';
 import { Film } from 'lucide-react';
+import ChangelogModal from './ChangelogModal';
 
 const Footer: React.FC = () => {
   const { t } = useTranslation();
+  const [isChangelogOpen, setIsChangelogOpen] = React.useState(false);
 
   const socialLinks = [
     { icon: <FaInstagram size={20} />, href: 'https://www.instagram.com/', target: '_blank', label: 'Instagram' },
@@ -78,6 +80,14 @@ const Footer: React.FC = () => {
                 </Link>
               </li>
             ))}
+            <li>
+              <button
+                onClick={() => setIsChangelogOpen(true)}
+                className="text-[var(--text-secondary)] hover:text-netflix-red transition-colors duration-200 cursor-pointer"
+              >
+                {t('changelog')}
+              </button>
+            </li>
           </ul>
         </div>
 
@@ -109,6 +119,8 @@ const Footer: React.FC = () => {
           <span className="cursor-pointer hover:text-[var(--text-primary)] transition-colors">Indonesia</span>
         </div>
       </div>
+
+      <ChangelogModal isOpen={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />
     </footer>
   );
 };

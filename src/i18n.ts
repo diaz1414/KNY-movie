@@ -34,7 +34,8 @@ const resources = {
       "loading": "Loading...",
       "synopsis": "Synopsis",
       "director": "Director",
-      "cast": "Key Cast"
+      "cast": "Key Cast",
+      "changelog": "Changelog"
     }
   },
   id: {
@@ -69,7 +70,8 @@ const resources = {
       "loading": "Memuat...",
       "synopsis": "Sinopsis",
       "director": "Sutradara",
-      "cast": "Pemeran Utama"
+      "cast": "Pemeran Utama",
+      "changelog": "Catatan Perubahan"
     }
   },
   ja: {
