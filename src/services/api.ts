@@ -167,5 +167,17 @@ export const movieService = {
       }
     });
     return res.data.results.map(normalizeTMDB);
+  },
+
+  getSeriesByGenre: async (genreId: string, page: number = 1, lang: string = 'en-US') => {
+    const res = await api.get('/discover/tv', {
+      params: {
+        with_genres: genreId,
+        language: lang,
+        page: page,
+        sort_by: 'popularity.desc'
+      }
+    });
+    return res.data.results.map(normalizeTMDB);
   }
 };

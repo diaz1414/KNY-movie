@@ -54,6 +54,15 @@ const Navbar: React.FC = () => {
     { name: 'Thriller', path: '/genre/53' },
   ];
 
+  const seriesGenres = [
+    { name: 'Drama', path: '/series/genre/18' },
+    { name: 'Crime', path: '/series/genre/80' },
+    { name: 'Animation', path: '/series/genre/16' },
+    { name: 'Reality', path: '/series/genre/10764' },
+    { name: 'Sci-Fi & Fantasy', path: '/series/genre/10765' },
+    { name: 'Action & Adventure', path: '/series/genre/10759' },
+  ];
+
 
   return (
     <>
@@ -119,17 +128,42 @@ const Navbar: React.FC = () => {
               <span className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity font-bold text-sm flex items-center gap-1 uppercase tracking-widest">
                 Genres
               </span>
-              <div className="absolute right-0 top-full pt-2 w-48 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300">
-                <div className="glass rounded-2xl overflow-hidden py-2 shadow-2xl border border-white/10">
-                  {genres.map((genre) => (
-                    <Link
-                      key={genre.name}
-                      to={genre.path}
-                      className="block w-full text-left px-5 py-2.5 text-xs font-bold hover:bg-netflix-red hover:text-white transition-colors text-[var(--text-primary)] uppercase tracking-tighter"
-                    >
-                      {genre.name}
-                    </Link>
-                  ))}
+              <div className="absolute right-0 top-full pt-2 w-80 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300">
+                <div className="glass rounded-2xl overflow-hidden py-3 shadow-2xl border border-white/10">
+                  {/* Movies Section */}
+                  <div className="px-4 pb-1">
+                    <p className="text-[9px] font-black uppercase tracking-[4px] text-netflix-red/70 mb-1">🎬 Movies</p>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    {genres.map((genre) => (
+                      <Link
+                        key={genre.name}
+                        to={genre.path}
+                        className="block w-full text-left px-4 py-2 text-xs font-bold hover:bg-netflix-red hover:text-white transition-colors text-[var(--text-primary)] uppercase tracking-tighter"
+                      >
+                        {genre.name}
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Divider */}
+                  <div className="mx-4 my-2 h-px bg-white/5" />
+
+                  {/* Series Section */}
+                  <div className="px-4 pb-1">
+                    <p className="text-[9px] font-black uppercase tracking-[4px] text-netflix-red/70 mb-1">📺 Series</p>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    {seriesGenres.map((genre) => (
+                      <Link
+                        key={genre.name}
+                        to={genre.path}
+                        className="block w-full text-left px-4 py-2 text-xs font-bold hover:bg-netflix-red hover:text-white transition-colors text-[var(--text-primary)] uppercase tracking-tighter"
+                      >
+                        {genre.name}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
