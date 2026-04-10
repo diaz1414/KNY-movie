@@ -1331,9 +1331,9 @@
 
     <div class="container" id="main-container" style="display: none;">
         <nav class="stagger-in delay-1">
-            <a href="/" class="back-nav" onclick="if(window.history.length > 1) { history.back(); return false; }">
+            <a href="/" class="back-nav">
                 <i data-lucide="arrow-left"></i>
-                Back
+                Home
             </a>
         </nav>
 
@@ -1648,7 +1648,28 @@
                 const type = isTV ? 'tv' : 'movie';
                 let currentSeason = 1;
                 let currentEp = 1;
+                let currentServerIndex = 0;
                 let currentSeasonData = null; // Store episodes for auto-next logic
+
+                // --- PROGRESS TRACKING ---
+                const getStorageKey = () => `ykn_progress_${movieId}`;
+                const saveProgress = (s, e, serverIdx) => {
+                    const data = { s, e, server: serverIdx, timestamp: Date.now() };
+                    localStorage.setItem(getStorageKey(), JSON.stringify(data));
+                };
+                const loadProgress = () => {
+                    try {
+                        const saved = localStorage.getItem(getStorageKey());
+                        return saved ? JSON.parse(saved) : null;
+                    } catch (e) { return null; }
+                };
+
+                const savedProgress = loadProgress();
+                if (savedProgress) {
+                    currentSeason = savedProgress.s || 1;
+                    currentEp = savedProgress.e || 1;
+                    currentServerIndex = savedProgress.server || 0;
+                }
 
                 // --- AUTO NEXT SETTINGS ---
                 let isAutoNextEnabled = localStorage.getItem('ykn_autonext') === 'true';
@@ -1676,7 +1697,7 @@
                         .map(s => {
                             const poster = s.poster_path ? `https://image.tmdb.org/t/p/w200${s.poster_path}` : 'https://via.placeholder.com/200x300/222/555?text=Poster';
                             return `
-                                <div class="season-card ${s.season_number === 1 ? 'active' : ''}" 
+                                <div class="season-card ${s.season_number === currentSeason ? 'active' : ''}" 
                                      data-season="${s.season_number}"
                                      onclick="changeSeason(${s.season_number}, this)">
                                     <div class="season-poster" style="background-image: url('${poster}')"></div>
@@ -1686,9 +1707,12 @@
                         }).join('');
 
                     window.changeSeason = (sNum, el) => {
+                        currentSeason = sNum;
+                        currentEp = 1; // Reset to ep 1 when season changes
                         document.querySelectorAll('.season-card').forEach(c => c.classList.remove('active'));
                         el.classList.add('active');
                         loadEpisodes(sNum);
+                        updateUrlState();
                     };
 
                     async function loadEpisodes(seasonNum) {
@@ -1724,11 +1748,12 @@
                         currentSeason = s;
                         currentEp = e;
                         document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
-                        el.classList.add('active');
+                        if (el) el.classList.add('active');
                         updatePlayerUrls();
+                        updateUrlState();
                     };
 
-                    loadEpisodes(1); // Default load
+                    loadEpisodes(currentSeason); // Load the current (potentially saved) season
                 }
 
                 // --- CUSTOM SUPABASE CHECK ---
@@ -1757,6 +1782,31 @@
                     if (serverBase.includes('nontongo.win')) return `https://www.nontongo.win/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
                     if (serverBase.includes('2embed.cc')) return `https://www.2embed.cc/embedtv/${movieId}&s=${sNum}&e=${eNum}${extra}`;
                     return serverBase; // Fallback
+                }
+
+                function updateUrlState() {
+                    const newUrl = new URL(window.location);
+                    if (isTV) {
+                        newUrl.searchParams.set('s', currentSeason);
+                        newUrl.searchParams.set('e', currentEp);
+                    }
+                    history.replaceState(null, '', newUrl);
+                    saveProgress(currentSeason, currentEp, currentServerIndex);
+                }
+
+                function setIframeSrc(url) {
+                    const player = document.getElementById('player');
+                    const playerWrapper = document.getElementById('player-wrapper');
+                    playerWrapper.classList.add('changing');
+                    
+                    // The trick to avoid history entry is to replace the iframe or use location.replace
+                    // Since it's cross-origin, location.replace is tricky, so we clone and replace the element.
+                    setTimeout(() => {
+                        const newPlayer = player.cloneNode();
+                        newPlayer.src = url;
+                        newPlayer.onload = () => playerWrapper.classList.remove('changing');
+                        player.parentNode.replaceChild(newPlayer, player);
+                    }, 400);
                 }
 
                 // --- SYNC UI AUTO NEXT LOGIC ---
@@ -1815,35 +1865,29 @@
                         servers.push(customServer);
                     }
 
+                    if (currentServerIndex >= servers.length) currentServerIndex = 0;
+
                     // Render Servers
                     const serverList = document.getElementById('server-list');
                     serverList.innerHTML = '';
                     servers.forEach((s, idx) => {
                         const btn = document.createElement('button');
-                        const isActive = idx === 0;
+                        const isActive = idx === currentServerIndex;
                         btn.className = `pill-btn ${isActive ? 'active' : ''}`;
                         btn.innerHTML = `<i data-lucide="${s.icon}"></i> <span>${s.name}</span>`;
                         btn.onclick = () => {
                             if (btn.classList.contains('active')) return;
+                            currentServerIndex = idx;
                             document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
                             btn.classList.add('active');
-                            const playerWrapper = document.getElementById('player-wrapper');
-                            playerWrapper.classList.add('changing');
-                            setTimeout(() => {
-                                player.src = s.url;
-                                player.onload = () => playerWrapper.classList.remove('changing');
-                            }, 400);
+                            setIframeSrc(s.url);
+                            updateUrlState();
                         };
                         serverList.appendChild(btn);
                     });
 
                     // Update Player
-                    const playerWrapper = document.getElementById('player-wrapper');
-                    playerWrapper.classList.add('changing');
-                    setTimeout(() => {
-                        player.src = servers[0].url;
-                        player.onload = () => playerWrapper.classList.remove('changing');
-                    }, 400);
+                    setIframeSrc(servers[currentServerIndex].url);
 
                     lucide.createIcons();
                 }

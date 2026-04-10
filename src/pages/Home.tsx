@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
-import Hero from '../components/Hero';
+import HeroCarousel from '../components/HeroCarousel';
 import MovieCard from '../components/MovieCard';
 import MovieRow from '../components/MovieRow';
 import Footer from '../components/Footer';
@@ -232,7 +232,7 @@ const Home: React.FC = () => {
                 <NetflixLoader fullScreen />
               ) : (
                 <>
-                  <Hero movie={popularMovies[0]} />
+                  <HeroCarousel movies={popularMovies.slice(0, 7)} />
 
                   <div className="relative z-10 -mt-20 md:-mt-32 space-y-8">
                     <MovieRow
