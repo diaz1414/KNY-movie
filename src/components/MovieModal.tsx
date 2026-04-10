@@ -1,0 +1,242 @@
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import { X, Play, Star, Calendar, Clock, User, Film } from 'lucide-react';
+import { movieService, type UnifiedMovieDetail } from '../services/api';
+import { useTranslation } from 'react-i18next';
+import NetflixLoader from './NetflixLoader';
+
+interface MovieModalProps {
+  movieId: string | null;
+  onClose: () => void;
+}
+
+const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
+  const { t, i18n } = useTranslation();
+  const [movie, setMovie] = useState<UnifiedMovieDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (movieId) {
+      setLoading(true);
+      movieService.getMovieDetail(movieId, i18n.language)
+        .then((detail) => {
+          setMovie(detail);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setLoading(false);
+        });
+
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [movieId, i18n.language]);
+
+  if (!movieId) return null;
+
+  const handleWatch = () => {
+    window.location.href = `/watch.html?id=${movieId}`;
+  };
+
+  const containerVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.95, y: 40 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
+      y: 0,
+      transition: { type: 'spring', damping: 25, stiffness: 300 }
+    },
+    exit: { opacity: 0, scale: 0.95, y: 40, transition: { duration: 0.2 } }
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-0 sm:p-4 md:p-10 pointer-events-none overflow-hidden">
+        {/* Backdrop overlay */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-black/90 backdrop-blur-xl pointer-events-auto"
+        />
+
+        {/* Modal Content */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="relative w-full max-w-5xl h-full sm:h-auto sm:max-h-[85vh] bg-[#0c0c0c] sm:rounded-[2.5rem] overflow-hidden shadow-[0_0_120px_rgba(0,0,0,1)] border-0 sm:border border-white/10 pointer-events-auto flex flex-col md:flex-row"
+        >
+          {loading ? (
+            <div className="w-full h-[60vh] flex items-center justify-center">
+              <NetflixLoader />
+            </div>
+          ) : movie ? (
+            <>
+              {/* Close Button (Universal) */}
+              <button 
+                onClick={onClose}
+                className="absolute top-6 right-6 z-[110] w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-netflix-red hover:scale-110 active:scale-90 transition-all shadow-2xl group"
+              >
+                <X size={24} className="group-hover:rotate-90 transition-transform duration-300" />
+              </button>
+
+              {/* Poster/Hero Section */}
+              <div className="relative w-full md:w-[38%] h-[40vh] md:h-auto overflow-hidden shrink-0">
+                <img 
+                  src={movie.poster} 
+                  alt={movie.title} 
+                  className="w-full h-full object-cover"
+                />
+                {/* Integration Gradients */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0c] via-[#0c0c0c]/20 to-transparent md:hidden" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0c0c0c]/10 to-[#0c0c0c] hidden md:block" />
+                
+                {/* Mobile Floating Meta (Rating) */}
+                <div className="absolute bottom-6 left-6 md:hidden flex items-center gap-2 bg-yellow-500/20 backdrop-blur-xl border border-yellow-500/30 px-3 py-1.5 rounded-xl text-yellow-500 font-black">
+                  <Star size={16} fill="currentColor" />
+                  <span>{movie.rating}</span>
+                </div>
+              </div>
+
+              {/* Details Content Area */}
+              <div className="flex-1 overflow-y-auto premium-scroll px-6 py-10 md:px-14 md:py-16 flex flex-col gap-10">
+                
+                {/* Header Info */}
+                <motion.div 
+                  variants={itemVariants}
+                  transition={{ delay: 0.1 }}
+                  className="space-y-4"
+                >
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="bg-netflix-red text-white text-[10px] font-black px-2.5 py-1 rounded-sm uppercase tracking-tighter shadow-lg shadow-red-600/20">
+                      {movie.type.toUpperCase()}
+                    </span>
+                    <span className="text-white/40 text-[10px] font-black tracking-widest uppercase border border-white/10 px-2 py-0.5 rounded">
+                      {movie.quality}
+                    </span>
+                    <div className="hidden md:flex items-center gap-1.5 text-yellow-500 font-black ml-2">
+                      <Star size={18} fill="currentColor" />
+                      <span className="text-lg">{movie.rating}</span>
+                    </div>
+                  </div>
+
+                  <h2 className="text-3xl md:text-6xl font-black font-outfit text-white leading-[1.1] tracking-tighter antialiased">
+                    {movie.title}
+                  </h2>
+
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-zinc-400 font-bold text-xs md:text-sm">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={18} className="text-netflix-red/60" />
+                      <span>{movie.releaseDate.split('-')[0]}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock size={18} className="text-netflix-red/60" />
+                      <span>{movie.duration}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Film size={18} className="text-netflix-red/60" />
+                      <span className="truncate max-w-[200px]">{movie.genres.join(', ')}</span>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Synopsis */}
+                <motion.div 
+                  variants={itemVariants}
+                  transition={{ delay: 0.2 }}
+                  className="space-y-4"
+                >
+                  <h4 className="text-netflix-red text-[10px] font-black uppercase tracking-[5px] flex items-center gap-3">
+                    {t('synopsis')} <div className="h-px flex-1 bg-white/5" />
+                  </h4>
+                  <p className="text-zinc-300 text-base md:text-xl leading-relaxed font-outfit font-medium opacity-90 italic">
+                    "{movie.synopsis}"
+                  </p>
+                </motion.div>
+
+                {/* Team Info */}
+                <motion.div 
+                  variants={itemVariants}
+                  transition={{ delay: 0.3 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-10"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-netflix-red/80">
+                      <User size={16} strokeWidth={3} />
+                      <h4 className="text-[10px] font-black uppercase tracking-[4px]">{t('director')}</h4>
+                    </div>
+                    <p className="text-white font-black text-lg md:text-xl font-outfit leading-tight">{movie.director}</p>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-netflix-red/80">
+                      <Film size={16} strokeWidth={3} />
+                      <h4 className="text-[10px] font-black uppercase tracking-[4px]">{t('cast')}</h4>
+                    </div>
+                    <p className="text-zinc-400 font-bold text-sm md:text-base leading-relaxed">
+                      {movie.cast.join(' • ')}
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* Actions */}
+                <motion.div 
+                  variants={itemVariants}
+                  transition={{ delay: 0.4 }}
+                  className="pt-6 mt-auto"
+                >
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleWatch}
+                    className="w-full md:w-max bg-white text-black px-12 py-5 rounded-2xl font-black flex items-center justify-center gap-4 shadow-[0_25px_50px_rgba(255,255,255,0.15)] group/btn"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-netflix-red flex items-center justify-center text-white group-hover/btn:scale-110 transition-transform">
+                      <Play fill="white" size={20} className="ml-0.5" />
+                    </div>
+                    <span className="uppercase tracking-tighter text-xl">{t('watch_now')}</span>
+                  </motion.button>
+                </motion.div>
+                
+              </div>
+            </>
+          ) : (
+            <div className="w-full h-[60vh] flex items-center justify-center text-white font-bold">
+              ERROR: CONTENT UNAVAILABLE
+            </div>
+          )}
+        </motion.div>
+
+        {/* Local Scrollbar Correction for Tailwind */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          .premium-scroll::-webkit-scrollbar {
+            width: 5px;
+          }
+          .premium-scroll::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .premium-scroll::-webkit-scrollbar-thumb {
+            background: rgba(229, 9, 20, 0.4);
+            border-radius: 10px;
+          }
+          .premium-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(229, 9, 20, 0.8);
+          }
+        `}} />
+      </div>
+    </AnimatePresence>
+  );
+};
+
+export default MovieModal;

@@ -9,6 +9,7 @@ import type { UnifiedMovie } from '../services/api';
 import { movieService } from '../services/api';
 import { Search, X } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
+import MovieModal from '../components/MovieModal';
 
 const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -20,6 +21,7 @@ const Home: React.FC = () => {
   const [suggestions, setSuggestions] = useState<UnifiedMovie[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedMovieId, setSelectedMovieId] = useState<string | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
   // Restore state on mount
@@ -232,7 +234,16 @@ const Home: React.FC = () => {
                 <NetflixLoader fullScreen />
               ) : (
                 <>
-                  <HeroCarousel movies={popularMovies.slice(0, 7)} />
+                  <HeroCarousel 
+                    movies={popularMovies.slice(0, 7)} 
+                    onMoreInfo={(id) => setSelectedMovieId(id)}
+                  />
+
+                  {/* Movie Info Modal */}
+                  <MovieModal 
+                    movieId={selectedMovieId} 
+                    onClose={() => setSelectedMovieId(null)} 
+                  />
 
                   <div className="relative z-10 -mt-20 md:-mt-32 space-y-8">
                     <MovieRow

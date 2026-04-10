@@ -31,7 +31,10 @@ const resources = {
       "results": "results",
       "new_releases": "New Releases",
       "popular_series": "Popular Series",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "synopsis": "Synopsis",
+      "director": "Director",
+      "cast": "Key Cast"
     }
   },
   id: {
@@ -63,7 +66,10 @@ const resources = {
       "results": "hasil",
       "new_releases": "Rilisan Terbaru",
       "popular_series": "Serial Populer",
-      "loading": "Memuat..."
+      "loading": "Memuat...",
+      "synopsis": "Sinopsis",
+      "director": "Sutradara",
+      "cast": "Pemeran Utama"
     }
   },
   ja: {

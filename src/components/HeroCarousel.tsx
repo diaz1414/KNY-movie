@@ -6,9 +6,10 @@ import type { UnifiedMovie } from '../services/api';
 
 interface HeroCarouselProps {
   movies: UnifiedMovie[];
+  onMoreInfo: (movieId: string) => void;
 }
 
-const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies }) => {
+const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -121,6 +122,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies }) => {
                 <motion.button
                   whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.15)' }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => onMoreInfo(currentMovie.id)}
                   className="bg-zinc-800/60 backdrop-blur-xl text-white border border-white/10 px-6 md:px-10 py-3.5 md:py-4 rounded-xl font-black flex items-center gap-3 transition-colors"
                 >
                   <Info size={24} />
