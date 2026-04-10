@@ -8,10 +8,12 @@ import Privacy from './pages/Privacy';
 import Genre from './pages/Genre';
 import { ThemeProvider } from './context/ThemeContext';
 import ScrollToTop from './components/ScrollToTop';
+import NetflixIntro from './components/NetflixIntro';
 
 const App: React.FC = () => {
   return (
     <ThemeProvider>
+      <NetflixIntro />
       <Router>
         <ScrollToTop />
         <Routes>

@@ -35,45 +35,8 @@
       height: 100vh;
       width: 100vw;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 20px;
-    }
-
-    #root:empty::before {
-      content: '';
-      width: 120px;
-      height: 120px;
-      background: url('/logo.png') no-repeat center;
-      background-size: contain;
-      animation: pulse 2s infinite ease-in-out;
-    }
-
-    #root:empty::after {
-      content: 'YUK KITA NONTON';
-      color: #E50914;
-      font-family: 'Outfit', sans-serif;
-      font-weight: 900;
-      letter-spacing: 5px;
-      font-size: 1.2rem;
-    }
-
-    @keyframes pulse {
-      0% {
-        transform: scale(0.95);
-        opacity: 0.8;
-      }
-
-      50% {
-        transform: scale(1.05);
-        opacity: 1;
-      }
-
-      100% {
-        transform: scale(0.95);
-        opacity: 0.8;
-      }
     }
   </style>
 </head>

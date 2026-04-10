@@ -30,7 +30,8 @@ const resources = {
       "back_to_home": "Back to Home",
       "results": "results",
       "new_releases": "New Releases",
-      "popular_series": "Popular Series"
+      "popular_series": "Popular Series",
+      "loading": "Loading..."
     }
   },
   id: {
@@ -61,7 +62,8 @@ const resources = {
       "back_to_home": "Kembali ke Beranda",
       "results": "hasil",
       "new_releases": "Rilisan Terbaru",
-      "popular_series": "Serial Populer"
+      "popular_series": "Serial Populer",
+      "loading": "Memuat..."
     }
   },
   ja: {

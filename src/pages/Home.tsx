@@ -8,6 +8,7 @@ import Footer from '../components/Footer';
 import type { UnifiedMovie } from '../services/api';
 import { movieService } from '../services/api';
 import { Search, X } from 'lucide-react';
+import NetflixLoader from '../components/NetflixLoader';
 
 const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -228,9 +229,7 @@ const Home: React.FC = () => {
           ) : (
             <div className="space-y-12">
               {loading ? (
-                <div className="h-[80vh] flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-                </div>
+                <NetflixLoader fullScreen />
               ) : (
                 <>
                   <Hero movie={popularMovies[0]} />

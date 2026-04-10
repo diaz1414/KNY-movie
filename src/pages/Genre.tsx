@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import MovieCard from '../components/MovieCard';
 import { movieService, type UnifiedMovie } from '../services/api';
 import { motion } from 'framer-motion';
+import NetflixLoader from '../components/NetflixLoader';
 
 const getGenreName = (id: string) => {
   const genres: Record<string, string> = {
@@ -122,9 +123,7 @@ const Genre: React.FC = () => {
         </div>
 
         {loading && (
-          <div className="text-center py-10">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-netflix-red mx-auto"></div>
-          </div>
+          <NetflixLoader />
         )}
 
         {!loading && movies.length > 0 && (
