@@ -84,7 +84,7 @@ const NetflixIntro: React.FC = () => {
                 className="space-y-2"
               >
                 <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                  READY TO <span className="text-red-600">WATCH?</span>
+                  WELCOME TO <span className="text-red-600">YKN</span>
                 </h2>
                 <p className="text-white/40 text-sm md:text-base font-medium tracking-widest uppercase">
                   Enable sound for the best experience
@@ -101,7 +101,7 @@ const NetflixIntro: React.FC = () => {
                   onClick={handleStart}
                   className="relative flex items-center justify-center gap-4 px-10 py-4 bg-black rounded-full border border-white/10 text-white text-lg font-bold tracking-widest transition-all duration-300"
                 >
-                  START EXPERIENCE
+                  GO TO YKN MOVIES
                   <div className="relative flex h-3 w-3">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
