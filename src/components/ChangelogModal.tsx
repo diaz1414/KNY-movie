@@ -13,6 +13,18 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
 
   const updates = [
     {
+      date: 'April 11, 2026',
+      title: 'Cinematic Intro & Branding Polish',
+      items: [
+        'Implemented a premium, Netflix-style cinematic intro sequence.',
+        'Added "Welcome to YKN" interactive entry popup with sound experience.',
+        'Refined branding logo with improved sharpness and reduced visual noise.',
+        'Added Skip Intro functionality with session-based persistence.',
+        'Optimized system-wide TypeScript types for better environment compatibility.',
+        'Full English localization for all intro UI components.'
+      ]
+    },
+    {
       date: 'April 10, 2026',
       title: 'Cinematic Experience & UI Upgrades',
       items: [
