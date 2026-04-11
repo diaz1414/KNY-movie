@@ -16,7 +16,7 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
       date: 'April 11, 2026',
       title: 'Cinematic Intro & Branding Polish',
       items: [
-        'Implemented a premium, Netflix-style cinematic intro sequence.',
+        'Implemented a premium, Net***x-style cinematic intro sequence.',
         'Added "Welcome to YKN" interactive entry popup with sound experience.',
         'Refined branding logo with improved sharpness and reduced visual noise.',
         'Added Skip Intro functionality with session-based persistence.',
@@ -58,9 +58,9 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
 
   const containerVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95, y: 30 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
+    visible: {
+      opacity: 1,
+      scale: 1,
       y: 0,
       transition: { type: 'spring', damping: 25, stiffness: 300, delayChildren: 0.2, staggerChildren: 0.1 }
     },
@@ -104,7 +104,7 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
                   <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Platform Updates</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={onClose}
                 className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-netflix-red transition-all group"
               >
@@ -118,7 +118,7 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
                 <motion.div key={idx} variants={itemVariants} className="relative pl-8 border-l border-white/10">
                   {/* Dot */}
                   <div className="absolute top-1 -left-[5px] w-2 h-2 rounded-full bg-netflix-red shadow-[0_0_10px_rgba(229,9,20,0.8)]" />
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 text-xs font-black text-netflix-red/60 uppercase tracking-widest">
                       <Calendar size={14} />
@@ -136,14 +136,15 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 </motion.div>
               ))}
-              
+
               <div className="pt-4 text-center">
                 <p className="text-[10px] font-black text-white/20 uppercase tracking-[4px]">More updates coming soon</p>
               </div>
             </div>
 
             {/* Local Scrollbar Correction */}
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+              __html: `
               .premium-scroll::-webkit-scrollbar {
                 width: 4px;
               }
