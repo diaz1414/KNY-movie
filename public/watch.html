@@ -1313,6 +1313,74 @@
             color: var(--accent-red);
             transform: translateY(-5px) scale(1.1);
         }
+        /* Share Section - Premium Glass */
+        .share-section {
+            margin-bottom: 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .share-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .share-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 100px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: var(--transition);
+            backdrop-filter: blur(20px);
+            cursor: pointer;
+        }
+
+        .share-btn:hover {
+            background: var(--glass-highlight);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .share-btn i, .share-btn img {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Platform Colors (Subtle border glow) */
+        .share-btn.whatsapp:hover { border-color: #25D366; box-shadow: 0 0 15px rgba(37, 211, 102, 0.3); }
+        .share-btn.facebook:hover { border-color: #1877F2; box-shadow: 0 0 15px rgba(24, 119, 242, 0.3); }
+        .share-btn.x-twitter:hover { border-color: #ffffff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
+        .share-btn.telegram:hover { border-color: #26A5E4; box-shadow: 0 0 15px rgba(38, 165, 228, 0.3); }
+        .share-btn.other:hover { border-color: var(--accent-red); box-shadow: 0 0 15px var(--accent-red-glow); }
+
+        @media (max-width: 768px) {
+            .share-container {
+                gap: 8px;
+            }
+            .share-btn {
+                padding: 10px 16px;
+                font-size: 0.8rem;
+                flex: 1 1 calc(50% - 8px);
+                justify-content: center;
+            }
+            .share-btn.other {
+                flex: 1 1 100%;
+            }
+        }
     </style>
 </head>
 
@@ -1381,6 +1449,37 @@
                     <i data-lucide="skip-forward"></i>
                 </button>
             </div>
+
+            <!-- Share Section (Added) -->
+            <div class="share-section stagger-in delay-4">
+                <div class="label-group">
+                    <i data-lucide="share-2"></i>
+                    <span class="section-tag">Share This Content</span>
+                </div>
+                <div class="share-container">
+                    <button class="share-btn whatsapp" onclick="shareContent('whatsapp')">
+                        <img src="https://cdn.simpleicons.org/whatsapp/white" alt="WhatsApp">
+                        <span>WhatsApp</span>
+                    </button>
+                    <button class="share-btn facebook" onclick="shareContent('facebook')">
+                        <img src="https://cdn.simpleicons.org/facebook/white" alt="Facebook">
+                        <span>Facebook</span>
+                    </button>
+                    <button class="share-btn x-twitter" onclick="shareContent('x')">
+                        <img src="https://cdn.simpleicons.org/x/white" alt="X">
+                        <span>X (Twitter)</span>
+                    </button>
+                    <button class="share-btn telegram" onclick="shareContent('telegram')">
+                        <img src="https://cdn.simpleicons.org/telegram/white" alt="Telegram">
+                        <span>Telegram</span>
+                    </button>
+                    <button class="share-btn other" onclick="shareContent('other')">
+                        <i data-lucide="more-horizontal"></i>
+                        <span>Other</span>
+                    </button>
+                </div>
+            </div>
+
 
             <!-- TV Series Controls (Hidden for movies) -->
             <div id="tv-controls" class="stagger-in" style="display: none; margin-bottom: 3rem;">
@@ -1570,6 +1669,47 @@
         const TMDB_API_KEY = 'f76f5f908dd164d45ec92431b0517a3a';
         const urlParams = new URLSearchParams(window.location.search);
         const movieId = urlParams.get('id');
+        let currentContentTitle = "";
+
+        function shareContent(platform) {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent(`Nonton ${currentContentTitle} di YKN Movies! Kualitas mantap 🔥`);
+            let shareUrl = "";
+
+            switch (platform) {
+                case 'whatsapp':
+                    shareUrl = `https://api.whatsapp.com/send?text=${text}%20${url}`;
+                    break;
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+                    break;
+                case 'x':
+                    shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${text}`;
+                    break;
+                case 'telegram':
+                    shareUrl = `https://t.me/share/url?url=${url}&text=${text}`;
+                    break;
+                case 'other':
+                    if (navigator.share) {
+                        navigator.share({
+                            title: currentContentTitle,
+                            text: `Nonton ${currentContentTitle} di YKN Movies!`,
+                            url: window.location.href,
+                        }).catch(console.error);
+                        return;
+                    } else {
+                        // Fallback: Copy to clipboard
+                        navigator.clipboard.writeText(window.location.href);
+                        alert('Link copied to clipboard!');
+                        return;
+                    }
+            }
+
+            if (shareUrl) {
+                window.open(shareUrl, '_blank', 'width=600,height=400');
+            }
+        }
+
 
         // Supabase Init (Replace with your actual keys)
         const supabaseUrl = SUPABASE_URL;
@@ -1602,6 +1742,7 @@
                 // Title Logic: Prioritize English Title (movie.title or movie.name)
                 // If the original title is different (e.g. Japanese/Russian), we'll show it as a sub-header later
                 const movieTitle = movie.title || movie.name || movie.original_title || movie.original_name;
+                currentContentTitle = movieTitle;
                 const originalTitle = movie.original_title || movie.original_name;
 
                 document.title = `Watch ${movieTitle} - YKN`;
