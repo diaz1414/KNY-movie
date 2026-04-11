@@ -412,12 +412,19 @@
             height: 20px;
         }
 
-        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
 
         .slider {
             position: absolute;
             cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background-color: rgba(255, 255, 255, 0.15);
             transition: .4s;
             border-radius: 34px;
@@ -435,8 +442,13 @@
             border-radius: 50%;
         }
 
-        input:checked + .slider { background-color: var(--accent-red); }
-        input:checked + .slider:before { transform: translateX(18px); }
+        input:checked+.slider {
+            background-color: var(--accent-red);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(18px);
+        }
 
         /* Enhanced Player Wrapper */
         .player-frame {
@@ -1313,6 +1325,7 @@
             color: var(--accent-red);
             transform: translateY(-5px) scale(1.1);
         }
+
         /* Share Section - Premium Glass */
         .share-section {
             margin-bottom: 4rem;
@@ -1352,7 +1365,8 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .share-btn i, .share-btn img {
+        .share-btn i,
+        .share-btn img {
             width: 18px;
             height: 18px;
             display: flex;
@@ -1361,22 +1375,43 @@
         }
 
         /* Platform Colors (Subtle border glow) */
-        .share-btn.whatsapp:hover { border-color: #25D366; box-shadow: 0 0 15px rgba(37, 211, 102, 0.3); }
-        .share-btn.facebook:hover { border-color: #1877F2; box-shadow: 0 0 15px rgba(24, 119, 242, 0.3); }
-        .share-btn.x-twitter:hover { border-color: #ffffff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
-        .share-btn.telegram:hover { border-color: #26A5E4; box-shadow: 0 0 15px rgba(38, 165, 228, 0.3); }
-        .share-btn.other:hover { border-color: var(--accent-red); box-shadow: 0 0 15px var(--accent-red-glow); }
+        .share-btn.whatsapp:hover {
+            border-color: #25D366;
+            box-shadow: 0 0 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .share-btn.facebook:hover {
+            border-color: #1877F2;
+            box-shadow: 0 0 15px rgba(24, 119, 242, 0.3);
+        }
+
+        .share-btn.x-twitter:hover {
+            border-color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .share-btn.telegram:hover {
+            border-color: #26A5E4;
+            box-shadow: 0 0 15px rgba(38, 165, 228, 0.3);
+        }
+
+        .share-btn.other:hover {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 15px var(--accent-red-glow);
+        }
 
         @media (max-width: 768px) {
             .share-container {
                 gap: 8px;
             }
+
             .share-btn {
                 padding: 10px 16px;
                 font-size: 0.8rem;
                 flex: 1 1 calc(50% - 8px);
                 justify-content: center;
             }
+
             .share-btn.other {
                 flex: 1 1 100%;
             }
@@ -1647,7 +1682,7 @@
                 </div>
 
                 <div class="footer-bottom-sync">
-                    <p>&copy; 2026 YKN Movie. All rights reserved.</p>
+                    <p>&copy; 2026 Yuk Kita Nonton. All rights reserved.</p>
                     <div class="lang-switch">
                         <span>English (US)</span>
                         <span>Indonesia</span>
@@ -1939,7 +1974,7 @@
                     const player = document.getElementById('player');
                     const playerWrapper = document.getElementById('player-wrapper');
                     playerWrapper.classList.add('changing');
-                    
+
                     // The trick to avoid history entry is to replace the iframe or use location.replace
                     // Since it's cross-origin, location.replace is tricky, so we clone and replace the element.
                     setTimeout(() => {
@@ -1953,10 +1988,10 @@
                 // --- SYNC UI AUTO NEXT LOGIC ---
                 window.playNextEpisode = () => {
                     if (!isAutoNextEnabled || !isTV || !currentSeasonData) return;
-                    
+
                     const nextEpNum = currentEp + 1;
                     const nextEp = currentSeasonData.episodes.find(e => e.episode_number === nextEpNum);
-                    
+
                     if (nextEp) {
                         const epEl = document.querySelector(`.ep-card[data-ep="${nextEpNum}"]`);
                         changeEpisode(currentSeason, nextEpNum, epEl);
@@ -1977,7 +2012,7 @@
                     // Supported event patterns from various providers
                     const data = e.data;
                     const isEnded = (data.event === 'ended' || data.type === 'ended' || data === 'vidlink_ended' || data === 'vidsrc_ended');
-                    
+
                     if (isEnded && isAutoNextEnabled) {
                         console.log("Auto Next triggered by player event");
                         playNextEpisode();
