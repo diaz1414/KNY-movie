@@ -27,7 +27,7 @@ const Contact: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <p className="text-xs font-black uppercase tracking-[6px] text-netflix-red">Official Email</p>
-                <p className="text-2xl font-bold font-outfit">support@diaww.my.id</p>
+                <p className="text-2xl font-bold font-outfit">yknsupport@diaww.my.id</p>
               </div>
               <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                 Send technical questions or partnership inquiries to our official email.
