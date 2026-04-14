@@ -346,7 +346,7 @@ const Home: React.FC = () => {
                             disabled={explorePage === 1}
                             className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white hover:bg-white/10 disabled:opacity-30 transition-all"
                           >
-                            <ChevronLeft size={20} md:size={24} />
+                            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
                           </button>
                           <span className="w-10 h-10 md:w-14 h-10 flex items-center justify-center font-black font-outfit text-lg md:text-xl text-netflix-red">
                             {explorePage}
@@ -355,7 +355,7 @@ const Home: React.FC = () => {
                             onClick={() => loadExploreContent(explorePage + 1)}
                             className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all"
                           >
-                            <ChevronRight size={20} md:size={24} />
+                            <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
                           </button>
                         </div>
                       </div>
