@@ -78,29 +78,29 @@ const api = axios.create({
 });
 
 export const movieService = {
-  getPopularMovies: async (lang: string = 'en-US') => {
-    const res = await api.get('/movie/popular', { params: { language: lang, region: 'US' } });
+  getPopularMovies: async () => {
+    const res = await api.get('/movie/popular', { params: { language: 'en-US', region: 'US' } });
     return res.data.results.map(normalizeTMDB);
   },
 
-  getRecentMovies: async (lang: string = 'en-US') => {
-    const res = await api.get('/movie/now_playing', { params: { language: lang, region: 'US' } });
+  getRecentMovies: async () => {
+    const res = await api.get('/movie/now_playing', { params: { language: 'en-US', region: 'US' } });
     return res.data.results.map(normalizeTMDB);
   },
 
-  getPopularSeries: async (lang: string = 'en-US') => {
-    const res = await api.get('/tv/popular', { params: { language: lang, region: 'US' } });
+  getPopularSeries: async () => {
+    const res = await api.get('/tv/popular', { params: { language: 'en-US', region: 'US' } });
     return res.data.results.map(normalizeTMDB);
   },
 
-  search: async (query: string, lang: string = 'en-US') => {
-    const res = await api.get('/search/multi', { params: { query, language: lang } });
+  search: async (query: string) => {
+    const res = await api.get('/search/multi', { params: { query, language: 'en-US' } });
     return res.data.results
       .filter((item: any) => item.media_type !== 'person')
       .map(normalizeTMDB);
   },
 
-  getMovieDetail: async (id: string, lang: string = 'en-US'): Promise<UnifiedMovieDetail | null> => {
+  getMovieDetail: async (id: string): Promise<UnifiedMovieDetail | null> => {
     try {
       const res = await api.get(`/movie/${id}`, { params: { append_to_response: 'credits', language: 'en-US' } });
       const movie = res.data;
@@ -179,7 +179,7 @@ export const movieService = {
     }
   },
 
-  getMoviesByGenre: async (genreId: string, page: number = 1, lang: string = 'en-US') => {
+  getMoviesByGenre: async (genreId: string, page: number = 1) => {
     const res = await api.get('/discover/movie', {
       params: {
         with_genres: genreId,
@@ -191,11 +191,11 @@ export const movieService = {
     return res.data.results.map(normalizeTMDB);
   },
 
-  getSeriesByGenre: async (genreId: string, page: number = 1, lang: string = 'en-US') => {
+  getSeriesByGenre: async (genreId: string, page: number = 1) => {
     const res = await api.get('/discover/tv', {
       params: {
         with_genres: genreId,
-        language: lang,
+        language: 'en-US',
         page: page,
         sort_by: 'popularity.desc'
       }
