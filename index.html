@@ -39,6 +39,21 @@
       justify-content: center;
     }
   </style>
+
+  <!-- Disable DevTools in Production -->
+  <script src="https://cdn.jsdelivr.net/npm/disable-devtool"></script>
+  <script>
+    // Only disable if NOT on localhost
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      DisableDevtool({
+        clearLog: true,
+        disableMenu: true,
+        ondevtoolopen: (type) => {
+          window.location.href = '/'; // Opsional: lempar ke home kalau ketauan buka inspect
+        }
+      });
+    }
+  </script>
 </head>
 
 <body>
