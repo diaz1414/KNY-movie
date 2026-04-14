@@ -102,7 +102,7 @@ export const movieService = {
 
   getMovieDetail: async (id: string, lang: string = 'en-US'): Promise<UnifiedMovieDetail | null> => {
     try {
-      const res = await api.get(`/movie/${id}`, { params: { append_to_response: 'credits', language: lang } });
+      const res = await api.get(`/movie/${id}`, { params: { append_to_response: 'credits', language: 'en-US' } });
       const movie = res.data;
 
       const director = movie.credits?.crew?.find((c: any) => c.job === 'Director')?.name || 'Unknown';
@@ -142,7 +142,7 @@ export const movieService = {
     } catch (e) {
       // Try TV if Movie fails
       try {
-        const res = await api.get(`/tv/${id}`, { params: { append_to_response: 'credits' } });
+        const res = await api.get(`/tv/${id}`, { params: { append_to_response: 'credits', language: 'en-US' } });
         const tv = res.data;
         const cast = tv.credits?.cast?.slice(0, 5).map((c: any) => c.name) || [];
         const castMembers = tv.credits?.cast?.slice(0, 15).map((c: any) => ({
@@ -183,7 +183,7 @@ export const movieService = {
     const res = await api.get('/discover/movie', {
       params: {
         with_genres: genreId,
-        language: lang,
+        language: 'en-US',
         page: page,
         sort_by: 'popularity.desc'
       }

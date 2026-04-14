@@ -413,7 +413,7 @@
                 <div class="info-block min-w-0">
                     <div class="flex items-center gap-2.5 mb-4">
                         <i data-lucide="file-text" class="w-3.5 h-3.5 text-netflix-red"></i>
-                        <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Synopsis</span>
+                        <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red" data-lang-key="synopsis">Synopsis</span>
                     </div>
                     <p id="movie-synopsis"
                         class="text-[1.15rem] text-white/85 leading-[1.7] mb-10 text-left max-md:text-[1rem] max-md:leading-relaxed max-md:text-white/80">
@@ -425,7 +425,7 @@
                         style="display: none;">
                         <div class="flex items-center gap-2.5 mb-6 justify-start">
                             <i data-lucide="users" class="w-3.5 h-3.5 text-netflix-red"></i>
-                            <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Cast
+                            <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red" data-lang-key="cast">Cast
                                 Spotlight</span>
                         </div>
                         <div class="rec-container relative">
@@ -457,12 +457,12 @@
                 <div class="sidebar">
                     <div class="elite-card glass-card p-10 rounded-3xl backdrop-blur-[40px] self-start shadow-2xl">
                         <div class="mb-8 last:mb-0">
-                            <div class="text-[0.7rem] font-black text-netflix-red tracking-[4px] uppercase mb-2">
+                            <div class="text-[0.7rem] font-black text-netflix-red tracking-[4px] uppercase mb-2" data-lang-key="director">
                                 Production</div>
                             <div id="movie-director" class="text-[1.3rem] font-bold leading-tight"></div>
                         </div>
                         <div class="mb-8 last:mb-0">
-                            <div class="text-[0.7rem] font-black text-netflix-red tracking-[4px] uppercase mb-2">Main
+                            <div class="text-[0.7rem] font-black text-netflix-red tracking-[4px] uppercase mb-2" data-lang-key="key_cast">Main
                                 Cast</div>
                             <div id="movie-cast" class="text-[1.3rem] font-bold leading-tight"></div>
                         </div>
@@ -474,7 +474,7 @@
             <div class="recommendations-section mt-24 animate-[fadeIn_1s_ease_forwards]">
                 <div class="flex items-center gap-2.5 mb-2">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5 text-netflix-red"></i>
-                    <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Recommended for
+                    <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red" data-lang-key="recommendations">Recommended for
                         You</span>
                 </div>
                 <h2 class="font-outfit text-white text-[2rem] font-black mb-6">More Like This</h2>
@@ -670,7 +670,23 @@
 
         async function init() {
             try {
-                // Force English language for titles and overview
+                // Determine UI Language
+                const hostname = window.location.hostname;
+                const uiLang = hostname.startsWith('id.') ? 'id' : 'en';
+
+                const labels = {
+                    en: { synopsis: 'Synopsis', director: 'Director', cast: 'Key Cast Spotlight', share: 'Share This Content', servers: 'Streaming Servers', next: 'Next Episode' },
+                    id: { synopsis: 'Sinopsis', director: 'Sutradara', cast: 'Pemeran Utama Spotlight', share: 'Bagikan Konten Ini', servers: 'Server Streaming', next: 'Episode Selanjutnya' }
+                };
+                const t = labels[uiLang];
+
+                // Update Labels
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.getAttribute('data-lang-key');
+                    if (t[key]) el.textContent = t[key];
+                });
+
+                // Force English language for titles and overview (TMDB Data)
                 const lang = 'en-US';
                 let movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}&language=${lang}&append_to_response=credits`);
                 let movie = await movieResponse.json();
