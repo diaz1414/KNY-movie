@@ -130,18 +130,8 @@ const getDetectedLanguage = () => {
   // 1. Cek Hostname (Subdomain)
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
-    const mapping: Record<string, string> = {
-      'id.': 'id',
-      'sg.': 'en',
-      'us.': 'en',
-      'jp.': 'ja',
-      'eu.': 'en',
-      'ar.': 'ar'
-    };
-    
-    for (const [prefix, lang] of Object.entries(mapping)) {
-      if (hostname.startsWith(prefix)) return lang;
-    }
+    if (hostname.startsWith('id.')) return 'id';
+    if (hostname.startsWith('sg.')) return 'en';
   }
 
   // 2. Cek Cookie (Geo Data dari Middleware)

@@ -254,7 +254,9 @@
                 <div
                     class="player-loader absolute inset-0 flex flex-col items-center justify-center bg-[#020202] z-[5] opacity-0 pointer-events-none transition-opacity duration-500 backdrop-blur-sm">
                     <div class="relative flex flex-col items-center">
-                        <div class="text-netflix-red font-outfit text-4xl font-black tracking-[-2px] animate-netflix-zoom mb-2">YKN</div>
+                        <div
+                            class="text-netflix-red font-outfit text-4xl font-black tracking-[-2px] animate-netflix-zoom mb-2">
+                            YKN</div>
                         <div class="w-12 h-0.5 bg-netflix-red/20 rounded-full overflow-hidden">
                             <div class="w-full h-full bg-netflix-red animate-[shimmer_1.5s_infinite]"></div>
                         </div>
@@ -395,7 +397,8 @@
                 <div class="tip-item flex items-start gap-3 text-[0.85rem] leading-relaxed text-white/60">
                     <i data-lucide="languages" class="w-[18px] h-[18px] text-netflix-red shrink-0 mt-0.5"></i>
                     <p><b>LANGUAGES:</b> Use the <b>CC</b> icon in the bottom-right of the player to enable subtitles. /
-                        <i>Gunakan ikon <b>CC</b> di pojok kanan bawah player untuk mengaktifkan subtitle.</i></p>
+                        <i>Gunakan ikon <b>CC</b> di pojok kanan bawah player untuk mengaktifkan subtitle.</i>
+                    </p>
                 </div>
                 <div class="tip-item flex items-start gap-3 text-[0.85rem] leading-relaxed text-white/60">
                     <i data-lucide="alert-circle" class="w-[18px] h-[18px] text-netflix-red shrink-0 mt-0.5"></i>
@@ -905,7 +908,7 @@
                 function setIframeSrc(url) {
                     const player = document.getElementById('player');
                     const loader = document.querySelector('.player-loader');
-                    
+
                     if (!player) return;
 
                     // Show loader for smooth transition & block clicks
@@ -936,7 +939,7 @@
                             }
                             player.style.opacity = '1';
                         };
-                    }, 400); 
+                    }, 400);
                 }
 
                 // --- SYNC UI AUTO NEXT LOGIC ---
