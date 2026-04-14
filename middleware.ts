@@ -20,11 +20,16 @@ export default function middleware(request: Request) {
   // Tentukan subdomain target berdasarkan negara
   let targetPrefix = '';
   if (geo.country === 'SG') targetPrefix = 'sg';
-  if (geo.country === 'ID') targetPrefix = 'id';
+  else if (geo.country === 'ID') targetPrefix = 'id';
+  else if (geo.country === 'US') targetPrefix = 'us';
+  else if (geo.country === 'JP') targetPrefix = 'jp';
+  else if (['GB', 'FR', 'DE', 'IT', 'ES', 'NL', 'BE', 'EU'].includes(geo.country || '')) targetPrefix = 'eu';
+  else if (['SA', 'AE', 'EG', 'JO', 'LB', 'QA', 'KW', 'OM'].includes(geo.country || '')) targetPrefix = 'ar';
 
   // Logika Smart Redirect:
-  // Cek apakah hostname saat ini sudah punya prefix (sg. atau id.)
-  const hasPrefix = hostname.startsWith('sg.') || hostname.startsWith('id.');
+  // Cek apakah hostname saat ini sudah punya prefix regional
+  const supportedPrefixes = ['sg', 'id', 'us', 'jp', 'eu', 'ar'];
+  const hasPrefix = supportedPrefixes.some(p => hostname.startsWith(`${p}.`));
 
   // JANGAN REDIRECT jika:
   // 1. User sudah berada di subdomain (supaya orang Indo bisa akses sg secara paksa)

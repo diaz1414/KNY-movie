@@ -31,8 +31,13 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const hostname = window.location.hostname;
     let detectedCountry = '';
     
-    if (hostname.startsWith('sg.')) detectedCountry = 'SG';
-    else if (hostname.startsWith('id.')) detectedCountry = 'ID';
+    // Daftar prefix yang didukung
+    const supportedPrefixes = ['sg', 'id', 'us', 'jp', 'eu', 'ar'];
+    const prefix = supportedPrefixes.find(p => hostname.startsWith(`${p}.`));
+    
+    if (prefix) {
+      detectedCountry = prefix.toUpperCase();
+    }
 
     // 2. Cek Cookie (Geo Data dari Middleware)
     const rawData = getCookie('user-region-data');
