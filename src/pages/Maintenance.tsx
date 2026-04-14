@@ -62,10 +62,10 @@ const Maintenance: React.FC = () => {
           className="space-y-4"
         >
           <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
-            Situs Dalam Pemeliharaan
+            Site Under Maintenance
           </h2>
           <p className="text-[var(--text-secondary)] text-lg md:text-xl font-medium leading-relaxed max-w-lg mx-auto">
-            Kami sedang melakukan peningkatan performa untuk memberikan pengalaman menonton yang lebih baik. Kami akan segera kembali!
+            We are performing a scheduled update to enhance your viewing experience. We'll be back online shortly!
           </p>
         </motion.div>
 
@@ -77,7 +77,7 @@ const Maintenance: React.FC = () => {
           className="mt-12 space-y-6"
         >
           <p className="text-white/40 uppercase tracking-[0.4em] text-xs font-black">
-            Tetap Terhubung
+            Stay Connected
           </p>
           <div className="flex gap-6 justify-center">
             {socialLinks.map((social, index) => (
