@@ -322,13 +322,14 @@ const Home: React.FC = () => {
                       movies={recentMovies}
                     />
 
-                    {/* Adsterra Native Banner */}
+                    {/* Native Banner Disabled for Troubleshooting
                     <AdBanner 
                       id="container-d6a7c7b01488e26dacc23a94129c76cd"
                       format="native"
                       scriptUrl="https://pl29154194.profitablecpmratenetwork.com/d6a7c7b01488e26dacc23a94129c76cd/invoke.js"
                       className="my-10 animate-in fade-in slide-in-from-bottom-5 duration-700"
                     />
+                    */}
 
                     <MovieRow
                       id="series"
