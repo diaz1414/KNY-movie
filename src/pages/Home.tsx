@@ -9,7 +9,7 @@ import { movieService, type UnifiedMovie } from '../services/api';
 import { Search, X, ChevronLeft, ChevronRight, Sparkles, Trophy } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import MovieModal from '../components/MovieModal';
-import AdBanner from '../components/AdBanner';
+// import AdBanner from '../components/AdBanner';
 
 const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
