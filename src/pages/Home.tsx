@@ -9,7 +9,7 @@ import { movieService, type UnifiedMovie } from '../services/api';
 import { Search, X, ChevronLeft, ChevronRight, Sparkles, Trophy } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import MovieModal from '../components/MovieModal';
-// import AdBanner from '../components/AdBanner';
+import AdBanner from '../components/AdBanner';
 
 const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -266,6 +266,26 @@ const Home: React.FC = () => {
             </div>
           </form>
 
+          {/* Banner 1: Top Hero Banner (728x90) */}
+          <div className="mb-16 flex justify-center animate-in fade-in slide-in-from-bottom-5 duration-700">
+            <AdBanner 
+              id="banner-top-desktop"
+              format="iframe"
+              width={728}
+              height={90}
+              key="9eb1c807951034d8d5dba6629c6bb6ed"
+              className="hidden md:block" // Hidden on mobile, we use 320x50 there
+            />
+            <AdBanner 
+              id="banner-top-mobile"
+              format="iframe"
+              width={320}
+              height={50}
+              key="ef4cb8ad932d82082fc05ad2d1be6a43"
+              className="md:hidden"
+            />
+          </div>
+
           {searchResults ? (
             <div className="fade-in pb-20">
               <div className="flex justify-between items-end mb-10">
@@ -316,20 +336,53 @@ const Home: React.FC = () => {
                       title={t('trending')}
                       movies={popularMovies}
                     />
+
+                    {/* Banner 2: Middle Divider (728x90) */}
+                    <div className="my-12 flex justify-center animate-in fade-in slide-in-from-bottom-5 duration-700">
+                      <AdBanner 
+                        id="banner-mid-desktop"
+                        format="iframe"
+                        width={728}
+                        height={90}
+                        key="9eb1c807951034d8d5dba6629c6bb6ed"
+                        className="hidden md:block"
+                      />
+                      <AdBanner 
+                        id="banner-mid-mobile"
+                        format="iframe"
+                        width={320}
+                        height={50}
+                        key="ef4cb8ad932d82082fc05ad2d1be6a43"
+                        className="md:hidden"
+                      />
+                    </div>
+
                     <MovieRow
                       id="movies"
                       title={t('new_releases')}
                       movies={recentMovies}
                     />
 
-                    {/* Native Banner Disabled for Troubleshooting
-                    <AdBanner 
-                      id="container-d6a7c7b01488e26dacc23a94129c76cd"
-                      format="native"
-                      scriptUrl="https://pl29154194.profitablecpmratenetwork.com/d6a7c7b01488e26dacc23a94129c76cd/invoke.js"
-                      className="my-10 animate-in fade-in slide-in-from-bottom-5 duration-700"
-                    />
-                    */}
+
+                    {/* Banner 3: Double Square Banners (300x250) */}
+                    <div className="my-16 flex flex-wrap justify-center gap-8 animate-in fade-in slide-in-from-bottom-5 duration-1000">
+                      <AdBanner 
+                        id="banner-box-1"
+                        format="iframe"
+                        width={300}
+                        height={250}
+                        key="7416c14407226b70dfe1c1a8ef1ed288"
+                        className="shadow-2xl rounded-xl overflow-hidden border border-white/5"
+                      />
+                      <AdBanner 
+                        id="banner-box-2"
+                        format="iframe"
+                        width={300}
+                        height={250}
+                        key="7416c14407226b70dfe1c1a8ef1ed288"
+                        className="hidden lg:block shadow-2xl rounded-xl overflow-hidden border border-white/5"
+                      />
+                    </div>
 
                     <MovieRow
                       id="series"
