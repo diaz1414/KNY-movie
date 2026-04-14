@@ -1,36 +1,52 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import NetflixIntro2 from './NetflixIntro2';
 
 const NetflixIntro: React.FC = () => {
-  const [phase, setPhase] = useState<'popup' | 'intro' | 'none'>('none');
+  const [phase, setPhase] = useState<'popup' | 'intro1' | 'intro2' | 'none'>('none');
   const [isSkipVisible, setIsSkipVisible] = useState(false);
   const introAudioObj = useRef<HTMLAudioElement | null>(null);
   const clickAudioObj = useRef<HTMLAudioElement | null>(null);
   const introTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Storage Keys
+  const STORAGE_KEY_FIRST_TIME = 'KNY_INTRO_FIRST_TIME_DONE_V1';
+  const STORAGE_KEY_SESSION = 'KNY_INTRO_SESSION_SHOWN_V1';
+
   useEffect(() => {
-    // sessionStorage is perfect here: it persists on Refresh, but clears when the tab/browser is closed.
-    const hasShownIntro = sessionStorage.getItem('hasShownIntro_v4');
+    // Check if we already showed an intro in THIS browser session (tab)
+    // If yes, we don't show anything (handles Refresh)
+    const hasShownInSession = sessionStorage.getItem(STORAGE_KEY_SESSION);
+    if (hasShownInSession) {
+      setPhase('none');
+      return;
+    }
 
-    if (!hasShownIntro) {
+    // Check if it's the absolute first time
+    const hasSeenFirstTime = localStorage.getItem(STORAGE_KEY_FIRST_TIME);
+
+    if (!hasSeenFirstTime) {
+      // First time ever -> Show the full cinematic sequence (Intro 1)
       setPhase('popup');
-
+      
       clickAudioObj.current = new Audio('https://www.soundjay.com/buttons/button-16.mp3');
       clickAudioObj.current.volume = 0.5;
 
-      // Using the user's specific sound file name found in research
       introAudioObj.current = new Audio(`${window.location.origin}/Tabir_Terbuka.mp3`);
       introAudioObj.current.volume = 0.8;
       introAudioObj.current.preload = 'auto';
+    } else {
+      // Returning user -> Show the snappy Netflix intro (Intro 2)
+      setPhase('intro2');
     }
   }, []);
 
-  const handleStart = async () => {
+  const handleStartIntro1 = async () => {
     if (clickAudioObj.current) {
       clickAudioObj.current.play().catch(e => console.warn("Click audio blocked:", e));
     }
 
-    setPhase('intro');
+    setPhase('intro1');
 
     if (introAudioObj.current) {
       try {
@@ -40,16 +56,19 @@ const NetflixIntro: React.FC = () => {
       }
     }
 
-    // Set persistence for this session (prevents showing on refresh)
-    sessionStorage.setItem('hasShownIntro_v4', 'true');
-
     // Show skip button after 2 seconds
     setTimeout(() => setIsSkipVisible(true), 2000);
 
-    // Auto-hide when the intro finishes
+    // Auto-hide when the intro finishes (approx 29.5s)
     introTimeout.current = setTimeout(() => {
-      setPhase('none');
+      completeIntro1();
     }, 29500);
+  };
+
+  const completeIntro1 = () => {
+    localStorage.setItem(STORAGE_KEY_FIRST_TIME, 'true');
+    sessionStorage.setItem(STORAGE_KEY_SESSION, 'true');
+    setPhase('none');
   };
 
   const handleSkip = () => {
@@ -60,10 +79,19 @@ const NetflixIntro: React.FC = () => {
     if (introTimeout.current) {
       clearTimeout(introTimeout.current);
     }
+    completeIntro1();
+  };
+
+  const completeIntro2 = () => {
+    sessionStorage.setItem(STORAGE_KEY_SESSION, 'true');
     setPhase('none');
   };
 
   if (phase === 'none') return null;
+
+  if (phase === 'intro2') {
+    return <NetflixIntro2 onComplete={completeIntro2} />;
+  }
 
   return (
     <AnimatePresence>
@@ -98,7 +126,7 @@ const NetflixIntro: React.FC = () => {
               >
                 <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-red-900 rounded-full blur opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
                 <button
-                  onClick={handleStart}
+                  onClick={handleStartIntro1}
                   className="relative flex items-center justify-center gap-4 px-10 py-4 bg-black rounded-full border border-white/10 text-white text-lg font-bold tracking-widest transition-all duration-300"
                 >
                   GO TO YKN MOVIES
@@ -112,17 +140,15 @@ const NetflixIntro: React.FC = () => {
           </motion.div>
         )}
 
-        {/* PHASE 2: ENHANCED NETFLIX INTRO */}
-        {phase === 'intro' && (
+        {/* PHASE 2: LONG CINEMATIC INTRO */}
+        {phase === 'intro1' && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 flex flex-col items-center justify-center bg-black overflow-hidden"
           >
-            {/* Cinematic Background Elements */}
             <div className="absolute inset-0 pointer-events-none">
-              {/* Dynamic Perspective Grid */}
               <div className="absolute inset-0 opacity-20" style={{ perspective: '500px' }}>
                 <div
                   className="absolute inset-0 animate-grid-move"
@@ -135,17 +161,12 @@ const NetflixIntro: React.FC = () => {
                 />
               </div>
 
-              {/* Fog / Smoke Effect Overlay */}
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.8)_100%)] z-10" />
-
-              {/* Film Grain / Noise Overlay */}
               <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
 
-              {/* Cinematic Beams & Light Streaks */}
               <div className="absolute top-1/2 left-0 w-full h-[2px] bg-red-600/30 blur-md animate-sweep-horizontal z-0" />
               <div className="absolute top-0 left-1/2 w-[2px] h-full bg-red-600/20 blur-xl animate-sweep-vertical z-0" />
 
-              {/* Dynamic Energy Particles (Increased count and variation) */}
               {[...Array(30)].map((_, i) => (
                 <div
                   key={i}
@@ -162,17 +183,13 @@ const NetflixIntro: React.FC = () => {
               ))}
             </div>
 
-            {/* Logo Container */}
             <div className="relative flex flex-col items-center z-50">
               <div className="relative group">
-
-
                 <motion.h1
                   className="font-black text-8xl md:text-9xl tracking-tighter text-[#E50914] animate-netflix-logo mb-2 relative overflow-hidden"
                   style={{ textShadow: '0 0 20px rgba(229, 9, 20, 0.4)' }}
                 >
                   YKN
-                  {/* Text Shimmer Effect */}
                   <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer" />
                 </motion.h1>
               </div>
@@ -185,7 +202,6 @@ const NetflixIntro: React.FC = () => {
               </motion.p>
             </div>
 
-            {/* Progress Bar Container */}
             <div className="absolute bottom-0 left-0 w-full h-[2px] bg-white/5 overflow-hidden z-[100]">
               <motion.div
                 initial={{ width: 0 }}
@@ -195,7 +211,6 @@ const NetflixIntro: React.FC = () => {
               />
             </div>
 
-            {/* Skip Button */}
             <AnimatePresence>
               {isSkipVisible && (
                 <motion.button
@@ -203,7 +218,6 @@ const NetflixIntro: React.FC = () => {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
                   whileHover={{ scale: 1.05, backgroundColor: 'rgba(0,0,0,0.8)' }}
-                  whileTap={{ scale: 0.95 }}
                   onClick={handleSkip}
                   className="absolute bottom-12 right-8 md:right-12 px-8 py-3 bg-black/60 backdrop-blur-xl border border-white/10 hover:border-red-600/40 text-white/40 hover:text-white text-[10px] font-black uppercase tracking-[0.4em] transition-all group z-[100] rounded-sm"
                 >
@@ -228,7 +242,6 @@ const NetflixIntro: React.FC = () => {
             92% { transform: scale(1.2); opacity: 1; filter: blur(0); }
             100% { transform: scale(100); opacity: 0; }
           }
-
           @keyframes netflix-text {
             0%, 6% { opacity: 0; transform: translateY(30px); filter: blur(15px); }
             15% { opacity: 1; transform: translateY(0); filter: blur(0); }
@@ -236,7 +249,6 @@ const NetflixIntro: React.FC = () => {
             90% { opacity: 0; transform: translateY(-20px) scale(0.8); filter: blur(10px); }
             100% { opacity: 0; }
           }
-
           @keyframes netflix-flash {
             0%, 4% { opacity: 0; }
             5% { opacity: 1; }
@@ -245,40 +257,29 @@ const NetflixIntro: React.FC = () => {
             92% { opacity: 0.8; }
             100% { opacity: 0; }
           }
-
           @keyframes sweep-horizontal {
             0% { transform: translateY(-50vh); opacity: 0; }
             20%, 80% { opacity: 1; }
             100% { transform: translateY(50vh); opacity: 0; }
           }
-
           @keyframes sweep-vertical {
             0% { transform: translateX(-50vw); opacity: 0; }
             20%, 80% { opacity: 1; }
             100% { transform: translateX(50vw); opacity: 0; }
           }
-
           @keyframes float-particles {
             0%, 100% { transform: translate(0, 0); opacity: 0; }
             20% { opacity: 0.15; }
             80% { opacity: 0.15; }
           }
-
           @keyframes grid-move {
             0% { transform: rotateX(60deg) translateY(0); }
             100% { transform: rotateX(60deg) translateY(100px); }
           }
-
           @keyframes shimmer {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(200%); }
           }
-
-          @keyframes pulse-slow {
-            0%, 100% { opacity: 0.5; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.1); }
-          }
-
           .animate-netflix-logo { animation: netflix-logo 29s cubic-bezier(0.7, 0, 0.3, 1) forwards; }
           .animate-netflix-text { animation: netflix-text 29s cubic-bezier(0.7, 0, 0.3, 1) forwards; }
           .animate-netflix-flash { animation: netflix-flash 29s ease-out forwards; }
@@ -287,7 +288,6 @@ const NetflixIntro: React.FC = () => {
           .animate-float-particles { animation: float-particles 15s ease-in-out infinite; }
           .animate-grid-move { animation: grid-move 4s linear infinite; }
           .animate-shimmer { animation: shimmer 5s infinite linear; animation-delay: 5s; }
-          .animate-pulse-slow { animation: pulse-slow 8s infinite ease-in-out; }
         `}</style>
       </div>
     </AnimatePresence>
