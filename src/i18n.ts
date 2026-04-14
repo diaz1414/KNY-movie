@@ -116,11 +116,53 @@ const resources = {
   }
 };
 
+// Helper to get cookie value
+const getCookie = (name: string) => {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return decodeURIComponent(parts.pop()?.split(';').shift() || '');
+  return null;
+};
+
+// Detect language from region cookie or subdomain
+const getDetectedLanguage = () => {
+  // 1. Cek Hostname (Subdomain)
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname.startsWith('id.')) return 'id';
+    if (hostname.startsWith('sg.')) return 'en';
+  }
+
+  // 2. Cek Cookie (Geo Data dari Middleware)
+  const rawData = getCookie('user-region-data');
+  if (rawData) {
+    try {
+      const { country } = JSON.parse(rawData);
+      const mapping: Record<string, string> = {
+        'ID': 'id',
+        'JP': 'ja',
+        'KR': 'ko',
+        'CN': 'zh', 'TW': 'zh', 'HK': 'zh',
+        'FR': 'fr',
+        'DE': 'de', 'CH': 'de', 'AT': 'de',
+        'RU': 'ru', 'BY': 'ru', 'KZ': 'ru',
+        'SA': 'ar', 'AE': 'ar', 'EG': 'ar', 'JO': 'ar',
+        'ES': 'es', 'MX': 'es', 'AR': 'es', 'CO': 'es'
+      };
+      return mapping[country] || 'en';
+    } catch (e) {
+      return 'en';
+    }
+  }
+  return 'en';
+};
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'en',
+    lng: getDetectedLanguage(),
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false

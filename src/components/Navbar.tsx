@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Sun, Moon, Globe, X, Film } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useRegion } from '../context/RegionContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
+  const { countryCode, regionData } = useRegion();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -169,8 +171,13 @@ const Navbar: React.FC = () => {
 
             {/* Language Selector */}
             <div className="group relative">
-              <div className="p-2 rounded-full hover:bg-white/10 transition-colors cursor-pointer opacity-70 hover:opacity-100">
+              <div className="p-2 rounded-full hover:bg-white/10 transition-colors cursor-pointer opacity-70 hover:opacity-100 flex items-center gap-2">
                 <Globe size={20} />
+                {countryCode && (
+                  <span className="text-[9px] font-black bg-netflix-red text-white px-1.5 py-0.5 rounded leading-none transition-all duration-300">
+                    {countryCode}
+                  </span>
+                )}
               </div>
               <div className="absolute right-0 top-full pt-2 w-48 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300">
                 <div className="glass rounded-2xl overflow-hidden py-2 shadow-2xl border border-white/10 max-h-[60vh] overflow-y-auto premium-scroll">
@@ -345,7 +352,9 @@ const Navbar: React.FC = () => {
                   transition={{ delay: 0.6 }}
                   className="space-y-4"
                 >
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[6px]">{t('Select Language')}</p>
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[6px]">
+                    {t('Select Language')} {countryCode && <span className="text-netflix-red ml-2 font-bold">[{countryCode}]</span>}
+                  </p>
                   <div className="grid grid-cols-2 gap-3">
                     {languages.slice(0, 4).map((l) => (
                       <button

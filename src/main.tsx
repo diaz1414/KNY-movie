@@ -4,11 +4,14 @@ import App from './App'
 import './index.css'
 import './i18n'
 import { ThemeProvider } from './context/ThemeContext'
+import { RegionProvider } from './context/RegionContext'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
+    <RegionProvider>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </RegionProvider>
   </React.StrictMode>,
 )
