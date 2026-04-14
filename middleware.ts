@@ -8,8 +8,7 @@ export default function middleware(request: Request) {
   if (
     url.pathname.includes('.') || 
     url.pathname.startsWith('/api') ||
-    url.pathname.startsWith('/_vercel') ||
-    url.pathname === '/restricted' // Jangan redirect halaman restricted
+    url.pathname.startsWith('/_vercel')
   ) {
     return new Response(null, {
       headers: { 'x-middleware-next': '1' }
@@ -19,7 +18,7 @@ export default function middleware(request: Request) {
   const geo = geolocation(request);
   const country = geo.country || 'US';
   
-  // Daftar prefix yang didukung dan mapping negara yang diizinkan
+  // Daftar prefix yang didukung dan mapping negara yang diizinkan (hanya untuk auto-redirect)
   const regionMapping: Record<string, string[]> = {
     'id': ['ID'],
     'sg': ['SG'],
@@ -34,19 +33,8 @@ export default function middleware(request: Request) {
   // Cek apakah hostname saat ini sudah punya prefix regional
   const activePrefix = supportedPrefixes.find(p => hostname.startsWith(`${p}.`));
 
-  // 1. LOGIKA REGIONAL LOCK (GEO-BLOCKING)
-  // Jika user sudah berada di sebuah subdomain, pastikan lokasinya sesuai
-  if (activePrefix) {
-    const allowedCountries = regionMapping[activePrefix];
-    if (allowedCountries && !allowedCountries.includes(country)) {
-      // Jika lokasi TIDAK diizinkan untuk subdomain ini, lempar ke halaman restricted
-      // Kita tetap gunakan hostname saat ini agar user tau dia di-block di region mana
-      return Response.redirect(`https://${hostname}/restricted`);
-    }
-  }
-
-  // 2. LOGIKA SMART REDIRECT (AUTO-ROUTING)
-  // Jika user berada di domain utama, arahkan ke subdomain yang sesuai lokasinya
+  // LOGIKA SMART REDIRECT (AUTO-ROUTING)
+  // Kita cuma redirect kalau user ada di domain UTAMA (tanpa prefix)
   if (!activePrefix) {
     let targetPrefix = '';
     
@@ -62,6 +50,9 @@ export default function middleware(request: Request) {
       return Response.redirect(`https://${targetPrefix}.${hostname}${url.pathname}${url.search}`);
     }
   }
+
+  // Jika user sudah berada di subdomain (misal ar.), kita BIARKAN saja (Open Access)
+  // meskipun lokasi aslinya di Indonesia. Tidak ada lagi blokir/restricted.
 
   // Jika tidak diredirect, lanjut ke aplikasi
   const response = new Response(null, {
