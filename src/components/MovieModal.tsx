@@ -11,14 +11,14 @@ interface MovieModalProps {
 }
 
 const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [movie, setMovie] = useState<UnifiedMovieDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (movieId) {
       setLoading(true);
-      movieService.getMovieDetail(movieId, i18n.language)
+      movieService.getMovieDetail(movieId)
         .then((detail) => {
           setMovie(detail);
           setLoading(false);
@@ -34,7 +34,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [movieId, i18n.language]);
+  }, [movieId]);
 
   if (!movieId) return null;
 
@@ -44,9 +44,9 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
 
   const containerVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95, y: 40 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
+    visible: {
+      opacity: 1,
+      scale: 1,
       y: 0,
       transition: { type: 'spring', damping: 25, stiffness: 300 }
     },
@@ -85,7 +85,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
           ) : movie ? (
             <>
               {/* Close Button (Universal) */}
-              <button 
+              <button
                 onClick={onClose}
                 className="absolute top-6 right-6 z-[110] w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-netflix-red hover:scale-110 active:scale-90 transition-all shadow-2xl group"
               >
@@ -94,15 +94,15 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
 
               {/* Poster/Hero Section */}
               <div className="relative w-full md:w-[38%] h-[40vh] md:h-auto overflow-hidden shrink-0">
-                <img 
-                  src={movie.poster} 
-                  alt={movie.title} 
+                <img
+                  src={movie.poster}
+                  alt={movie.title}
                   className="w-full h-full object-cover"
                 />
                 {/* Integration Gradients */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0c] via-[#0c0c0c]/20 to-transparent md:hidden" />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0c0c0c]/10 to-[#0c0c0c] hidden md:block" />
-                
+
                 {/* Mobile Floating Meta (Rating) */}
                 <div className="absolute bottom-6 left-6 md:hidden flex items-center gap-2 bg-yellow-500/20 backdrop-blur-xl border border-yellow-500/30 px-3 py-1.5 rounded-xl text-yellow-500 font-black">
                   <Star size={16} fill="currentColor" />
@@ -112,9 +112,9 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
 
               {/* Details Content Area */}
               <div className="flex-1 overflow-y-auto premium-scroll px-6 py-10 md:px-14 md:py-16 flex flex-col gap-10">
-                
+
                 {/* Header Info */}
-                <motion.div 
+                <motion.div
                   variants={itemVariants}
                   transition={{ delay: 0.1 }}
                   className="space-y-4"
@@ -153,7 +153,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                 </motion.div>
 
                 {/* Synopsis */}
-                <motion.div 
+                <motion.div
                   variants={itemVariants}
                   transition={{ delay: 0.2 }}
                   className="space-y-4"
@@ -169,7 +169,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                 {/* Team & Cast Section */}
                 <div className="space-y-10">
                   {/* Director Info (Compact) */}
-                  <motion.div 
+                  <motion.div
                     variants={itemVariants}
                     transition={{ delay: 0.3 }}
                     className="flex flex-col md:flex-row md:items-center gap-4 md:gap-10 border-l-2 border-netflix-red/30 pl-6"
@@ -181,7 +181,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                   </motion.div>
 
                   {/* Visual Cast Gallery */}
-                  <motion.div 
+                  <motion.div
                     variants={itemVariants}
                     transition={{ delay: 0.4 }}
                     className="space-y-6"
@@ -203,8 +203,8 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                           className="snap-start shrink-0 group/cast w-24 md:w-28 text-center"
                         >
                           <div className="relative aspect-square rounded-full overflow-hidden mb-3 border-2 border-white/5 group-hover/cast:border-netflix-red/50 transition-all duration-300 shadow-xl">
-                            <img 
-                              src={member.profilePath || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=111&color=E50914&bold=true`} 
+                            <img
+                              src={member.profilePath || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=111&color=E50914&bold=true`}
                               alt={member.name}
                               className="w-full h-full object-cover group-hover/cast:scale-110 transition-transform duration-500"
                             />
@@ -221,7 +221,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                 </div>
 
                 {/* Actions */}
-                <motion.div 
+                <motion.div
                   variants={itemVariants}
                   transition={{ delay: 0.4 }}
                   className="pt-6 mt-auto"
@@ -238,7 +238,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                     <span className="uppercase tracking-tighter text-xl">{t('watch_now')}</span>
                   </motion.button>
                 </motion.div>
-                
+
               </div>
             </>
           ) : (
@@ -249,7 +249,8 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
         </motion.div>
 
         {/* Local Scrollbar Correction for Tailwind */}
-        <style dangerouslySetInnerHTML={{ __html: `
+        <style dangerouslySetInnerHTML={{
+          __html: `
           .premium-scroll::-webkit-scrollbar {
             width: 5px;
           }

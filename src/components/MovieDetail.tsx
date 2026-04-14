@@ -11,7 +11,7 @@ interface MovieDetailProps {
 }
 
 const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
-  const { i18n, t } = useTranslation();
+  const { t } = useTranslation();
   const [movie, setMovie] = useState<MovieDetailType | null>(null);
   const [loading, setLoading] = useState(true);
   const [streamUrl, setStreamUrl] = useState<string | null>(null);
@@ -20,7 +20,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
     window.scrollTo(0, 0);
     if (movieId) {
       setLoading(true);
-      movieService.getMovieDetail(movieId, i18n.language).then((detail) => {
+      movieService.getMovieDetail(movieId).then((detail) => {
         if (detail) {
           setMovie(detail);
           setStreamUrl(detail.streamSources?.[0]?.url || null);
@@ -31,7 +31,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
         setLoading(false);
       });
     }
-  }, [movieId, i18n.language]);
+  }, [movieId]);
 
   if (!movieId) return null;
 

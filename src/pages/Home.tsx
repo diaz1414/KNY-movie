@@ -28,13 +28,13 @@ const Home: React.FC = () => {
   useEffect(() => {
     const savedState = sessionStorage.getItem('home_state');
     if (savedState) {
-      const { 
-        popularMovies: savedPop, 
-        recentMovies: savedRecent, 
-        popularSeries: savedSeries, 
-        scrollY 
+      const {
+        popularMovies: savedPop,
+        recentMovies: savedRecent,
+        popularSeries: savedSeries,
+        scrollY
       } = JSON.parse(savedState);
-      
+
       setPopularMovies(savedPop);
       setRecentMovies(savedRecent);
       setPopularSeries(savedSeries);
@@ -54,9 +54,9 @@ const Home: React.FC = () => {
   const fetchData = () => {
     setLoading(true);
     Promise.all([
-      movieService.getPopularMovies(i18n.language),
-      movieService.getRecentMovies(i18n.language),
-      movieService.getPopularSeries(i18n.language)
+      movieService.getPopularMovies(),
+      movieService.getRecentMovies(),
+      movieService.getPopularSeries()
     ]).then(([popular, recent, series]) => {
       setPopularMovies(popular);
       setRecentMovies(recent);
@@ -100,7 +100,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (searchQuery.trim().length > 1) {
-        const results = await movieService.search(searchQuery, i18n.language);
+        const results = await movieService.search(searchQuery);
         setSuggestions(results.slice(0, 8));
         setShowSuggestions(true);
       } else {
@@ -129,7 +129,7 @@ const Home: React.FC = () => {
       setSearchResults(null);
       return;
     }
-    const results = await movieService.search(searchQuery, i18n.language);
+    const results = await movieService.search(searchQuery);
     setSearchResults(results);
   };
 
@@ -234,15 +234,15 @@ const Home: React.FC = () => {
                 <NetflixLoader fullScreen />
               ) : (
                 <>
-                  <HeroCarousel 
-                    movies={popularMovies.slice(0, 7)} 
+                  <HeroCarousel
+                    movies={popularMovies.slice(0, 7)}
                     onMoreInfo={(id) => setSelectedMovieId(id)}
                   />
 
                   {/* Movie Info Modal */}
-                  <MovieModal 
-                    movieId={selectedMovieId} 
-                    onClose={() => setSelectedMovieId(null)} 
+                  <MovieModal
+                    movieId={selectedMovieId}
+                    onClose={() => setSelectedMovieId(null)}
                   />
 
                   <div className="relative z-10 -mt-20 md:-mt-32 space-y-8">
