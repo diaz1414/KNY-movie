@@ -34,10 +34,18 @@ export interface UnifiedMovie {
   type: 'movie' | 'series';
 }
 
+export interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profilePath: string | null;
+}
+
 export interface UnifiedMovieDetail extends UnifiedMovie {
   synopsis: string;
   director: string;
   cast: string[];
+  castMembers: CastMember[];
   genres: string[];
   duration: string;
   releaseDate: string;
@@ -99,6 +107,12 @@ export const movieService = {
 
       const director = movie.credits?.crew?.find((c: any) => c.job === 'Director')?.name || 'Unknown';
       const cast = movie.credits?.cast?.slice(0, 5).map((c: any) => c.name) || [];
+      const castMembers = movie.credits?.cast?.slice(0, 15).map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        character: c.character,
+        profilePath: c.profile_path ? getImageUrl(c.profile_path, 'w500') : null
+      })) || [];
       const genres = movie.genres?.map((g: any) => g.name) || [];
 
       return {
@@ -106,6 +120,7 @@ export const movieService = {
         synopsis: movie.overview,
         director,
         cast,
+        castMembers,
         genres,
         duration: movie.runtime ? `${movie.runtime}m` : '',
         releaseDate: movie.release_date,
@@ -130,6 +145,12 @@ export const movieService = {
         const res = await api.get(`/tv/${id}`, { params: { append_to_response: 'credits' } });
         const tv = res.data;
         const cast = tv.credits?.cast?.slice(0, 5).map((c: any) => c.name) || [];
+        const castMembers = tv.credits?.cast?.slice(0, 15).map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          character: c.character,
+          profilePath: c.profile_path ? getImageUrl(c.profile_path, 'w500') : null
+        })) || [];
         const genres = tv.genres?.map((g: any) => g.name) || [];
 
         return {
@@ -137,6 +158,7 @@ export const movieService = {
           synopsis: tv.overview,
           director: 'Various',
           cast,
+          castMembers,
           genres,
           duration: `${tv.number_of_seasons} Seasons`,
           releaseDate: tv.first_air_date,

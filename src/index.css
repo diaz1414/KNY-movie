@@ -63,11 +63,36 @@
   --color-netflix-red: #E50914;
   --color-glass: var(--glass-bg);
   --font-outfit: "Outfit", sans-serif;
+
+  --animate-netflix-zoom: netflix-zoom 2.5s cubic-bezier(0.7, 0, 0.3, 1) infinite;
+  --animate-status-pulse: status-pulse 1.5s ease-in-out infinite;
+  --animate-slide-up: slideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+
+  @keyframes netflix-zoom {
+    0% { transform: scale(0.8); filter: blur(15px); opacity: 0; }
+    20% { transform: scale(1); filter: blur(0); opacity: 1; }
+    80% { transform: scale(1.1); opacity: 1; filter: blur(0); }
+    100% { transform: scale(1.5); filter: blur(20px); opacity: 0; }
+  }
+
+  @keyframes status-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 }
 
 @layer components {
   .glass {
     @apply bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl;
+  }
+
+  .glass-card {
+    @apply bg-white/3 border border-white/10 backdrop-blur-3xl;
   }
 
   .premium-scroll {
@@ -81,5 +106,13 @@
 
   .premium-scroll::-webkit-scrollbar-thumb {
     @apply bg-netflix-red rounded-full;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

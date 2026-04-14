@@ -166,29 +166,59 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                   </p>
                 </motion.div>
 
-                {/* Team Info */}
-                <motion.div 
-                  variants={itemVariants}
-                  transition={{ delay: 0.3 }}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-10"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-netflix-red/80">
-                      <User size={16} strokeWidth={3} />
-                      <h4 className="text-[10px] font-black uppercase tracking-[4px]">{t('director')}</h4>
+                {/* Team & Cast Section */}
+                <div className="space-y-10">
+                  {/* Director Info (Compact) */}
+                  <motion.div 
+                    variants={itemVariants}
+                    transition={{ delay: 0.3 }}
+                    className="flex flex-col md:flex-row md:items-center gap-4 md:gap-10 border-l-2 border-netflix-red/30 pl-6"
+                  >
+                    <div className="space-y-1">
+                      <h4 className="text-[10px] font-black uppercase tracking-[4px] text-netflix-red/80">{t('director')}</h4>
+                      <p className="text-white font-black text-xl md:text-2xl font-outfit">{movie.director}</p>
                     </div>
-                    <p className="text-white font-black text-lg md:text-xl font-outfit leading-tight">{movie.director}</p>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-netflix-red/80">
-                      <Film size={16} strokeWidth={3} />
-                      <h4 className="text-[10px] font-black uppercase tracking-[4px]">{t('cast')}</h4>
+                  </motion.div>
+
+                  {/* Visual Cast Gallery */}
+                  <motion.div 
+                    variants={itemVariants}
+                    transition={{ delay: 0.4 }}
+                    className="space-y-6"
+                  >
+                    <div className="flex items-center gap-3">
+                      <h4 className="text-[10px] md:text-[12px] font-black uppercase tracking-[5px] text-white/60">
+                        {t('cast')} Spotlight
+                      </h4>
+                      <div className="h-px flex-1 bg-white/5" />
                     </div>
-                    <p className="text-zinc-400 font-bold text-sm md:text-base leading-relaxed">
-                      {movie.cast.join(' • ')}
-                    </p>
-                  </div>
-                </motion.div>
+
+                    <div className="flex gap-6 overflow-x-auto pb-4 premium-scroll snap-x">
+                      {movie.castMembers.map((member, idx) => (
+                        <motion.div
+                          key={member.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.05 * idx }}
+                          className="snap-start shrink-0 group/cast w-24 md:w-28 text-center"
+                        >
+                          <div className="relative aspect-square rounded-full overflow-hidden mb-3 border-2 border-white/5 group-hover/cast:border-netflix-red/50 transition-all duration-300 shadow-xl">
+                            <img 
+                              src={member.profilePath || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=111&color=E50914&bold=true`} 
+                              alt={member.name}
+                              className="w-full h-full object-cover group-hover/cast:scale-110 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover/cast:opacity-100 transition-opacity" />
+                          </div>
+                          <div className="space-y-0.5">
+                            <p className="text-white font-black text-[10px] md:text-xs truncate">{member.name}</p>
+                            <p className="text-white/40 font-bold text-[8px] md:text-[9px] truncate tracking-tighter uppercase">{member.character}</p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </div>
 
                 {/* Actions */}
                 <motion.div 
