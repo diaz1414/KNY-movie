@@ -102,9 +102,12 @@
             <div class="player-frame relative w-full aspect-video bg-black rounded-3xl overflow-hidden border border-white/8 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.9)] mb-20 transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] md:rounded-3xl max-md:rounded-none max-md:w-[calc(100%+3rem)] max-md:-ml-6 animate-slide-up [animation-delay:0.4s]"
                 id="player-wrapper">
                 <div
-                    class="player-loader absolute inset-0 flex items-center justify-center bg-black z-[5] opacity-0 pointer-events-none transition-opacity duration-300">
-                    <div
-                        class="spinner w-10 h-10 border-[3px] border-netflix-red/10 border-t-netflix-red rounded-full animate-spin">
+                    class="player-loader absolute inset-0 flex flex-col items-center justify-center bg-[#020202] z-[5] opacity-0 pointer-events-none transition-opacity duration-500 backdrop-blur-sm">
+                    <div class="relative flex flex-col items-center">
+                        <div class="text-netflix-red font-outfit text-4xl font-black tracking-[-2px] animate-netflix-zoom mb-2">YKN</div>
+                        <div class="w-12 h-0.5 bg-netflix-red/20 rounded-full overflow-hidden">
+                            <div class="w-full h-full bg-netflix-red animate-[shimmer_1.5s_infinite]"></div>
+                        </div>
                     </div>
                 </div>
                 <iframe id="player" class="w-full h-full border-none transition-opacity duration-400"
@@ -751,17 +754,39 @@
 
                 function setIframeSrc(url) {
                     const player = document.getElementById('player');
-                    const playerWrapper = document.getElementById('player-wrapper');
-                    playerWrapper.classList.add('changing');
+                    const loader = document.querySelector('.player-loader');
+                    
+                    if (!player) return;
 
-                    // The trick to avoid history entry is to replace the iframe or use location.replace
-                    // Since it's cross-origin, location.replace is tricky, so we clone and replace the element.
+                    // Show loader for smooth transition & block clicks
+                    if (loader) {
+                        loader.style.pointerEvents = 'auto';
+                        loader.style.opacity = '1';
+                    }
+                    player.style.opacity = '0';
+                    player.src = "about:blank"; // Clear first to force reload
+
+                    // Safety timeout if onload fails to fire
+                    const safetyTimeout = setTimeout(() => {
+                        if (loader) {
+                            loader.style.opacity = '0';
+                            loader.style.pointerEvents = 'none';
+                        }
+                        player.style.opacity = '1';
+                    }, 6000);
+
+                    // Small delay to let the animation start nicely
                     setTimeout(() => {
-                        const newPlayer = player.cloneNode();
-                        newPlayer.src = url;
-                        newPlayer.onload = () => playerWrapper.classList.remove('changing');
-                        player.parentNode.replaceChild(newPlayer, player);
-                    }, 400);
+                        player.src = url;
+                        player.onload = () => {
+                            clearTimeout(safetyTimeout);
+                            if (loader) {
+                                loader.style.opacity = '0';
+                                loader.style.pointerEvents = 'none';
+                            }
+                            player.style.opacity = '1';
+                        };
+                    }, 400); 
                 }
 
                 // --- SYNC UI AUTO NEXT LOGIC ---
@@ -835,10 +860,12 @@
                             currentServerIndex = idx;
                             document.querySelectorAll('.pill-btn').forEach(b => {
                                 b.classList.remove('bg-netflix-red', 'border-netflix-red', 'shadow-[0_0_30px_rgba(229,9,20,0.5)]', 'scale-105');
-                                b.querySelector('i').classList.replace('opacity-100', 'opacity-60');
+                                const icon = b.querySelector('i') || b.querySelector('svg');
+                                if (icon) icon.classList.replace('opacity-100', 'opacity-60');
                             });
                             btn.classList.add('bg-netflix-red', 'border-netflix-red', 'shadow-[0_0_30px_rgba(229,9,20,0.5)]', 'scale-105');
-                            btn.querySelector('i').classList.replace('opacity-60', 'opacity-100');
+                            const activeIcon = btn.querySelector('i') || btn.querySelector('svg');
+                            if (activeIcon) activeIcon.classList.replace('opacity-60', 'opacity-100');
                             setIframeSrc(s.url);
                             updateUrlState();
                         };
