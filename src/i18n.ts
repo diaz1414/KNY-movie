@@ -35,7 +35,11 @@ const resources = {
       "synopsis": "Synopsis",
       "director": "Director",
       "cast": "Key Cast",
-      "changelog": "Changelog"
+      "changelog": "Changelog",
+      "explore_more": "Explore Top Rated",
+      "latest_explore": "Explore Latest Hits",
+      "loading_more": "Discovering more hits...",
+      "end_of_list": "You've reached the end of our current spotlight."
     }
   },
   id: {
@@ -71,7 +75,11 @@ const resources = {
       "synopsis": "Sinopsis",
       "director": "Sutradara",
       "cast": "Pemeran Utama",
-      "changelog": "Catatan Perubahan"
+      "changelog": "Catatan Perubahan",
+      "explore_more": "Eksplorasi Rating Tertinggi",
+      "latest_explore": "Eksplorasi Hits Terbaru",
+      "loading_more": "Menemukan lebih banyak hits...",
+      "end_of_list": "Anda telah mencapai akhir dari sorotan kami."
     }
   },
   ja: {

@@ -5,9 +5,8 @@ import HeroCarousel from '../components/HeroCarousel';
 import MovieCard from '../components/MovieCard';
 import MovieRow from '../components/MovieRow';
 import Footer from '../components/Footer';
-import type { UnifiedMovie } from '../services/api';
-import { movieService } from '../services/api';
-import { Search, X } from 'lucide-react';
+import { movieService, type UnifiedMovie } from '../services/api';
+import { Search, X, ChevronLeft, ChevronRight, Sparkles, Trophy } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import MovieModal from '../components/MovieModal';
 
@@ -22,6 +21,9 @@ const Home: React.FC = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedMovieId, setSelectedMovieId] = useState<string | null>(null);
+  const [exploreMovies, setExploreMovies] = useState<UnifiedMovie[]>([]);
+  const [explorePage, setExplorePage] = useState(1);
+  const [exploreLoading, setExploreLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   // Restore state on mount
@@ -32,12 +34,16 @@ const Home: React.FC = () => {
         popularMovies: savedPop,
         recentMovies: savedRecent,
         popularSeries: savedSeries,
+        exploreMovies: savedExplore,
+        explorePage: savedPage,
         scrollY
       } = JSON.parse(savedState);
 
-      setPopularMovies(savedPop);
-      setRecentMovies(savedRecent);
-      setPopularSeries(savedSeries);
+      setPopularMovies(savedPop || []);
+      setRecentMovies(savedRecent || []);
+      setPopularSeries(savedSeries || []);
+      setExploreMovies(savedExplore || []);
+      setExplorePage(savedPage || 1);
       setLoading(false);
 
       setTimeout(() => {
@@ -56,17 +62,73 @@ const Home: React.FC = () => {
     Promise.all([
       movieService.getPopularMovies(),
       movieService.getRecentMovies(),
-      movieService.getPopularSeries()
-    ]).then(([popular, recent, series]) => {
+      movieService.getPopularSeries(),
+      movieService.getRecentMovies(1) // Start Explore with Latest
+    ]).then(([popular, recent, series, latest]) => {
       setPopularMovies(popular);
       setRecentMovies(recent);
       setPopularSeries(series);
+      setExploreMovies(latest);
       setLoading(false);
     }).catch(err => {
       console.error(err);
       setLoading(false);
     });
   };
+
+  const loadExploreContent = async (page: number) => {
+    if (page < 1 || exploreLoading) return;
+    setExploreLoading(true);
+    try {
+      // Pages 1-10: Latest Movies
+      // Pages 11+: Top Rated Movies
+      const results = page <= 10
+        ? await movieService.getRecentMovies(page)
+        : await movieService.getTopRatedMovies(page - 10);
+
+      if (results.length > 0) {
+        setExploreMovies(results);
+        setExplorePage(page);
+
+        // Smooth scroll to Explore Section with offset for navbar
+        setTimeout(() => {
+          const section = document.getElementById('explore-section');
+          if (section) {
+            const offset = 100; // Offset for fixed navbar + padding
+            const bodyRect = document.body.getBoundingClientRect().top;
+            const elementRect = section.getBoundingClientRect().top;
+            const elementPosition = elementRect - bodyRect;
+            const offsetPosition = elementPosition - offset;
+
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setExploreLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Scroll handling for state restoration only
+    const handleScroll = () => {
+      if (popularMovies.length > 0) {
+        const current = JSON.parse(sessionStorage.getItem('home_state') || '{}');
+        sessionStorage.setItem('home_state', JSON.stringify({
+          ...current,
+          scrollY: window.scrollY
+        }));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [popularMovies, recentMovies, popularSeries]);
 
   // Save state
   useEffect(() => {
@@ -76,6 +138,8 @@ const Home: React.FC = () => {
           popularMovies,
           recentMovies,
           popularSeries,
+          exploreMovies,
+          explorePage,
           scrollY: window.scrollY
         }));
       }
@@ -95,7 +159,7 @@ const Home: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [popularMovies, recentMovies, popularSeries]);
+  }, [popularMovies, recentMovies, popularSeries, exploreMovies, explorePage]);
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -142,13 +206,13 @@ const Home: React.FC = () => {
           <form onSubmit={handleSearch} className="relative mb-16 group">
             <div className={`absolute -inset-1 bg-gradient-to-r from-netflix-red to-red-800 rounded-full blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200`}></div>
             <div className="relative flex items-center">
-              <Search className="absolute left-6 text-[var(--text-muted)] group-focus-within:text-netflix-red transition-colors" size={24} />
+              <Search className="absolute left-4 md:left-6 text-[var(--text-muted)] group-focus-within:text-netflix-red transition-colors" size={20} />
               <input
                 type="text"
                 placeholder={t('search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-full py-5 pl-16 pr-8 outline-none focus:ring-0 transition-all text-xl font-outfit shadow-2xl"
+                className="w-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-full py-3 md:py-5 pl-12 md:pl-16 pr-6 md:pr-8 outline-none focus:ring-0 transition-all text-base md:text-xl font-outfit shadow-2xl"
               />
               {searchQuery && (
                 <button
@@ -156,7 +220,7 @@ const Home: React.FC = () => {
                   onClick={() => { setSearchQuery(''); setSearchResults(null); setSuggestions([]); }}
                   className="absolute right-6 text-[var(--text-muted)] hover:text-netflix-red transition-colors"
                 >
-                  <X size={24} />
+                  <X className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
               )}
               {/* Suggestions Dropdown - Simple Solid UI */}
@@ -261,6 +325,97 @@ const Home: React.FC = () => {
                       title={t('popular_series')}
                       movies={popularSeries}
                     />
+
+                    {/* Explore More Section */}
+                    <div id="explore-section" className="pt-20 space-y-10 px-[var(--container-padding)]">
+                      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        <div className="flex flex-col gap-3">
+                          <span className="text-netflix-red text-xs md:text-sm font-black uppercase tracking-[4px] md:tracking-[6px] animate-pulse flex items-center gap-2">
+                            {explorePage <= 10 ? <Sparkles size={16} /> : <Trophy size={16} />}
+                            {explorePage <= 10 ? t('new_releases') : t('top_rated')}
+                          </span>
+                          <h2 className="text-3xl md:text-6xl font-black font-outfit text-white tracking-tighter leading-tight">
+                            {explorePage <= 10 ? t('latest_explore') : t('explore_more')}
+                          </h2>
+                        </div>
+
+                        {/* Pagination Controls Top (Optional but premium) */}
+                        <div className="flex items-center self-start md:self-auto bg-[#111111]/80 backdrop-blur-md border border-white/5 p-1 rounded-full shadow-2xl">
+                          <button
+                            onClick={() => loadExploreContent(explorePage - 1)}
+                            disabled={explorePage === 1}
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white hover:bg-white/10 disabled:opacity-30 transition-all"
+                          >
+                            <ChevronLeft size={20} md:size={24} />
+                          </button>
+                          <span className="w-10 h-10 md:w-14 h-10 flex items-center justify-center font-black font-outfit text-lg md:text-xl text-netflix-red">
+                            {explorePage}
+                          </span>
+                          <button
+                            onClick={() => loadExploreContent(explorePage + 1)}
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all"
+                          >
+                            <ChevronRight size={20} md:size={24} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 gap-y-12 transition-all duration-500 ${exploreLoading ? 'opacity-30 blur-sm pointer-events-none' : 'opacity-100'}`}>
+                        {exploreMovies.map((movie, index) => (
+                          <MovieCard
+                            key={`${movie.id}-${index}`}
+                            movie={movie}
+                          />
+                        ))}
+                      </div>
+
+                      {/* Pagination Controls Bottom */}
+                      <div className="pt-10 flex flex-col items-center gap-8 pb-32">
+                        <div className="flex items-center justify-center gap-2 md:gap-4 max-w-full px-4 py-2">
+                          <button
+                            onClick={() => loadExploreContent(explorePage - 1)}
+                            disabled={explorePage === 1}
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-netflix-red hover:border-netflix-red transition-all disabled:opacity-20 shadow-xl shrink-0"
+                          >
+                            <ChevronLeft size={20} />
+                          </button>
+
+                          {(() => {
+                            const pages = [];
+                            const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+                            const maxVisible = isMobile ? 5 : 10;
+                            const startPage = Math.max(1, explorePage - Math.floor(maxVisible / 2));
+                            const endPage = startPage + maxVisible - 1;
+                            for (let p = startPage; p <= endPage; p++) {
+                              pages.push(p);
+                            }
+                            return pages.map((p) => (
+                              <button
+                                key={p}
+                                onClick={() => loadExploreContent(p)}
+                                className={`shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl font-black font-outfit text-sm md:text-lg transition-all shadow-xl ${explorePage === p
+                                  ? 'bg-netflix-red text-white scale-110 ring-4 ring-netflix-red/20'
+                                  : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border border-white/10'
+                                  }`}
+                              >
+                                {p}
+                              </button>
+                            ));
+                          })()}
+
+                          <button
+                            onClick={() => loadExploreContent(explorePage + 1)}
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-netflix-red hover:border-netflix-red transition-all shadow-xl shrink-0"
+                          >
+                            <ChevronRight size={20} />
+                          </button>
+                        </div>
+
+                        <p className="text-[var(--text-muted)] text-sm font-bold tracking-widest uppercase">
+                          PAGE {explorePage} OF AMAZING CONTENT
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </>
               )}

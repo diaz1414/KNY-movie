@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Star, Play } from 'lucide-react';
 import type { UnifiedMovie } from '../services/api';
 
-const MovieCard: React.FC<{ movie: UnifiedMovie }> = ({ movie }) => {
+const MovieCard: React.FC<{ movie: UnifiedMovie; rank?: number }> = ({ movie, rank }) => {
   const handleClick = () => {
     window.location.href = `/watch?id=${movie.id}`;
   };

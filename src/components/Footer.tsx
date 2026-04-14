@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaInstagram, FaGithub, FaXTwitter, FaEnvelope } from 'react-icons/fa6';
+import { SiInstagram, SiGithub, SiX, SiGmail } from 'react-icons/si';
 import { Film } from 'lucide-react';
 import ChangelogModal from './ChangelogModal';
 
@@ -10,10 +10,10 @@ const Footer: React.FC = () => {
   const [isChangelogOpen, setIsChangelogOpen] = React.useState(false);
 
   const socialLinks = [
-    { icon: <FaInstagram size={20} />, href: 'https://www.instagram.com/', target: '_blank', label: 'Instagram' },
-    { icon: <FaXTwitter size={20} />, href: 'https://x.com/', target: '_blank', label: 'Twitter' },
-    { icon: <FaGithub size={20} />, href: 'https://github.com/diaz1414/KNY-movie', target: '_blank', label: 'GitHub' },
-    { icon: <FaEnvelope size={20} />, href: 'https://mail.google.com/', target: '_blank', label: 'Email' },
+    { icon: <SiInstagram size={20} />, href: 'https://www.instagram.com/', target: '_blank', label: 'Instagram' },
+    { icon: <SiX size={18} />, href: 'https://x.com/', target: '_blank', label: 'Twitter' },
+    { icon: <SiGithub size={20} />, href: 'https://github.com/diaz1414/KNY-movie', target: '_blank', label: 'GitHub' },
+    { icon: <SiGmail size={20} />, href: 'https://mail.google.com/', target: '_blank', label: 'Email' },
   ];
 
   const links = [

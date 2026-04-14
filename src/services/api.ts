@@ -78,18 +78,23 @@ const api = axios.create({
 });
 
 export const movieService = {
-  getPopularMovies: async () => {
-    const res = await api.get('/movie/popular', { params: { language: 'en-US', region: 'US' } });
+  getPopularMovies: async (page: number = 1) => {
+    const res = await api.get('/movie/popular', { params: { language: 'en-US', region: 'US', page } });
     return res.data.results.map(normalizeTMDB);
   },
 
-  getRecentMovies: async () => {
-    const res = await api.get('/movie/now_playing', { params: { language: 'en-US', region: 'US' } });
+  getRecentMovies: async (page: number = 1) => {
+    const res = await api.get('/movie/now_playing', { params: { language: 'en-US', region: 'US', page } });
     return res.data.results.map(normalizeTMDB);
   },
 
-  getPopularSeries: async () => {
-    const res = await api.get('/tv/popular', { params: { language: 'en-US', region: 'US' } });
+  getTopRatedMovies: async (page: number = 1) => {
+    const res = await api.get('/movie/top_rated', { params: { language: 'en-US', region: 'US', page } });
+    return res.data.results.map(normalizeTMDB);
+  },
+
+  getPopularSeries: async (page: number = 1) => {
+    const res = await api.get('/tv/popular', { params: { language: 'en-US', region: 'US', page } });
     return res.data.results.map(normalizeTMDB);
   },
 
