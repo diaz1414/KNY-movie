@@ -13,7 +13,6 @@ import ScrollToTop from './components/ScrollToTop';
 import NetflixIntro from './components/NetflixIntro';
 import NotFound from './pages/NotFound';
 import OfflineOverlay from './components/OfflineOverlay';
-import AdBanner from './components/AdBanner';
 
 const App: React.FC = () => {
   // Maintenance Mode Logic:
@@ -42,17 +41,6 @@ const App: React.FC = () => {
           {/* Catch-all route for Not Found (404) */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-
-        {/* Global Mobile Sticky Footer */}
-        <div className="fixed bottom-0 left-0 w-full z-[9999] flex justify-center md:hidden bg-black/50 backdrop-blur-sm py-1">
-          <AdBanner 
-            id="ad-sticky-footer"
-            format="iframe"
-            width={320}
-            height={50}
-            key="ef4cb8ad932d82082fc05ad2d1be6a43"
-          />
-        </div>
       </Router>
     </ThemeProvider>
   );
