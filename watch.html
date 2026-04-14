@@ -47,20 +47,32 @@
 
 <body class="bg-black text-white font-sans min-h-screen overflow-x-hidden antialiased">
     <div id="backdrop-canvas" class="fixed inset-0 -z-20 bg-black"></div>
-    <div id="backdrop-image" class="fixed inset-0 -z-10 bg-cover bg-center opacity-0 transition-opacity duration-[1500ms]"></div>
-    <div class="gradient-overlay fixed inset-0 -z-10 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%),linear-gradient(to_bottom,rgba(0,0,0,0.8)_0%,transparent_50%,rgba(0,0,0,0.9)_100%)]"></div>
+    <div id="backdrop-image"
+        class="fixed inset-0 -z-10 bg-cover bg-center opacity-0 transition-opacity duration-[1500ms]"></div>
+    <div
+        class="gradient-overlay fixed inset-0 -z-10 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%),linear-gradient(to_bottom,rgba(0,0,0,0.8)_0%,transparent_50%,rgba(0,0,0,0.9)_100%)]">
+    </div>
 
-    <div id="master-loader" class="master-loader fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999] transition-opacity duration-800 overflow-hidden">
+    <div id="master-loader"
+        class="master-loader fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999] transition-opacity duration-800 overflow-hidden">
         <div class="loader-content relative flex flex-col items-center z-10">
-            <div class="loader-logo font-outfit text-[6rem] font-black text-netflix-red tracking-[-4px] mb-8 drop-shadow-[0_0_30px_rgba(229,9,20,0.6)] animate-netflix-zoom select-none">YKN</div>
-            <div class="loader-label font-outfit font-extrabold tracking-[6px] text-white/40 text-[0.6rem] uppercase mt-[-1rem] mb-8">Yuk Kita Nonton</div>
-            <div class="loader-status font-sans text-[0.6rem] font-semibold text-netflix-red tracking-[3px] uppercase animate-status-pulse">LOADING...</div>
+            <div
+                class="loader-logo font-outfit text-[6rem] font-black text-netflix-red tracking-[-4px] mb-8 drop-shadow-[0_0_30px_rgba(229,9,20,0.6)] animate-netflix-zoom select-none">
+                YKN</div>
+            <div
+                class="loader-label font-outfit font-extrabold tracking-[6px] text-white/40 text-[0.6rem] uppercase mt-[-1rem] mb-8">
+                Yuk Kita Nonton</div>
+            <div
+                class="loader-status font-sans text-[0.6rem] font-semibold text-netflix-red tracking-[3px] uppercase animate-status-pulse">
+                LOADING...</div>
         </div>
     </div>
 
-    <div class="container mx-auto max-w-[1440px] p-6 md:p-8 pb-[22rem] md:pb-[25rem]" id="main-container" style="display: none;">
+    <div class="container mx-auto max-w-[1440px] p-6 md:p-8 pb-[22rem] md:pb-[25rem]" id="main-container"
+        style="display: none;">
         <nav class="animate-slide-up [animation-delay:0.1s]">
-            <a href="/" class="back-nav inline-flex items-center gap-3 text-white/60 hover:text-white no-underline font-semibold text-[0.85rem] uppercase tracking-[2px] mb-12 px-5 py-3 rounded-full bg-white/3 border border-white/10 backdrop-blur-xl transition-all duration-500 hover:bg-white/10 hover:-translate-x-2">
+            <a href="/"
+                class="back-nav inline-flex items-center gap-3 text-white/60 hover:text-white no-underline font-semibold text-[0.85rem] uppercase tracking-[2px] mb-12 px-5 py-3 rounded-full bg-white/3 border border-white/10 backdrop-blur-xl transition-all duration-500 hover:bg-white/10 hover:-translate-x-2">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
                 Home
             </a>
@@ -69,7 +81,9 @@
         <div id="content-mount">
             <!-- Header Section -->
             <header class="animate-slide-up [animation-delay:0.2s]">
-                <h1 id="movie-title" class="font-outfit text-white text-[clamp(2.5rem,8vw,5rem)] font-black leading-[0.95] tracking-[-3px] mb-6 bg-gradient-to-r from-white to-[#aaa] bg-clip-text text-transparent"></h1>
+                <h1 id="movie-title"
+                    class="font-outfit text-white text-[clamp(2.5rem,8vw,5rem)] font-black leading-[0.95] tracking-[-3px] mb-6 bg-gradient-to-r from-white to-[#aaa] bg-clip-text text-transparent">
+                </h1>
                 <div class="flex flex-wrap gap-6 mb-12" id="movie-meta"></div>
             </header>
 
@@ -77,36 +91,58 @@
             <section class="mb-14 animate-slide-up [animation-delay:0.3s]">
                 <div class="flex items-center gap-2.5 mb-5">
                     <i data-lucide="monitor" class="w-3.5 h-3.5 text-netflix-red"></i>
-                    <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Streaming Servers</span>
+                    <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Streaming
+                        Servers</span>
                 </div>
-                <div class="server-pills flex overflow-x-auto md:flex-wrap gap-2.5 w-full pb-1 no-scrollbar md:overflow-visible md:w-auto" id="server-list"></div>
+                <div class="server-pills flex overflow-x-auto md:flex-wrap gap-2.5 w-full pb-1 no-scrollbar md:overflow-visible md:w-auto"
+                    id="server-list"></div>
             </section>
 
             <!-- Video Player -->
-            <div class="player-frame relative w-full aspect-video bg-black rounded-3xl overflow-hidden border border-white/8 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.9)] mb-20 transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] md:rounded-3xl max-md:rounded-none max-md:w-[calc(100%+3rem)] max-md:-ml-6 animate-slide-up [animation-delay:0.4s]" id="player-wrapper">
-                <div class="player-loader absolute inset-0 flex items-center justify-center bg-black z-[5] opacity-0 pointer-events-none transition-opacity duration-300">
-                    <div class="spinner w-10 h-10 border-[3px] border-netflix-red/10 border-t-netflix-red rounded-full animate-spin"></div>
+            <div class="player-frame relative w-full aspect-video bg-black rounded-3xl overflow-hidden border border-white/8 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.9)] mb-20 transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] md:rounded-3xl max-md:rounded-none max-md:w-[calc(100%+3rem)] max-md:-ml-6 animate-slide-up [animation-delay:0.4s]"
+                id="player-wrapper">
+                <div
+                    class="player-loader absolute inset-0 flex items-center justify-center bg-black z-[5] opacity-0 pointer-events-none transition-opacity duration-300">
+                    <div
+                        class="spinner w-10 h-10 border-[3px] border-netflix-red/10 border-t-netflix-red rounded-full animate-spin">
+                    </div>
                 </div>
-                <iframe id="player" class="w-full h-full border-none transition-opacity duration-400" allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *"
-                    allowfullscreen webkitallowfullscreen mozallowfullscreen referrerpolicy="no-referrer"
-                    loading="lazy"></iframe>
+                <iframe id="player" class="w-full h-full border-none transition-opacity duration-400"
+                    allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *" allowfullscreen
+                    webkitallowfullscreen mozallowfullscreen referrerpolicy="no-referrer" loading="lazy"></iframe>
             </div>
 
             <!-- Player Controls (Redesigned) -->
-            <div id="autonext-toggle-wrapper" class="player-controls flex flex-wrap items-center justify-center gap-[15px] -mt-12 mb-16 z-10 relative md:justify-center max-md:px-4 max-md:justify-between animate-slide-up [animation-delay:0.4s]" style="display: none;">
-                <div class="control-pill flex items-center gap-3 bg-white/5 border border-white/10 px-5- py-2.5- rounded-full backdrop-blur-[40px] transition-all duration-500 hover:bg-white/8 hover:border-white/20 hover:-translate-y-0.5 px-[22px] py-[10px] max-md:px-4 max-md:flex-1 max-md:justify-between">
+            <div id="autonext-toggle-wrapper"
+                class="player-controls flex flex-wrap items-center justify-center gap-[15px] -mt-12 mb-16 z-10 relative md:justify-center max-md:px-4 max-md:justify-between animate-slide-up [animation-delay:0.4s]"
+                style="display: none;">
+                <div
+                    class="control-pill flex items-center gap-3 bg-white/5 border border-white/10 px-5- py-2.5- rounded-full backdrop-blur-[40px] transition-all duration-500 hover:bg-white/8 hover:border-white/20 hover:-translate-y-0.5 px-[22px] py-[10px] max-md:px-4 max-md:flex-1 max-md:justify-between">
                     <div class="toggle-info flex items-center gap-2.5">
                         <i data-lucide="fast-forward" class="w-4 h-4 text-netflix-red"></i>
-                        <span class="text-[0.8rem] font-bold tracking-[1px] text-white/60 whitespace-nowrap max-md:text-[0.75rem]">Auto Next</span>
+                        <span
+                            class="text-[0.8rem] font-bold tracking-[1px] text-white/60 whitespace-nowrap max-md:text-[0.75rem]">Auto
+                            Next</span>
                     </div>
                     <label class="switch relative inline-block w-[38px] h-5 cursor-pointer">
-                        <input type="checkbox" id="autonext-switch" class="opacity-0 w-0 h-0" onchange="toggleAutoNext(this.checked)">
-                        <span class="slider absolute inset-0 bg-white/15 transition-all duration-400 rounded-[34px] before:absolute before:content-[''] before:h-3.5 before:w-3.5 before:left-[3px] before:bottom-[3px] before:bg-white before:transition-all duration-400 before:rounded-full"></span>
-                        <style>input:checked + .slider { background-color: #E50914; } input:checked + .slider:before { transform: translateX(18px); }</style>
+                        <input type="checkbox" id="autonext-switch" class="opacity-0 w-0 h-0"
+                            onchange="toggleAutoNext(this.checked)">
+                        <span
+                            class="slider absolute inset-0 bg-white/15 transition-all duration-400 rounded-[34px] before:absolute before:content-[''] before:h-3.5 before:w-3.5 before:left-[3px] before:bottom-[3px] before:bg-white before:transition-all duration-400 before:rounded-full"></span>
+                        <style>
+                            input:checked+.slider {
+                                background-color: #E50914;
+                            }
+
+                            input:checked+.slider:before {
+                                transform: translateX(18px);
+                            }
+                        </style>
                     </label>
                 </div>
 
-                <button class="next-btn flex items-center gap-2.5 bg-netflix-red text-white border-none px-6 py-2.5 rounded-full font-extrabold text-[0.85rem] cursor-pointer transition-all duration-500 shadow-[0_10px_25px_rgba(229,9,20,0.5)] font-outfit uppercase tracking-[1px] hover:scale-105 hover:-translate-y-0.5 hover:shadow-[0_15px_35px_rgba(229,9,20,0.5)] active:scale-[0.98] max-md:flex-1 max-md:justify-center max-md:px-4">
+                <button
+                    class="next-btn flex items-center gap-2.5 bg-netflix-red text-white border-none px-6 py-2.5 rounded-full font-extrabold text-[0.85rem] cursor-pointer transition-all duration-500 shadow-[0_10px_25px_rgba(229,9,20,0.5)] font-outfit uppercase tracking-[1px] hover:scale-105 hover:-translate-y-0.5 hover:shadow-[0_15px_35px_rgba(229,9,20,0.5)] active:scale-[0.98] max-md:flex-1 max-md:justify-center max-md:px-4">
                     <span>Next Episode</span>
                     <i data-lucide="skip-forward" class="w-[18px] h-[18px] stroke-3"></i>
                 </button>
@@ -116,26 +152,37 @@
             <div class="mb-16 flex flex-col gap-6 animate-slide-up [animation-delay:0.4s]">
                 <div class="flex items-center gap-2.5">
                     <i data-lucide="share-2" class="w-3.5 h-3.5 text-netflix-red"></i>
-                    <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Share This Content</span>
+                    <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Share This
+                        Content</span>
                 </div>
                 <div class="flex flex-wrap gap-3 items-center max-md:gap-2">
-                    <button class="share-btn whatsapp flex items-center gap-2.5 bg-white/3 border border-white/8 text-white px-5 py-3 rounded-full no-underline text-[0.85rem] font-bold transition-all duration-500 backdrop-blur-[20px] cursor-pointer hover:bg-white/10 hover:border-white/30 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg hover:border-[#25D366] hover:shadow-[#25D366]/30 max-md:px-4 max-md:text-[0.8rem] max-md:flex-1- max-md:w-[calc(50%-4px)] max-md:justify-center" onclick="shareContent('whatsapp')">
+                    <button
+                        class="share-btn whatsapp flex items-center gap-2.5 bg-white/3 border border-white/8 text-white px-5 py-3 rounded-full no-underline text-[0.85rem] font-bold transition-all duration-500 backdrop-blur-[20px] cursor-pointer hover:bg-white/10 hover:border-white/30 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg hover:border-[#25D366] hover:shadow-[#25D366]/30 max-md:px-4 max-md:text-[0.8rem] max-md:flex-1- max-md:w-[calc(50%-4px)] max-md:justify-center"
+                        onclick="shareContent('whatsapp')">
                         <img src="https://cdn.simpleicons.org/whatsapp/white" class="w-4.5 h-4.5" alt="WhatsApp">
                         <span>WhatsApp</span>
                     </button>
-                    <button class="share-btn facebook flex items-center gap-2.5 bg-white/3 border border-white/8 text-white px-5 py-3 rounded-full no-underline text-[0.85rem] font-bold transition-all duration-500 backdrop-blur-[20px] cursor-pointer hover:bg-white/10 hover:border-white/30 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg hover:border-[#1877F2] hover:shadow-[#1877F2]/30 max-md:px-4 max-md:text-[0.8rem] max-md:w-[calc(50%-4px)] max-md:justify-center" onclick="shareContent('facebook')">
+                    <button
+                        class="share-btn facebook flex items-center gap-2.5 bg-white/3 border border-white/8 text-white px-5 py-3 rounded-full no-underline text-[0.85rem] font-bold transition-all duration-500 backdrop-blur-[20px] cursor-pointer hover:bg-white/10 hover:border-white/30 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg hover:border-[#1877F2] hover:shadow-[#1877F2]/30 max-md:px-4 max-md:text-[0.8rem] max-md:w-[calc(50%-4px)] max-md:justify-center"
+                        onclick="shareContent('facebook')">
                         <img src="https://cdn.simpleicons.org/facebook/white" class="w-4.5 h-4.5" alt="Facebook">
                         <span>Facebook</span>
                     </button>
-                    <button class="share-btn x-twitter flex items-center gap-2.5 bg-white/3 border border-white/8 text-white px-5 py-3 rounded-full no-underline text-[0.85rem] font-bold transition-all duration-500 backdrop-blur-[20px] cursor-pointer hover:bg-white/10 hover:border-white/30 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg hover:border-white hover:shadow-white/20 max-md:px-4 max-md:text-[0.8rem] max-md:w-[calc(50%-4px)] max-md:justify-center" onclick="shareContent('x')">
+                    <button
+                        class="share-btn x-twitter flex items-center gap-2.5 bg-white/3 border border-white/8 text-white px-5 py-3 rounded-full no-underline text-[0.85rem] font-bold transition-all duration-500 backdrop-blur-[20px] cursor-pointer hover:bg-white/10 hover:border-white/30 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg hover:border-white hover:shadow-white/20 max-md:px-4 max-md:text-[0.8rem] max-md:w-[calc(50%-4px)] max-md:justify-center"
+                        onclick="shareContent('x')">
                         <img src="https://cdn.simpleicons.org/x/white" class="w-4.5 h-4.5" alt="X">
                         <span>X (Twitter)</span>
                     </button>
-                    <button class="share-btn telegram flex items-center gap-2.5 bg-white/3 border border-white/8 text-white px-5 py-3 rounded-full no-underline text-[0.85rem] font-bold transition-all duration-500 backdrop-blur-[20px] cursor-pointer hover:bg-white/10 hover:border-white/30 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg hover:border-[#26A5E4] hover:shadow-[#26A5E4]/30 max-md:px-4 max-md:text-[0.8rem] max-md:w-[calc(50%-4px)] max-md:justify-center" onclick="shareContent('telegram')">
+                    <button
+                        class="share-btn telegram flex items-center gap-2.5 bg-white/3 border border-white/8 text-white px-5 py-3 rounded-full no-underline text-[0.85rem] font-bold transition-all duration-500 backdrop-blur-[20px] cursor-pointer hover:bg-white/10 hover:border-white/30 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg hover:border-[#26A5E4] hover:shadow-[#26A5E4]/30 max-md:px-4 max-md:text-[0.8rem] max-md:w-[calc(50%-4px)] max-md:justify-center"
+                        onclick="shareContent('telegram')">
                         <img src="https://cdn.simpleicons.org/telegram/white" class="w-4.5 h-4.5" alt="Telegram">
                         <span>Telegram</span>
                     </button>
-                    <button class="share-btn other flex items-center gap-2.5 bg-white/3 border border-white/8 text-white px-5 py-3 rounded-full no-underline text-[0.85rem] font-bold transition-all duration-500 backdrop-blur-[20px] cursor-pointer hover:bg-white/10 hover:border-white/30 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg hober:border-netflix-red hover:shadow-netflix-red/30 max-md:px-4 max-md:text-[0.8rem] max-md:w-full max-md:justify-center" onclick="shareContent('other')">
+                    <button
+                        class="share-btn other flex items-center gap-2.5 bg-white/3 border border-white/8 text-white px-5 py-3 rounded-full no-underline text-[0.85rem] font-bold transition-all duration-500 backdrop-blur-[20px] cursor-pointer hover:bg-white/10 hover:border-white/30 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg hober:border-netflix-red hover:shadow-netflix-red/30 max-md:px-4 max-md:text-[0.8rem] max-md:w-full max-md:justify-center"
+                        onclick="shareContent('other')">
                         <i data-lucide="more-horizontal" class="w-4.5 h-4.5"></i>
                         <span>Other</span>
                     </button>
@@ -150,11 +197,15 @@
                     <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Seasons</span>
                 </div>
                 <div class="rec-container relative mb-12">
-                    <button class="nav-btn prev absolute top-1/2 -translate-y-1/2 -left-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden" onclick="scrollArea('season-list', 'prev')">
+                    <button
+                        class="nav-btn prev absolute top-1/2 -translate-y-1/2 -left-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
+                        onclick="scrollArea('season-list', 'prev')">
                         <i data-lucide="chevron-left" class="w-6 h-6"></i>
                     </button>
                     <div id="season-list" class="season-list flex overflow-x-auto gap-4 pb-6 no-scrollbar"></div>
-                    <button class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden" onclick="scrollArea('season-list', 'next')">
+                    <button
+                        class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
+                        onclick="scrollArea('season-list', 'next')">
                         <i data-lucide="chevron-right" class="w-6 h-6"></i>
                     </button>
                 </div>
@@ -164,55 +215,76 @@
                     <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Episodes</span>
                 </div>
                 <div class="rec-container relative">
-                    <button class="nav-btn prev absolute top-1/2 -translate-y-1/2 -left-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden" onclick="scrollArea('episode-grid', 'prev')">
+                    <button
+                        class="nav-btn prev absolute top-1/2 -translate-y-1/2 -left-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
+                        onclick="scrollArea('episode-grid', 'prev')">
                         <i data-lucide="chevron-left" class="w-6 h-6"></i>
                     </button>
-                    <div id="episode-grid" class="episode-grid flex overflow-x-auto gap-5 py-5 px-1 no-scrollbar premium-scroll"></div>
-                    <button class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden" onclick="scrollArea('episode-grid', 'next')">
+                    <div id="episode-grid"
+                        class="episode-grid flex overflow-x-auto gap-5 py-5 px-1 no-scrollbar premium-scroll"></div>
+                    <button
+                        class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
+                        onclick="scrollArea('episode-grid', 'next')">
                         <i data-lucide="chevron-right" class="w-6 h-6"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Enhanced Tips -->
-            <div class="tips-banner flex flex-col gap-3 bg-gradient-to-br from-netflix-red/10 to-transparent border-l-4 border-l-netflix-red p-6 rounded-r-2xl mb-16 backdrop-blur-md animate-slide-up">
+            <div
+                class="tips-banner flex flex-col gap-3 bg-gradient-to-br from-netflix-red/10 to-transparent border-l-4 border-l-netflix-red p-6 rounded-r-2xl mb-16 backdrop-blur-md animate-slide-up">
                 <div class="tip-item flex items-start gap-3 text-[0.85rem] leading-relaxed text-white/60">
                     <i data-lucide="mouse-pointer-click" class="w-[18px] h-[18px] text-netflix-red shrink-0 mt-0.5"></i>
-                    <p><b>AD BUFFER:</b> If the player feels locked, click once inside to clear invisible ads. / <i>Jika player terasa terkunci, klik sekali di dalam untuk membersihkan iklan, lalu tekan play kembali.</i></p>
+                    <p><b>AD BUFFER:</b> If the player feels locked, click once inside to clear invisible ads. / <i>Jika
+                            player terasa terkunci, klik sekali di dalam untuk membersihkan iklan, lalu tekan play
+                            kembali.</i></p>
                 </div>
                 <div class="tip-item flex items-start gap-3 text-[0.85rem] leading-relaxed text-white/60">
                     <i data-lucide="languages" class="w-[18px] h-[18px] text-netflix-red shrink-0 mt-0.5"></i>
-                    <p><b>LANGUAGES:</b> Use the <b>CC</b> icon in the bottom-right of the player to enable subtitles. / <i>Gunakan ikon <b>CC</b> di pojok kanan bawah player untuk mengaktifkan subtitle.</i></p>
+                    <p><b>LANGUAGES:</b> Use the <b>CC</b> icon in the bottom-right of the player to enable subtitles. /
+                        <i>Gunakan ikon <b>CC</b> di pojok kanan bawah player untuk mengaktifkan subtitle.</i></p>
                 </div>
                 <div class="tip-item flex items-start gap-3 text-[0.85rem] leading-relaxed text-white/60">
                     <i data-lucide="alert-circle" class="w-[18px] h-[18px] text-netflix-red shrink-0 mt-0.5"></i>
-                    <p><b>INDONESIAN MOVIES:</b> Server 1-10 are global. For Indonesian films, we recommend <b>Server 11 (Indo)</b> for better source and subtitle availability.</p>
+                    <p><b>INDONESIAN MOVIES:</b> Server 1-10 are global. For Indonesian films, we recommend <b>Server 11
+                            (Indo)</b> for better source and subtitle availability.</p>
                 </div>
             </div>
 
             <!-- Main Content Grid -->
-            <div class="content-grid grid grid-cols-1 lg:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)] gap-16 animate-slide-up">
+            <div
+                class="content-grid grid grid-cols-1 lg:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)] gap-16 animate-slide-up">
                 <div class="info-block min-w-0">
                     <div class="flex items-center gap-2.5 mb-4">
                         <i data-lucide="file-text" class="w-3.5 h-3.5 text-netflix-red"></i>
                         <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Synopsis</span>
                     </div>
-                    <p id="movie-synopsis" class="text-[1.15rem] text-white/85 leading-[1.7] mb-10 text-left max-md:text-[1rem] max-md:leading-relaxed max-md:text-white/80"></p>
+                    <p id="movie-synopsis"
+                        class="text-[1.15rem] text-white/85 leading-[1.7] mb-10 text-left max-md:text-[1rem] max-md:leading-relaxed max-md:text-white/80">
+                    </p>
 
                     <!-- NEW: CAST GALLERY -->
-                    <div id="cast-gallery-root" class="cast-gallery-wrapper my-10 pt-8 border-t border-t-white/8 relative animate-slide-up [animation-delay:0.4s] md:my-16" style="display: none;">
+                    <div id="cast-gallery-root"
+                        class="cast-gallery-wrapper my-10 pt-8 border-t border-t-white/8 relative animate-slide-up [animation-delay:0.4s] md:my-16"
+                        style="display: none;">
                         <div class="flex items-center gap-2.5 mb-6 justify-start">
                             <i data-lucide="users" class="w-3.5 h-3.5 text-netflix-red"></i>
-                            <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Cast Spotlight</span>
+                            <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Cast
+                                Spotlight</span>
                         </div>
                         <div class="rec-container relative">
-                            <button class="nav-btn prev absolute top-1/2 -translate-y-1/2 -left-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden" onclick="scrollArea('cast-scroll', 'prev')">
+                            <button
+                                class="nav-btn prev absolute top-1/2 -translate-y-1/2 -left-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
+                                onclick="scrollArea('cast-scroll', 'prev')">
                                 <i data-lucide="chevron-left" class="w-6 h-6"></i>
                             </button>
-                            <div id="cast-scroll" class="cast-scroll flex gap-4 overflow-x-auto pb-5 w-full no-scrollbar premium-scroll justify-start">
+                            <div id="cast-scroll"
+                                class="cast-scroll flex gap-4 overflow-x-auto pb-5 w-full no-scrollbar premium-scroll justify-start">
                                 <!-- CAST CARDS MOUNTED HERE -->
                             </div>
-                            <button class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden" onclick="scrollArea('cast-scroll', 'next')">
+                            <button
+                                class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
+                                onclick="scrollArea('cast-scroll', 'next')">
                                 <i data-lucide="chevron-right" class="w-6 h-6"></i>
                             </button>
                         </div>
@@ -220,7 +292,8 @@
 
                     <div class="flex items-center gap-2.5 mb-6">
                         <i data-lucide="hash" class="w-3.5 h-3.5 text-netflix-red"></i>
-                        <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Categories</span>
+                        <span
+                            class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Categories</span>
                     </div>
                     <div id="movie-genres" class="flex flex-wrap gap-2.5"></div>
                 </div>
@@ -228,11 +301,13 @@
                 <div class="sidebar">
                     <div class="elite-card glass-card p-10 rounded-3xl backdrop-blur-[40px] self-start shadow-2xl">
                         <div class="mb-8 last:mb-0">
-                            <div class="text-[0.7rem] font-black text-netflix-red tracking-[4px] uppercase mb-2">Production</div>
+                            <div class="text-[0.7rem] font-black text-netflix-red tracking-[4px] uppercase mb-2">
+                                Production</div>
                             <div id="movie-director" class="text-[1.3rem] font-bold leading-tight"></div>
                         </div>
                         <div class="mb-8 last:mb-0">
-                            <div class="text-[0.7rem] font-black text-netflix-red tracking-[4px] uppercase mb-2">Main Cast</div>
+                            <div class="text-[0.7rem] font-black text-netflix-red tracking-[4px] uppercase mb-2">Main
+                                Cast</div>
                             <div id="movie-cast" class="text-[1.3rem] font-bold leading-tight"></div>
                         </div>
                     </div>
@@ -243,17 +318,24 @@
             <div class="recommendations-section mt-24 animate-[fadeIn_1s_ease_forwards]">
                 <div class="flex items-center gap-2.5 mb-2">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5 text-netflix-red"></i>
-                    <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Recommended for You</span>
+                    <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Recommended for
+                        You</span>
                 </div>
                 <h2 class="font-outfit text-white text-[2rem] font-black mb-6">More Like This</h2>
                 <div class="rec-container relative">
-                    <button class="nav-btn prev absolute top-1/2 -translate-y-1/2 -left-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden" onclick="scrollRecs('prev')">
+                    <button
+                        class="nav-btn prev absolute top-1/2 -translate-y-1/2 -left-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
+                        onclick="scrollRecs('prev')">
                         <i data-lucide="chevron-left" class="w-6 h-6"></i>
                     </button>
                     <div id="recommendations-grid" class="rec-grid flex overflow-x-auto gap-5 pb-10 no-scrollbar">
-                        <div class="loader-label text-[0.6rem] font-extrabold tracking-[6px] text-white/40 uppercase my-8">FINDING SIMILAR CONTENT...</div>
+                        <div
+                            class="loader-label text-[0.6rem] font-extrabold tracking-[6px] text-white/40 uppercase my-8">
+                            FINDING SIMILAR CONTENT...</div>
                     </div>
-                    <button class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden" onclick="scrollRecs('next')">
+                    <button
+                        class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
+                        onclick="scrollRecs('next')">
                         <i data-lucide="chevron-right" class="w-6 h-6"></i>
                     </button>
                 </div>
@@ -262,57 +344,99 @@
 
         <footer class="mt-32 bg-[#080808] border-t border-t-white/5 py-20 px-8 relative max-md:py-16 max-md:px-6">
             <div class="footer-max max-w-[1200px] mx-auto">
-                <div class="footer-grid grid grid-cols-1 gap-16 mb-20 lg:grid-cols-[2.2fr_1fr_1.8fr] lg:gap-24 lg:text-left text-center">
+                <div
+                    class="footer-grid grid grid-cols-1 gap-16 mb-20 lg:grid-cols-[2.2fr_1fr_1.8fr] lg:gap-24 lg:text-left text-center">
                     <div class="brand-section flex flex-col gap-6 max-md:items-center">
-                        <a href="/" class="brand-logo flex items-center gap-3 text-netflix-red no-underline text-[1.8rem] font-black font-outfit uppercase tracking-[-1px] transition-all duration-500 hover:scale-105 hover:brightness-125">
+                        <a href="/"
+                            class="brand-logo flex items-center gap-3 text-netflix-red no-underline text-[1.8rem] font-black font-outfit uppercase tracking-[-1px] transition-all duration-500 hover:scale-105 hover:brightness-125">
                             <i data-lucide="film" class="stroke-3"></i>
                             YKN MOVIES
                         </a>
-                        <p class="brand-desc text-white/50 leading-relaxed max-w-[450px] text-[0.9rem]">Your ultimate destination for movies and series. Stream the latest hits in high quality anywhere, anytime with Yuk Kita Nonton.</p>
+                        <p class="brand-desc text-white/50 leading-relaxed max-w-[450px] text-[0.9rem]">Your ultimate
+                            destination for movies and series. Stream the latest hits in high quality anywhere, anytime
+                            with Yuk Kita Nonton.</p>
                         <div class="social-links flex gap-3 mt-2">
-                            <a href="https://instagram.com" target="_blank" class="social-btn w-10 h-10 rounded-full bg-white/3 border border-white/5 flex items-center justify-center transition-all duration-400 hover:bg-netflix-red hover:border-netflix-red hover:-translate-y-1.25 hover:shadow-[0_10px_20px_rgba(229,9,20,0.5)] group" title="Instagram">
-                                <img src="https://cdn.simpleicons.org/instagram/white" class="w-4 h-4 opacity-70 transition-all duration-300 group-hover:opacity-100 group-hover:brightness-150 group-hover:scale-110" alt="Instagram">
+                            <a href="https://instagram.com" target="_blank"
+                                class="social-btn w-10 h-10 rounded-full bg-white/3 border border-white/5 flex items-center justify-center transition-all duration-400 hover:bg-netflix-red hover:border-netflix-red hover:-translate-y-1.25 hover:shadow-[0_10px_20px_rgba(229,9,20,0.5)] group"
+                                title="Instagram">
+                                <img src="https://cdn.simpleicons.org/instagram/white"
+                                    class="w-4 h-4 opacity-70 transition-all duration-300 group-hover:opacity-100 group-hover:brightness-150 group-hover:scale-110"
+                                    alt="Instagram">
                             </a>
-                            <a href="https://x.com" target="_blank" class="social-btn w-10 h-10 rounded-full bg-white/3 border border-white/5 flex items-center justify-center transition-all duration-400 hover:bg-netflix-red hover:border-netflix-red hover:-translate-y-1.25 hover:shadow-[0_10px_20px_rgba(229,9,20,0.5)] group" title="X (Twitter)">
-                                <img src="https://cdn.simpleicons.org/x/white" class="w-4 h-4 opacity-70 transition-all duration-300 group-hover:opacity-100 group-hover:brightness-150 group-hover:scale-110" alt="X">
+                            <a href="https://x.com" target="_blank"
+                                class="social-btn w-10 h-10 rounded-full bg-white/3 border border-white/5 flex items-center justify-center transition-all duration-400 hover:bg-netflix-red hover:border-netflix-red hover:-translate-y-1.25 hover:shadow-[0_10px_20px_rgba(229,9,20,0.5)] group"
+                                title="X (Twitter)">
+                                <img src="https://cdn.simpleicons.org/x/white"
+                                    class="w-4 h-4 opacity-70 transition-all duration-300 group-hover:opacity-100 group-hover:brightness-150 group-hover:scale-110"
+                                    alt="X">
                             </a>
-                            <a href="https://github.com/diaz1414/KNY-movie" target="_blank" class="social-btn w-10 h-10 rounded-full bg-white/3 border border-white/5 flex items-center justify-center transition-all duration-400 hover:bg-netflix-red hover:border-netflix-red hover:-translate-y-1.25 hover:shadow-[0_10px_20px_rgba(229,9,20,0.5)] group" title="GitHub">
-                                <img src="https://cdn.simpleicons.org/github/white" class="w-4 h-4 opacity-70 transition-all duration-300 group-hover:opacity-100 group-hover:brightness-150 group-hover:scale-110" alt="GitHub">
+                            <a href="https://github.com/diaz1414/KNY-movie" target="_blank"
+                                class="social-btn w-10 h-10 rounded-full bg-white/3 border border-white/5 flex items-center justify-center transition-all duration-400 hover:bg-netflix-red hover:border-netflix-red hover:-translate-y-1.25 hover:shadow-[0_10px_20px_rgba(229,9,20,0.5)] group"
+                                title="GitHub">
+                                <img src="https://cdn.simpleicons.org/github/white"
+                                    class="w-4 h-4 opacity-70 transition-all duration-300 group-hover:opacity-100 group-hover:brightness-150 group-hover:scale-110"
+                                    alt="GitHub">
                             </a>
-                            <a href="mailto:yknsupport@diaww.my.id" class="social-btn w-10 h-10 rounded-full bg-white/3 border border-white/5 flex items-center justify-center transition-all duration-400 hover:bg-netflix-red hover:border-netflix-red hover:-translate-y-1.25 hover:shadow-[0_10px_20px_rgba(229,9,20,0.5)] group" title="Email">
-                                <i data-lucide="mail" class="w-4 h-4 opacity-70 transition-all duration-300 group-hover:opacity-100 group-hover:brightness-150 group-hover:scale-110"></i>
+                            <a href="mailto:yknsupport@diaww.my.id"
+                                class="social-btn w-10 h-10 rounded-full bg-white/3 border border-white/5 flex items-center justify-center transition-all duration-400 hover:bg-netflix-red hover:border-netflix-red hover:-translate-y-1.25 hover:shadow-[0_10px_20px_rgba(229,9,20,0.5)] group"
+                                title="Email">
+                                <i data-lucide="mail"
+                                    class="w-4 h-4 opacity-70 transition-all duration-300 group-hover:opacity-100 group-hover:brightness-150 group-hover:scale-110"></i>
                             </a>
                         </div>
                     </div>
 
                     <div>
-                        <h3 class="font-sans text-[0.95rem] font-extrabold uppercase tracking-[2px] text-white mb-8">Quick Links</h3>
+                        <h3 class="font-sans text-[0.95rem] font-extrabold uppercase tracking-[2px] text-white mb-8">
+                            Quick Links</h3>
                         <ul class="list-none flex flex-col gap-5 p-0">
-                            <li><a href="/about" class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">About</a></li>
-                            <li><a href="/contact" class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Contact</a></li>
-                            <li><a href="/privacy" class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Privacy Policy</a></li>
-                            <li><a href="/terms" class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Terms of Service</a></li>
+                            <li><a href="/about"
+                                    class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">About</a>
+                            </li>
+                            <li><a href="/contact"
+                                    class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Contact</a>
+                            </li>
+                            <li><a href="/privacy"
+                                    class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Privacy
+                                    Policy</a></li>
+                            <li><a href="/terms"
+                                    class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Terms
+                                    of Service</a></li>
                         </ul>
                     </div>
 
                     <div>
-                        <h3 class="font-sans text-[0.95rem] font-extrabold uppercase tracking-[2px] text-white mb-8">Genres</h3>
+                        <h3 class="font-sans text-[0.95rem] font-extrabold uppercase tracking-[2px] text-white mb-8">
+                            Genres</h3>
                         <ul class="list-none grid grid-cols-2 gap-x-12 gap-y-4 p-0">
                             <div>
-                                <li><a href="/genre/28" class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Action</a></li>
-                                <li class="mt-4"><a href="/genre/27" class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Horror</a></li>
-                                <li class="mt-4"><a href="/genre/878" class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Sci-Fi</a></li>
+                                <li><a href="/genre/28"
+                                        class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Action</a>
+                                </li>
+                                <li class="mt-4"><a href="/genre/27"
+                                        class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Horror</a>
+                                </li>
+                                <li class="mt-4"><a href="/genre/878"
+                                        class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Sci-Fi</a>
+                                </li>
                             </div>
                             <div>
-                                <li><a href="/genre/35" class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Comedy</a></li>
-                                <li class="mt-4"><a href="/genre/10749" class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Romance</a></li>
-                                <li class="mt-4"><a href="/genre/53" class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Thriller</a></li>
+                                <li><a href="/genre/35"
+                                        class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Comedy</a>
+                                </li>
+                                <li class="mt-4"><a href="/genre/10749"
+                                        class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Romance</a>
+                                </li>
+                                <li class="mt-4"><a href="/genre/53"
+                                        class="text-white/45 no-underline transition-all duration-300 text-[0.9rem] font-medium hover:text-netflix-red hover:pl-1">Thriller</a>
+                                </li>
                             </div>
                         </ul>
                     </div>
                 </div>
 
-                <div class="footer-bottom-sync pt-12 border-t border-t-white/3 flex flex-col items-center gap-6 text-white/25 text-[0.8rem] md:flex-row md:justify-between">
+                <div
+                    class="footer-bottom-sync pt-12 border-t border-t-white/3 flex flex-col items-center gap-6 text-white/25 text-[0.8rem] md:flex-row md:justify-between">
                     <p>&copy; 2026 Yuk Kita Nonton. All rights reserved.</p>
                     <div class="lang-switch flex gap-8">
                         <span class="cursor-pointer transition-all duration-300 hover:text-white">English (US)</span>
@@ -323,7 +447,9 @@
         </footer>
 
         <!-- Floating Back To Top -->
-        <div id="back-to-top" class="fixed bottom-[30px] right-[30px] w-[50px] h-[50px] bg-netflix-red text-white rounded-full flex items-center justify-center cursor-pointer z-[1000] opacity-0 invisible transition-all duration-400 cubic-bezier(0.175,0.885,0.32,1.275) translate-y-5 shadow-[0_10px_25px_rgba(229,9,20,0.5)] hover:bg-white hover:text-netflix-red hover:-translate-y-1.25 hover:scale-110 [&.visible]:opacity-100 [&.visible]:visible [&.visible]:translate-y-0" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <div id="back-to-top"
+            class="fixed bottom-[30px] right-[30px] w-[50px] h-[50px] bg-netflix-red text-white rounded-full flex items-center justify-center cursor-pointer z-[1000] opacity-0 invisible transition-all duration-400 cubic-bezier(0.175,0.885,0.32,1.275) translate-y-5 shadow-[0_10px_25px_rgba(229,9,20,0.5)] hover:bg-white hover:text-netflix-red hover:-translate-y-1.25 hover:scale-110 [&.visible]:opacity-100 [&.visible]:visible [&.visible]:translate-y-0"
+            onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
             <i data-lucide="arrow-up" class="w-6 h-6"></i>
         </div>
     </div>
@@ -445,7 +571,7 @@
 
                 // Production Sidebar
                 document.getElementById('movie-director').textContent = movie.credits?.crew?.find(c => c.job === 'Director')?.name || 'Various Production';
-                
+
                 // NEW: Visual Cast Gallery Rendering
                 const galleryRoot = document.getElementById('cast-gallery-root');
                 const castScroll = document.getElementById('cast-scroll');
@@ -454,8 +580,8 @@
                 if (castMembers.length > 0) {
                     galleryRoot.style.display = 'block';
                     castScroll.innerHTML = castMembers.map(c => {
-                        const profile = c.profile_path 
-                            ? `https://image.tmdb.org/t/p/w200${c.profile_path}` 
+                        const profile = c.profile_path
+                            ? `https://image.tmdb.org/t/p/w200${c.profile_path}`
                             : `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=111&color=E50914&bold=true`;
                         return `
                             <div class="cast-member flex-[0_0_90px] md:flex-[0_0_120px] text-center transition-all duration-500 hover:-translate-y-1.5 group">
@@ -784,7 +910,7 @@
                         const rating = m.vote_average ? m.vote_average.toFixed(1) : 'NR';
 
                         return `
-                            <div class="flex-[0_0_160px] md:flex-[0_0_200px] relative aspect-[2/3] rounded-xl overflow-hidden cursor-pointer transition-all duration-500 border border-white/10 shadow-2xl hover:scale-105 hover:-translate-y-2.5 hover:border-netflix-red hover:shadow-[0_20px_40px_rgba(229,9,20,0.4)] group" onclick="window.location.href='/watch.html?id=${m.id}'">
+                            <div class="flex-[0_0_160px] md:flex-[0_0_200px] relative aspect-[2/3] rounded-xl overflow-hidden cursor-pointer transition-all duration-500 border border-white/10 shadow-2xl hover:scale-105 hover:-translate-y-2.5 hover:border-netflix-red hover:shadow-[0_20px_40px_rgba(229,9,20,0.4)] group" onclick="window.location.href='/watch?id=${m.id}'">
                                 <img src="${poster}" alt="${title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                                     <div class="text-[0.85rem] font-bold text-white leading-tight font-outfit mb-1">${title}</div>

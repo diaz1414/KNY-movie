@@ -5,7 +5,7 @@ import type { UnifiedMovie } from '../services/api';
 
 const MovieCard: React.FC<{ movie: UnifiedMovie }> = ({ movie }) => {
   const handleClick = () => {
-    window.location.href = `/watch.html?id=${movie.id}`;
+    window.location.href = `/watch?id=${movie.id}`;
   };
 
   return (
