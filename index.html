@@ -49,8 +49,12 @@
         clearLog: true,
         disableMenu: false, // Klik kanan jadi BISA lagi
         ondevtoolopen: (type) => {
+          // Savage Console Welcome
+          console.log("%c STOP! %c FUCK YOU ", "color: white; background: red; font-size: 50px; font-weight: bold; border-radius: 10px 0 0 10px; padding: 10px;", "color: red; background: black; font-size: 50px; font-weight: bold; border-radius: 0 10px 10px 0; padding: 10px;");
+          console.log("%c\n       .---. \n      /     \\ \n      | ( ) | \n      |     | \n      |     | \n      |     | \n  .---'     '---. \n /  |         |  \\ \n |  |         |  | \n |  |         |  | \n '---.       .---' \n     |       | \n     |       | \n     '-------' \n", "color: #E50914; font-weight: bold; font-size: 14px;");
+          console.log("%c DON'T TOUCH MY CODE! ", "color: #E50914; font-size: 20px; font-weight: 800;");
+          
           document.getElementById('security-alert-modal').classList.add('active');
-          // Still try to clear logs
           console.clear();
         }
       });
