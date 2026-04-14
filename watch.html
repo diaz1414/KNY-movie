@@ -25,7 +25,11 @@
         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
             DisableDevtool({
                 clearLog: true,
-                disableMenu: false
+                disableMenu: false,
+                ondevtoolopen: (type) => {
+                    window.close();
+                    window.location.href = "about:blank";
+                }
             });
         }
     </script>
