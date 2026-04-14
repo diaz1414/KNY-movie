@@ -8,10 +8,11 @@ import Privacy from './pages/Privacy';
 import Genre from './pages/Genre';
 import SeriesGenre from './pages/SeriesGenre';
 import Maintenance from './pages/Maintenance';
-import NotFound from './pages/NotFound';
 import { ThemeProvider } from './context/ThemeContext';
 import ScrollToTop from './components/ScrollToTop';
 import NetflixIntro from './components/NetflixIntro';
+import NotFound from './pages/NotFound';
+import Restricted from './pages/Restricted';
 import OfflineOverlay from './components/OfflineOverlay';
 
 const App: React.FC = () => {
@@ -38,6 +39,7 @@ const App: React.FC = () => {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/genre/:id" element={<Genre />} />
           <Route path="/series/genre/:id" element={<SeriesGenre />} />
+          <Route path="/restricted" element={<Restricted />} />
           {/* Catch-all route for Not Found (404) */}
           <Route path="*" element={<NotFound />} />
         </Routes>

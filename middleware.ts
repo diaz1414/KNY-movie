@@ -8,7 +8,8 @@ export default function middleware(request: Request) {
   if (
     url.pathname.includes('.') || 
     url.pathname.startsWith('/api') ||
-    url.pathname.startsWith('/_vercel')
+    url.pathname.startsWith('/_vercel') ||
+    url.pathname === '/restricted' // Jangan redirect halaman restricted
   ) {
     return new Response(null, {
       headers: { 'x-middleware-next': '1' }
@@ -16,32 +17,53 @@ export default function middleware(request: Request) {
   }
 
   const geo = geolocation(request);
+  const country = geo.country || 'US';
   
-  // Tentukan subdomain target berdasarkan negara
-  let targetPrefix = '';
-  if (geo.country === 'SG') targetPrefix = 'sg';
-  else if (geo.country === 'ID') targetPrefix = 'id';
-  else if (geo.country === 'US') targetPrefix = 'us';
-  else if (geo.country === 'JP') targetPrefix = 'jp';
-  else if (['GB', 'FR', 'DE', 'IT', 'ES', 'NL', 'BE', 'EU'].includes(geo.country || '')) targetPrefix = 'eu';
-  else if (['SA', 'AE', 'EG', 'JO', 'LB', 'QA', 'KW', 'OM'].includes(geo.country || '')) targetPrefix = 'ar';
+  // Daftar prefix yang didukung dan mapping negara yang diizinkan
+  const regionMapping: Record<string, string[]> = {
+    'id': ['ID'],
+    'sg': ['SG'],
+    'us': ['US', 'CA'],
+    'jp': ['JP'],
+    'eu': ['GB', 'FR', 'DE', 'IT', 'ES', 'NL', 'BE'],
+    'ar': ['SA', 'AE', 'EG', 'JO', 'LB', 'QA', 'KW', 'OM']
+  };
 
-  // Logika Smart Redirect:
+  const supportedPrefixes = Object.keys(regionMapping);
+  
   // Cek apakah hostname saat ini sudah punya prefix regional
-  const supportedPrefixes = ['sg', 'id', 'us', 'jp', 'eu', 'ar'];
-  const hasPrefix = supportedPrefixes.some(p => hostname.startsWith(`${p}.`));
+  const activePrefix = supportedPrefixes.find(p => hostname.startsWith(`${p}.`));
 
-  // JANGAN REDIRECT jika:
-  // 1. User sudah berada di subdomain (supaya orang Indo bisa akses sg secara paksa)
-  // 2. Tidak ada target prefix untuk negara tersebut
-  if (!hasPrefix && targetPrefix) {
-    const newHostname = `${targetPrefix}.${hostname}`;
-    // Pastikan kita tidak melakukan redirect loop jika hostname sudah benar
-    // Redirect hanya jika kita berada di domain utama
-    return Response.redirect(`https://${newHostname}${url.pathname}${url.search}`);
+  // 1. LOGIKA REGIONAL LOCK (GEO-BLOCKING)
+  // Jika user sudah berada di sebuah subdomain, pastikan lokasinya sesuai
+  if (activePrefix) {
+    const allowedCountries = regionMapping[activePrefix];
+    if (allowedCountries && !allowedCountries.includes(country)) {
+      // Jika lokasi TIDAK diizinkan untuk subdomain ini, lempar ke halaman restricted
+      // Kita tetap gunakan hostname saat ini agar user tau dia di-block di region mana
+      return Response.redirect(`https://${hostname}/restricted`);
+    }
   }
 
-  // Jika tidak diredirect, lanjut ke aplikasi dengan menyertakan cookie geo data
+  // 2. LOGIKA SMART REDIRECT (AUTO-ROUTING)
+  // Jika user berada di domain utama, arahkan ke subdomain yang sesuai lokasinya
+  if (!activePrefix) {
+    let targetPrefix = '';
+    
+    // Cari prefix yang cocok dengan negara user
+    for (const [p, countries] of Object.entries(regionMapping)) {
+      if (countries.includes(country)) {
+        targetPrefix = p;
+        break;
+      }
+    }
+
+    if (targetPrefix) {
+      return Response.redirect(`https://${targetPrefix}.${hostname}${url.pathname}${url.search}`);
+    }
+  }
+
+  // Jika tidak diredirect, lanjut ke aplikasi
   const response = new Response(null, {
     headers: { 'x-middleware-next': '1' }
   });
