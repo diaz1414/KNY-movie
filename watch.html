@@ -27,6 +27,7 @@
                 clearLog: true,
                 disableMenu: false,
                 ondevtoolopen: (type) => {
+                    alert("SECURITY ALERT: Developer Tools are not allowed on this platform. Access denied.");
                     window.close();
                     window.location.href = "about:blank";
                 }
