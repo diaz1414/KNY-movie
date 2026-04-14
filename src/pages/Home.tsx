@@ -9,6 +9,7 @@ import { movieService, type UnifiedMovie } from '../services/api';
 import { Search, X, ChevronLeft, ChevronRight, Sparkles, Trophy } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import MovieModal from '../components/MovieModal';
+import AdBanner from '../components/AdBanner';
 
 const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -320,6 +321,15 @@ const Home: React.FC = () => {
                       title={t('new_releases')}
                       movies={recentMovies}
                     />
+
+                    {/* Adsterra Native Banner */}
+                    <AdBanner 
+                      id="container-d6a7c7b01488e26dacc23a94129c76cd"
+                      format="native"
+                      scriptUrl="https://pl29154194.profitablecpmratenetwork.com/d6a7c7b01488e26dacc23a94129c76cd/invoke.js"
+                      className="my-10 animate-in fade-in slide-in-from-bottom-5 duration-700"
+                    />
+
                     <MovieRow
                       id="series"
                       title={t('popular_series')}
