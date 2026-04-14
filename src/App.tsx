@@ -7,11 +7,21 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Genre from './pages/Genre';
 import SeriesGenre from './pages/SeriesGenre';
+import Maintenance from './pages/Maintenance';
 import { ThemeProvider } from './context/ThemeContext';
 import ScrollToTop from './components/ScrollToTop';
 import NetflixIntro from './components/NetflixIntro';
 
 const App: React.FC = () => {
+  // Maintenance Mode Logic:
+  // Only active in Production (e.g. Vercel) AND if the Env Var is set to 'true'
+  // This allows you to keep working locally even if maintenance is on for users.
+  const isMaintenanceMode = import.meta.env.PROD && import.meta.env.VITE_MAINTENANCE_MODE === 'true';
+
+  if (isMaintenanceMode) {
+    return <Maintenance />;
+  }
+
   return (
     <ThemeProvider>
       <NetflixIntro />
