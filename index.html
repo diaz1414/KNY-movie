@@ -47,9 +47,9 @@
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
       DisableDevtool({
         clearLog: true,
-        disableMenu: true,
+        disableMenu: false, // Klik kanan jadi BISA lagi
         ondevtoolopen: (type) => {
-          window.location.href = '/'; // Opsional: lempar ke home kalau ketauan buka inspect
+          window.location.href = '/'; 
         }
       });
     }
