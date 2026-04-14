@@ -21,17 +21,133 @@
 
     <!-- Disable DevTools in Production -->
     <script src="https://cdn.jsdelivr.net/npm/disable-devtool"></script>
+    <!-- Custom Security Alert Modal Styles -->
+    <style>
+        #security-alert-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            font-family: 'Outfit', sans-serif;
+            padding: 20px;
+        }
+
+        #security-alert-modal.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #0a0a0a;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            border-radius: 28px;
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(229, 9, 20, 0.1);
+            animation: modalIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(229, 9, 20, 0.1);
+            color: #E50914;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            border: 1px solid rgba(229, 9, 20, 0.2);
+            animation: pulseScale 2s infinite;
+        }
+
+        @keyframes pulseScale {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.2);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 20px 10px rgba(229, 9, 20, 0);
+            }
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 1.75rem;
+            font-weight: 900;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .modal-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .modal-btn {
+            background: #E50914;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(229, 9, 20, 0.4);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(229, 9, 20, 0.5);
+            background: #ff0f1e;
+        }
+
+        .modal-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
     <script>
         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
             DisableDevtool({
                 clearLog: true,
                 disableMenu: false,
                 ondevtoolopen: (type) => {
-                    alert("SECURITY ALERT: Developer Tools are not allowed on this platform. Access denied.");
-                    window.close();
-                    window.location.href = "about:blank";
+                    document.getElementById('security-alert-modal').classList.add('active');
+                    console.clear();
                 }
             });
+        }
+
+        function closeSecurityAlert() {
+            window.close();
+            window.location.href = "about:blank";
         }
     </script>
 
@@ -52,6 +168,26 @@
 
 <body class="bg-black text-white font-sans min-h-screen overflow-x-hidden antialiased">
     <div id="backdrop-canvas" class="fixed inset-0 -z-20 bg-black"></div>
+    <!-- Custom Security Modal HTML -->
+    <div id="security-alert-modal">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                    <line x1="12" x2="12" y1="8" y2="12" />
+                    <line x1="12" x2="12.01" y1="16" y2="16" />
+                </svg>
+            </div>
+            <h2 class="modal-title">SECURITY ALERT</h2>
+            <p class="modal-text">
+                Developer Tools are restricted on this platform for security reasons.
+                Your access has been suspended to protect our content and infrastructure.
+            </p>
+            <button class="modal-btn" onclick="closeSecurityAlert()">I Understand</button>
+        </div>
+    </div>
+
     <div id="backdrop-image"
         class="fixed inset-0 -z-10 bg-cover bg-center opacity-0 transition-opacity duration-[1500ms]"></div>
     <div
