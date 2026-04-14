@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { X, Play, Star, Calendar, Clock, User, Film } from 'lucide-react';
+import { X, Play, Star, Calendar, Clock, Film } from 'lucide-react';
 import { movieService, type UnifiedMovieDetail } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import NetflixLoader from './NetflixLoader';
