@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { SiInstagram, SiGithub, SiX, SiGmail } from 'react-icons/si';
-import { Film } from 'lucide-react';
+import { SiInstagram, SiGithub, SiX, SiGmail, SiKofi } from 'react-icons/si';
+import { Film, Gift } from 'lucide-react';
 import ChangelogModal from './ChangelogModal';
 
 const Footer: React.FC = () => {
@@ -36,18 +36,18 @@ const Footer: React.FC = () => {
     <footer className="bg-[var(--bg-secondary)] border-t border-[var(--glass-border)] pt-16 pb-8 px-[var(--container-padding)]">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
         {/* Brand Section */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="space-y-6">
           <div className="flex items-center gap-2">
             <Film className="text-netflix-red" size={32} />
             <Link
               to="/"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="text-3xl font-extrabold tracking-tighter text-netflix-red font-outfit uppercase"
+              className="text-2xl font-extrabold tracking-tighter text-netflix-red font-outfit uppercase"
             >
               {t('app_name')}
             </Link>
           </div>
-          <p className="text-[var(--text-secondary)] text-lg leading-relaxed max-w-md">
+          <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
             {t('footer_desc')}
           </p>
           <div className="flex gap-4">
@@ -55,7 +55,7 @@ const Footer: React.FC = () => {
               <a
                 key={index}
                 href={social.href}
-                className="w-10 h-10 rounded-full glass flex items-center justify-center text-[var(--text-primary)] hover:bg-netflix-red hover:text-white transition-all duration-300"
+                className="w-9 h-9 rounded-full glass flex items-center justify-center text-[var(--text-primary)] hover:bg-netflix-red hover:text-white transition-all duration-300"
                 aria-label={social.label}
               >
                 {social.icon}
@@ -69,12 +69,12 @@ const Footer: React.FC = () => {
           <h3 className="text-xl font-bold font-outfit text-[var(--text-primary)]">
             {t('quick_links')}
           </h3>
-          <ul className="space-y-4">
+          <ul className="space-y-3">
             {links.map((link) => (
               <li key={link.name}>
                 <Link
                   to={link.path}
-                  className="text-[var(--text-secondary)] hover:text-netflix-red transition-colors duration-200"
+                  className="text-[var(--text-secondary)] hover:text-netflix-red transition-colors duration-200 text-sm"
                 >
                   {link.name}
                 </Link>
@@ -83,7 +83,7 @@ const Footer: React.FC = () => {
             <li>
               <button
                 onClick={() => setIsChangelogOpen(true)}
-                className="text-[var(--text-secondary)] hover:text-netflix-red transition-colors duration-200 cursor-pointer"
+                className="text-[var(--text-secondary)] hover:text-netflix-red transition-colors duration-200 cursor-pointer text-sm"
               >
                 {t('changelog')}
               </button>
@@ -96,19 +96,53 @@ const Footer: React.FC = () => {
           <h3 className="text-xl font-bold font-outfit text-[var(--text-primary)]">
             Genres
           </h3>
-          <ul className="grid grid-cols-2 gap-4">
+          <ul className="grid grid-cols-1 gap-3">
             {genres.map((genre) => (
               <li key={genre.name}>
                 <Link
                   to={genre.path}
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="text-[var(--text-secondary)] hover:text-netflix-red transition-colors duration-200"
+                  className="text-[var(--text-secondary)] hover:text-netflix-red transition-colors duration-200 text-sm"
                 >
                   {genre.name}
                 </Link>
               </li>
             ))}
           </ul>
+        </div>
+
+        {/* Support Section */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-bold font-outfit text-[var(--text-primary)] transition-all duration-300">
+            {t('support_dev')}
+          </h3>
+          <p className="text-[var(--text-muted)] text-sm leading-relaxed">
+            {t('support_desc')}
+          </p>
+          <div className="flex flex-col gap-4">
+            <a
+              href="https://bagibagi.co/Diaww"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-orange-500/10 hover:border-orange-500/50 hover:text-orange-500 transition-all duration-300 group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-500 group-hover:scale-110 transition-transform">
+                <Gift size={18} />
+              </div>
+              <span className="font-bold text-sm">BagiBagi (Local ID)</span>
+            </a>
+            <a
+              href="https://ko-fi.com/diaww14"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-[#29abe2]/10 hover:border-[#29abe2]/50 hover:text-[#29abe2] transition-all duration-300 group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-[#29abe2]/20 flex items-center justify-center text-[#29abe2] group-hover:scale-110 transition-transform">
+                <SiKofi size={18} />
+              </div>
+              <span className="font-bold text-sm">Ko-fi (Global)</span>
+            </a>
+          </div>
         </div>
       </div>
 

@@ -39,7 +39,9 @@ const resources = {
       "explore_more": "Explore Top Rated",
       "latest_explore": "Explore Latest Hits",
       "loading_more": "Discovering more hits...",
-      "end_of_list": "You've reached the end of our current spotlight."
+      "end_of_list": "You've reached the end of our current spotlight.",
+      "support_dev": "Support Developer",
+      "support_desc": "Love this platform? Support the developer to keep bringing new features and updates!"
     }
   },
   id: {
@@ -79,7 +81,9 @@ const resources = {
       "explore_more": "Eksplorasi Rating Tertinggi",
       "latest_explore": "Eksplorasi Hits Terbaru",
       "loading_more": "Menemukan lebih banyak hits...",
-      "end_of_list": "Anda telah mencapai akhir dari sorotan kami."
+      "end_of_list": "Anda telah mencapai akhir dari sorotan kami.",
+      "support_dev": "Dukung Pengembang",
+      "support_desc": "Suka dengan platform ini? Dukung pengembang agar terus bisa update fitur terbaru!"
     }
   },
   ja: {
