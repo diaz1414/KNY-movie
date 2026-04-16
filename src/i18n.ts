@@ -46,7 +46,7 @@ const resources = {
   },
   id: {
     translation: {
-      "app_name": "YKN",
+      "app_name": "YKN Movies",
       "home": "Beranda",
       "movies": "Film",
       "series": "Serial",
