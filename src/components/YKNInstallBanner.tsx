@@ -104,7 +104,7 @@ const YKNInstallBanner: React.FC = () => {
               </button>
             ) : (
               <a
-                href="/ykn-app2.apk"
+                href="/ykn-app3.apk"
                 download="YKN-Movie.apk"
                 className="px-12 py-5 rounded-2xl bg-white text-black font-black flex items-center justify-center gap-4 hover:bg-netflix-red hover:text-white transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl shadow-white/5 uppercase tracking-widest text-sm"
               >
