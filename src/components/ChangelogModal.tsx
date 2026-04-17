@@ -13,11 +13,22 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
 
   const updates = [
     {
+      date: 'April 17, 2026',
+      title: 'Analytics & Monetization Infrastructure',
+      items: [
+        'Integrated Google Analytics 4 (GA4) for comprehensive visitor and event tracking.',
+        'Implemented responsive advertising units with strategic banner placement.',
+        'Developed a robust AdBanner system using isolated iframes to ensure UI stability.',
+        'Optimized component lifecycle for seamless ad rendering across SPA transitions.',
+        'Enhanced overall platform performance and script execution reliability.'
+      ]
+    },
+    {
       date: 'April 11, 2026',
       title: 'Cinematic Intro & Branding Polish',
       items: [
         'Implemented a premium, Net***x-style cinematic intro sequence.',
-        'Added "Welcome to YKN" interactive entry popup with sound experience.',
+        'Added "Welcome to YKN" interactive entry popup with an immersive sound experience.',
         'Refined branding logo with improved sharpness and reduced visual noise.',
         'Added Skip Intro functionality with session-based persistence.',
         'Optimized system-wide TypeScript types for better environment compatibility.',
@@ -30,7 +41,7 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
       items: [
         'Implemented "More Info" context modal with detailed synopsis and cast info.',
         'Added dynamic Hero Carousel featuring trending titles with auto-play.',
-        'Redesigned the watch page navigation (Back button now correctly returns Home).',
+        'Redesigned watch page navigation (Back button now returns to Home correctly).',
         'Enhanced UI with premium thin scrollbars and glassmorphic elements.',
         'Added smooth staggered entrance animations for better interactivity.'
       ]
@@ -39,10 +50,10 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
       date: 'April 09, 2026',
       title: 'Core Engine & History Fixes',
       items: [
-        'Added "Continue Watching" persistence (saves your server and episode progress).',
+        'Added "Continue Watching" persistence (saves server and episode progress).',
         'Optimized iframe history to prevent browser back-button bloat.',
         'Implemented TV Series season and episode state restoration.',
-        'Rebranded platform to Yuk Kita Nonton (YKN) with new premium logo.'
+        'Rebranded platform to Yuk Kita Nonton (YKN) with a new premium logo.'
       ]
     },
     {
