@@ -14,7 +14,6 @@ const resources = {
       "more_info": "More Info",
       "light_mode": "Light",
       "dark_mode": "Dark",
-      "trending": "Trending Now",
       "recommended": "Recommended for You",
       "top_rated": "Top Rated",
       "search_results": "Search Results",
@@ -41,7 +40,14 @@ const resources = {
       "loading_more": "Discovering more hits...",
       "end_of_list": "You've reached the end of our current spotlight.",
       "support_dev": "Support Developer",
-      "support_desc": "Love this platform? Support the developer to keep bringing new features and updates!"
+      "support_desc": "Love this platform? Support the developer to keep bringing new features and updates!",
+      "news": "News",
+      "article_hero": "Featured Story",
+      "explore_news": "Discover Latest Movie News",
+      "upcoming": "Coming Soon",
+      "trending": "Trending Now",
+      "trending_news": "Hot News",
+      "read_article": "Read Article"
     }
   },
   id: {
@@ -56,7 +62,6 @@ const resources = {
       "more_info": "Info Lebih Lanjut",
       "light_mode": "Terang",
       "dark_mode": "Gelap",
-      "trending": "Sedang Tren",
       "recommended": "Direkomendasikan Untuk Anda",
       "top_rated": "Rating Tertinggi",
       "search_results": "Hasil Pencarian",
@@ -83,7 +88,14 @@ const resources = {
       "loading_more": "Menemukan lebih banyak hits...",
       "end_of_list": "Anda telah mencapai akhir dari sorotan kami.",
       "support_dev": "Dukung Pengembang",
-      "support_desc": "Suka dengan platform ini? Dukung pengembang agar terus bisa update fitur terbaru!"
+      "support_desc": "Suka dengan platform ini? Dukung pengembang agar terus bisa update fitur terbaru!",
+      "news": "Berita",
+      "article_hero": "Berita Utama",
+      "explore_news": "Eksplorasi Berita Film Terbaru",
+      "upcoming": "Akan Datang",
+      "trending": "Sedang Tren",
+      "trending_news": "Berita Hangat",
+      "read_article": "Baca Artikel"
     }
   },
   ja: {

@@ -12,6 +12,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import ScrollToTop from './components/ScrollToTop';
 import NetflixIntro from './components/NetflixIntro';
 import NotFound from './pages/NotFound';
+import News from './pages/News';
 import OfflineOverlay from './components/OfflineOverlay';
 
 const App: React.FC = () => {
@@ -38,6 +39,7 @@ const App: React.FC = () => {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/genre/:id" element={<Genre />} />
           <Route path="/series/genre/:id" element={<SeriesGenre />} />
+          <Route path="/news" element={<News />} />
           {/* Catch-all route for Not Found (404) */}
           <Route path="*" element={<NotFound />} />
         </Routes>

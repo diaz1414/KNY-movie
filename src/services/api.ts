@@ -206,5 +206,15 @@ export const movieService = {
       }
     });
     return res.data.results.map(normalizeTMDB);
+  },
+
+  getUpcomingMovies: async (page: number = 1) => {
+    const res = await api.get('/movie/upcoming', { params: { language: 'en-US', region: 'US', page } });
+    return res.data.results.map(normalizeTMDB);
+  },
+
+  getTrendingMovies: async (page: number = 1) => {
+    const res = await api.get('/trending/movie/week', { params: { language: 'en-US', page } });
+    return res.data.results.map(normalizeTMDB);
   }
 };
