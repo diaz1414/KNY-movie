@@ -9,7 +9,7 @@ const Hero: React.FC<{ movie?: UnifiedMovie }> = ({ movie }) => {
 
   const handleWatch = () => {
     if (movie) {
-      window.location.href = `/watch?id=${movie.id}`;
+      window.location.href = `/watch.html?id=${movie.id}`;
     }
   };
 
