@@ -21,7 +21,7 @@
       "destination": "/watch.html"
     },
     {
-      "source": "/((?!assets/|static/|favicon.ico|.*\\.js|.*\\.css|.*\\.png|.*\\.jpg|.*\\.svg).*)",
+      "source": "/((?!assets/|static/|favicon.ico|.*\\.js|.*\\.css|.*\\.png|.*\\.jpg|.*\\.svg|.*\\.html).*)",
       "destination": "/index.html"
     }
   ]
