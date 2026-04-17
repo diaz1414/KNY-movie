@@ -47,7 +47,17 @@ const resources = {
       "upcoming": "Coming Soon",
       "trending": "Trending Now",
       "trending_news": "Hot News",
-      "read_article": "Read Article"
+      "read_article": "Read Article",
+      "app_promo_badge": "Official Mobile App",
+      "app_promo_title_1": "Android App",
+      "app_promo_title_2": "Now Available.",
+      "app_promo_desc": "Enjoy premium access via the official YKN Android app. More stable performance, distraction-free fullscreen, and automatic sync with the website.",
+      "app_promo_btn_apk": "Download APK (Android)",
+      "app_promo_btn_iphone": "Install on iPhone",
+      "app_promo_ios_title": "For iPhone Users (iOS)",
+      "app_promo_ios_step1": "Click the Share button in Safari.",
+      "app_promo_ios_step2": "Select 'Add to Home Screen' from the menu.",
+      "app_promo_footer": "Optimized for Android Official Global Version"
     }
   },
   id: {
@@ -95,7 +105,17 @@ const resources = {
       "upcoming": "Akan Datang",
       "trending": "Sedang Tren",
       "trending_news": "Berita Hangat",
-      "read_article": "Baca Artikel"
+      "read_article": "Baca Artikel",
+      "app_promo_badge": "Aplikasi Mobile Resmi",
+      "app_promo_title_1": "Aplikasi Android",
+      "app_promo_title_2": "Kini Tersedia.",
+      "app_promo_desc": "Nikmati akses premium melalui Aplikasi Android resmi YKN. Performa lebih stabil, layar penuh tanpa gangguan, dan sinkronisasi otomatis dengan website utama.",
+      "app_promo_btn_apk": "Unduh APK (Android)",
+      "app_promo_btn_iphone": "Instal di iPhone",
+      "app_promo_ios_title": "Khusus Pengguna iPhone (iOS)",
+      "app_promo_ios_step1": "Klik tombol Share di bar bawah Safari.",
+      "app_promo_ios_step2": "Cari dan pilih menu 'Add to Home Screen'.",
+      "app_promo_footer": "Dioptimalkan untuk Aplikasi Android Resmi"
     }
   },
   ja: {

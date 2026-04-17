@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Smartphone, Download, ShieldCheck, Zap, Share, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const YKNInstallBanner: React.FC = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const { t } = useTranslation();
   const [showIOSGuide, setShowIOSGuide] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
@@ -12,37 +13,9 @@ const YKNInstallBanner: React.FC = () => {
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
     }
-
-    const handler = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  const handleInstallClick = async () => {
-    // Logic for iOS
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-    if (isIOS) {
-      setShowIOSGuide(true);
-      return;
-    }
-
-    if (!deferredPrompt) {
-      alert("Browser Anda belum mendukung instalasi otomatis ini. Silakan gunakan menu browser 'Instal Aplikasi' atau 'Add to Home Screen'.");
-      return;
-    }
-
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-      setDeferredPrompt(null);
-    }
-  };
+  const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
 
   if (isInstalled) return null;
 
@@ -70,11 +43,11 @@ const YKNInstallBanner: React.FC = () => {
           <div className="absolute top-10 right-10 flex flex-col gap-4">
              <div className="px-6 py-3 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-3">
                 <ShieldCheck size={18} className="text-netflix-red" />
-                <span className="text-white font-black text-[10px] uppercase tracking-widest">Safe & Secure</span>
+                <span className="text-white font-black text-[10px] uppercase tracking-widest">{t('badge_safe_secure', { defaultValue: 'Safe & Secure' })}</span>
              </div>
              <div className="px-6 py-3 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-3">
                 <Zap size={18} className="text-yellow-400" />
-                <span className="text-white font-black text-[10px] uppercase tracking-widest">Ultra Fast</span>
+                <span className="text-white font-black text-[10px] uppercase tracking-widest">{t('badge_ultra_fast', { defaultValue: 'Ultra Fast' })}</span>
              </div>
           </div>
         </motion.div>
@@ -87,7 +60,7 @@ const YKNInstallBanner: React.FC = () => {
             viewport={{ once: true }}
             className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-netflix-red/20 text-netflix-red text-xs font-black uppercase tracking-[4px] border border-netflix-red/30"
           >
-             <Smartphone size={14} /> Official Mobile App
+             <Smartphone size={14} /> {t('app_promo_badge')}
           </motion.div>
 
           <motion.h2 
@@ -97,8 +70,12 @@ const YKNInstallBanner: React.FC = () => {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-6xl font-black font-outfit text-white leading-[1.1] tracking-tighter"
           >
-            Streaming Premium <br/>
-            Kini Dalam <span className="text-netflix-red">Genggaman.</span>
+            {t('app_promo_title_1')} <br/>
+            {t('app_promo_title_2').includes('Kini') ? (
+               <>Kini <span className="text-netflix-red">Tersedia.</span></>
+            ) : (
+               <><span className="text-netflix-red">Now</span> Available.</>
+            )}
           </motion.h2>
 
           <motion.p 
@@ -108,7 +85,7 @@ const YKNInstallBanner: React.FC = () => {
             transition={{ delay: 0.2 }}
             className="text-lg md:text-xl text-zinc-400 leading-relaxed font-medium"
           >
-            Nikmati akses instan ke seluruh library film dan serial YKN langsung dari layar utama HP Anda. Lebih cepat, lebih ringan, dan pengalaman layar penuh tanpa gangguan bar browser.
+            {t('app_promo_desc')}
           </motion.p>
 
           <motion.div 
@@ -118,24 +95,22 @@ const YKNInstallBanner: React.FC = () => {
             transition={{ delay: 0.3 }}
             className="flex flex-col sm:flex-row gap-6"
           >
-            <button 
-              onClick={handleInstallClick}
-              className="px-12 py-5 rounded-2xl bg-white text-black font-black flex items-center justify-center gap-4 hover:bg-netflix-red hover:text-white transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl shadow-white/5 uppercase tracking-widest text-sm"
-            >
-              <Download size={20} /> Pasang Sekarang
-            </button>
-            
-            <div className="flex items-center gap-4 px-2">
-              <div className="flex -space-x-4">
-                {[1,2,3].map(i => (
-                  <div key={i} className="w-10 h-10 rounded-full border-4 border-black bg-zinc-800 flex items-center justify-center text-[10px] font-black">U{i}</div>
-                ))}
-              </div>
-              <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest leading-none">
-                <span className="text-white">10K+</span> Users Installed<br/>
-                This Week Alone
-              </p>
-            </div>
+            {isIOS ? (
+              <button
+                onClick={() => setShowIOSGuide(true)}
+                className="px-12 py-5 rounded-2xl bg-white text-black font-black flex items-center justify-center gap-4 hover:bg-netflix-red hover:text-white transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl shadow-white/5 uppercase tracking-widest text-sm w-full sm:w-auto"
+              >
+                <Share size={20} /> {t('app_promo_btn_iphone')}
+              </button>
+            ) : (
+              <a 
+                href="/ykn-app.apk"
+                download="YKN-Movie.apk"
+                className="px-12 py-5 rounded-2xl bg-white text-black font-black flex items-center justify-center gap-4 hover:bg-netflix-red hover:text-white transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl shadow-white/5 uppercase tracking-widest text-sm"
+              >
+                <Download size={20} /> {t('app_promo_btn_apk')}
+              </a>
+            )}
           </motion.div>
 
           {/* iOS Special Guide */}
@@ -149,18 +124,18 @@ const YKNInstallBanner: React.FC = () => {
               >
                 <div className="flex items-center justify-between">
                   <h4 className="text-blue-400 font-black text-xs uppercase tracking-widest flex items-center gap-2">
-                    <Info size={16} /> Khusus Pengguna iPhone (iOS)
+                    <Info size={16} /> {t('app_promo_ios_title')}
                   </h4>
-                  <button onClick={() => setShowIOSGuide(false)} className="text-zinc-500 hover:text-white">utup</button>
+                  <button onClick={() => setShowIOSGuide(false)} className="text-zinc-500 hover:text-white">{t('close', { defaultValue: 'Close' })}</button>
                 </div>
                 <div className="space-y-3 text-sm text-zinc-300 font-medium">
                   <p className="flex items-center gap-3">
                     <span className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center text-[10px] text-blue-400">1</span>
-                    Klik tombol <b>Share</b> <Share size={14} className="inline mx-1" /> di bar bawah Safari.
+                    {t('app_promo_ios_step1')} <Share size={14} className="inline mx-1" />
                   </p>
                   <p className="flex items-center gap-3">
                     <span className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center text-[10px] text-blue-400">2</span>
-                    Cari dan pilih menu <b>'Add to Home Screen'</b>.
+                    {t('app_promo_ios_step2')}
                   </p>
                 </div>
               </motion.div>
@@ -169,7 +144,7 @@ const YKNInstallBanner: React.FC = () => {
 
           <div className="pt-10 border-t border-white/5">
              <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[3px]">
-               Optimized for Android & iOS Global Version
+               {t('app_promo_footer')}
              </p>
           </div>
         </div>
