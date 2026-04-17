@@ -5,7 +5,6 @@ const config: CapacitorConfig = {
   appName: 'Yuk Kita Nonton',
   webDir: 'dist',
   server: {
-    url: 'https://yknmovies.diaww.my.id',
     cleartext: true,
     allowNavigation: [
       'yknmovies.diaww.my.id',
