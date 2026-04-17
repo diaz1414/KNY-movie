@@ -3,6 +3,7 @@ import PageLayout from '../components/PageLayout';
 import { motion } from 'framer-motion';
 import { Shield, Zap, Globe, Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import YKNInstallBanner from '../components/YKNInstallBanner';
 
 const About: React.FC = () => {
   useTranslation();
@@ -82,6 +83,9 @@ const About: React.FC = () => {
             ))}
           </div>
         </section>
+
+        {/* YKN App Promo */}
+        <YKNInstallBanner />
       </div>
     </PageLayout>
   );

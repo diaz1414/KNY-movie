@@ -5,6 +5,7 @@ import HeroCarousel from '../components/HeroCarousel';
 import MovieCard from '../components/MovieCard';
 import MovieRow from '../components/MovieRow';
 import Footer from '../components/Footer';
+import YKNInstallBanner from '../components/YKNInstallBanner';
 import { movieService, type UnifiedMovie } from '../services/api';
 import { Search, X, ChevronLeft, ChevronRight, Sparkles, Trophy } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
@@ -449,6 +450,7 @@ const Home: React.FC = () => {
         </div>
       </main>
 
+      <YKNInstallBanner />
       <Footer />
     </div>
   );
