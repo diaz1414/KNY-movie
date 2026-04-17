@@ -14,5 +14,15 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/watch",
+      "destination": "/watch.html"
+    },
+    {
+      "source": "/((?!.*\\.).*)",
+      "destination": "/index.html"
+    }
   ]
 }

@@ -38,6 +38,9 @@ export default defineConfig({
             purpose: 'any maskable'
           }
         ]
+      },
+      workbox: {
+        navigateFallbackDenylist: [/^\/watch\.html/],
       }
     }),
     {
