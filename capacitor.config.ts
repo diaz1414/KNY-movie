@@ -7,16 +7,19 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://yknmovies.diaww.my.id',
     cleartext: true,
-    androidScheme: 'https',
     allowNavigation: [
       'yknmovies.diaww.my.id',
+      '*.diaww.my.id',
       'vidsrc.me',
       'vidsrc.to',
       'vidsrc.xyz',
       'vidsrc.cc',
       '*.vidsrc.me',
       '*.vidsrc.to',
-      '*.vidsrc.xyz'
+      '*.vidsrc.xyz',
+      '*.vidsrc.cc',
+      'vidsrc.in',
+      '*.vidsrc.in'
     ]
   },
   android: {

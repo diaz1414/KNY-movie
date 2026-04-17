@@ -26,59 +26,59 @@ const YKNInstallBanner: React.FC = () => {
 
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
         {/* Left Side: Cinematic IG-Style Image */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           className="relative w-full lg:w-1/2 aspect-square rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(229,9,20,0.3)] group"
         >
-          <img 
-            src="/ykn-app-promo.png" 
-            alt="Official YKN App" 
+          <img
+            src="/ykn-app-promo.png"
+            alt="Official YKN App"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-          
+
           {/* Floating Feature Badges */}
           <div className="absolute top-10 right-10 flex flex-col gap-4">
-             <div className="px-6 py-3 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-3">
-                <ShieldCheck size={18} className="text-netflix-red" />
-                <span className="text-white font-black text-[10px] uppercase tracking-widest">{t('badge_safe_secure', { defaultValue: 'Safe & Secure' })}</span>
-             </div>
-             <div className="px-6 py-3 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-3">
-                <Zap size={18} className="text-yellow-400" />
-                <span className="text-white font-black text-[10px] uppercase tracking-widest">{t('badge_ultra_fast', { defaultValue: 'Ultra Fast' })}</span>
-             </div>
+            <div className="px-6 py-3 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-3">
+              <ShieldCheck size={18} className="text-netflix-red" />
+              <span className="text-white font-black text-[10px] uppercase tracking-widest">{t('badge_safe_secure', { defaultValue: 'Safe & Secure' })}</span>
+            </div>
+            <div className="px-6 py-3 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-3">
+              <Zap size={18} className="text-yellow-400" />
+              <span className="text-white font-black text-[10px] uppercase tracking-widest">{t('badge_ultra_fast', { defaultValue: 'Ultra Fast' })}</span>
+            </div>
           </div>
         </motion.div>
 
         {/* Right Side: Persuasive Copy */}
         <div className="w-full lg:w-1/2 space-y-10">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-netflix-red/20 text-netflix-red text-xs font-black uppercase tracking-[4px] border border-netflix-red/30"
           >
-             <Smartphone size={14} /> {t('app_promo_badge')}
+            <Smartphone size={14} /> {t('app_promo_badge')}
           </motion.div>
 
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-6xl font-black font-outfit text-white leading-[1.1] tracking-tighter"
           >
-            {t('app_promo_title_1')} <br/>
+            {t('app_promo_title_1')} <br />
             {t('app_promo_title_2').includes('Kini') ? (
-               <>Kini <span className="text-netflix-red">Tersedia.</span></>
+              <>Kini <span className="text-netflix-red">Tersedia.</span></>
             ) : (
-               <><span className="text-netflix-red">Now</span> Available.</>
+              <><span className="text-netflix-red">Now</span> Available.</>
             )}
           </motion.h2>
 
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -88,7 +88,7 @@ const YKNInstallBanner: React.FC = () => {
             {t('app_promo_desc')}
           </motion.p>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -103,8 +103,8 @@ const YKNInstallBanner: React.FC = () => {
                 <Share size={20} /> {t('app_promo_btn_iphone')}
               </button>
             ) : (
-              <a 
-                href="/ykn-app.apk"
+              <a
+                href="/ykn-app1.apk"
                 download="YKN-Movie.apk"
                 className="px-12 py-5 rounded-2xl bg-white text-black font-black flex items-center justify-center gap-4 hover:bg-netflix-red hover:text-white transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl shadow-white/5 uppercase tracking-widest text-sm"
               >
@@ -116,7 +116,7 @@ const YKNInstallBanner: React.FC = () => {
           {/* iOS Special Guide */}
           <AnimatePresence>
             {showIOSGuide && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
@@ -143,9 +143,9 @@ const YKNInstallBanner: React.FC = () => {
           </AnimatePresence>
 
           <div className="pt-10 border-t border-white/5">
-             <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[3px]">
-               {t('app_promo_footer')}
-             </p>
+            <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[3px]">
+              {t('app_promo_footer')}
+            </p>
           </div>
         </div>
       </div>
