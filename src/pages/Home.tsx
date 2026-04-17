@@ -9,6 +9,7 @@ import { movieService, type UnifiedMovie } from '../services/api';
 import { Search, X, ChevronLeft, ChevronRight, Sparkles, Trophy } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import MovieModal from '../components/MovieModal';
+import AdBanner from '../components/AdBanner';
 
 const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -265,6 +266,15 @@ const Home: React.FC = () => {
             </div>
           </form>
 
+          {/* Ad Leaderboard Top */}
+          <AdBanner
+            id="ad-top"
+            format="iframe"
+            height={90}
+            width={728}
+            adKey="9eb1c807951034d8d5dba6629c6bb6ed"
+          />
+
 
           {searchResults ? (
             <div className="fade-in pb-20">
@@ -330,6 +340,15 @@ const Home: React.FC = () => {
                       id="series"
                       title={t('popular_series')}
                       movies={popularSeries}
+                    />
+
+                    {/* Ad Rectangle Middle */}
+                    <AdBanner
+                      id="ad-middle"
+                      format="iframe"
+                      height={250}
+                      width={300}
+                      adKey="7416c14407226b70dfe1c1a8ef1ed288"
                     />
 
                     {/* Explore More Section */}
