@@ -17,6 +17,10 @@
   ],
   "rewrites": [
     {
+      "source": "/watch",
+      "destination": "/watch.html"
+    },
+    {
       "source": "/((?!assets/|static/|favicon.ico|.*\\.js|.*\\.css|.*\\.png|.*\\.jpg|.*\\.svg).*)",
       "destination": "/index.html"
     }
