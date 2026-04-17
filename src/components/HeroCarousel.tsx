@@ -35,7 +35,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
   const currentMovie = movies[currentIndex];
 
   const handleWatch = () => {
-    window.location.href = `/watch?id=${currentMovie.id}`;
+    window.location.href = `/watch.html?id=${currentMovie.id}`;
   };
 
   return (

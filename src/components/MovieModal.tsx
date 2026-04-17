@@ -39,7 +39,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
   if (!movieId) return null;
 
   const handleWatch = () => {
-    window.location.href = `/watch?id=${movieId}`;
+    window.location.href = `/watch.html?id=${movieId}`;
   };
 
   const containerVariants: Variants = {
