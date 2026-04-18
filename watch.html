@@ -154,6 +154,26 @@
             });
         }
 
+        // --- ANTI-REDIRECT & ANTI-POPUP SYSTEM ---
+        (function() {
+            const originalOpen = window.open;
+            window.open = function() {
+                console.log("Blocked a popup attempt.");
+                return null;
+            };
+
+            // Prevent programmatic top-level navigation from iframes
+            // This is a second layer of defense alongside the sandbox attribute
+            window.onbeforeunload = function() {
+                // If the app is redirecting itself (e.g. back to home), allow it.
+                // But if it's an external domain, we might want to alert or block.
+                // However, onbeforeunload is limited.
+            };
+
+            // Override location for current window to prevent hijacking
+            // Note: This is tricky, but we can at least block some common patterns
+        })();
+
         function closeSecurityAlert() {
             window.close();
             window.location.href = "about:blank";
@@ -216,11 +236,41 @@
             <div
                 class="loader-label font-outfit font-extrabold tracking-[6px] text-white/40 text-[0.6rem] uppercase mt-[-1rem] mb-8">
                 Yuk Kita Nonton</div>
-            <div
+            <div id="loader-status"
                 class="loader-status font-sans text-[0.6rem] font-semibold text-netflix-red tracking-[3px] uppercase animate-status-pulse">
                 LOADING...</div>
         </div>
     </div>
+
+    <!-- Android Offline Overlay -->
+    <div id="android-offline-overlay" style="display: none;" class="fixed inset-0 z-[20000] bg-black flex flex-col items-center justify-center p-6 text-center">
+        <div class="relative mb-8">
+            <div class="absolute inset-0 bg-red-600 blur-3xl opacity-30 animate-pulse rounded-full"></div>
+            <div class="relative w-24 h-24 bg-red-900/40 border border-red-500/50 rounded-3xl flex items-center justify-center shadow-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+            </div>
+        </div>
+        <h2 class="text-3xl font-black text-white mb-4 uppercase tracking-tighter font-outfit">Connection Lost</h2>
+        <p class="text-zinc-400 text-lg font-medium leading-relaxed mb-8 max-w-sm">Oops! It looks like you've been disconnected. Please check your internet settings to continue streaming.</p>
+    </div>
+
+    <script>
+        function checkAndroidNetwork() {
+            if (/Android/i.test(navigator.userAgent)) {
+                if (!navigator.onLine) {
+                    document.getElementById('android-offline-overlay').style.display = 'flex';
+                    document.getElementById('main-container').style.display = 'none';
+                    document.getElementById('master-loader').style.display = 'none';
+                } else {
+                    document.getElementById('android-offline-overlay').style.display = 'none';
+                }
+            }
+        }
+
+        window.addEventListener('online', checkAndroidNetwork);
+        window.addEventListener('offline', checkAndroidNetwork);
+        checkAndroidNetwork();
+    </script>
 
     <div class="container mx-auto max-w-[1440px] p-6 md:p-8 pb-[22rem] md:pb-[25rem]" id="main-container"
         style="display: none;">
@@ -253,18 +303,21 @@
             </section>
 
             <!-- Ad Leaderboard Watch Page -->
-            <div class="flex justify-center mb-10 overflow-hidden">
+            <div id="ad-top-wrapper" class="flex justify-center mb-10 overflow-hidden">
                 <script type="text/javascript">
-                    atOptions = {
-                        'key': '9eb1c807951034d8d5dba6629c6bb6ed',
-                        'format': 'iframe',
-                        'height': 90,
-                        'width': 728,
-                        'params': {}
-                    };
+                    if (!/Android/i.test(navigator.userAgent)) {
+                        atOptions = {
+                            'key': '9eb1c807951034d8d5dba6629c6bb6ed',
+                            'format': 'iframe',
+                            'height': 90,
+                            'width': 728,
+                            'params': {}
+                        };
+                        document.write('<script type="text/javascript" src="https://www.highperformanceformat.com/9eb1c807951034d8d5dba6629c6bb6ed/invoke.js"></scr' + 'ipt>');
+                    } else {
+                        document.getElementById('ad-top-wrapper').style.display = 'none';
+                    }
                 </script>
-                <script type="text/javascript"
-                    src="https://www.highperformanceformat.com/9eb1c807951034d8d5dba6629c6bb6ed/invoke.js"></script>
             </div>
 
             <!-- Video Player -->
@@ -283,7 +336,8 @@
                 </div>
                 <iframe id="player" class="w-full h-full border-none transition-opacity duration-400"
                     allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *" allowfullscreen
-                    webkitallowfullscreen mozallowfullscreen referrerpolicy="no-referrer" loading="lazy"></iframe>
+                    webkitallowfullscreen mozallowfullscreen referrerpolicy="no-referrer" loading="lazy"
+                    sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation-by-user-activation"></iframe>
             </div>
 
 
@@ -478,18 +532,21 @@
 
                 <div class="sidebar">
                     <!-- Ad Rectangle Sidebar -->
-                    <div class="flex justify-center mb-8 overflow-hidden">
+                    <div id="ad-sidebar-wrapper" class="flex justify-center mb-8 overflow-hidden">
                         <script type="text/javascript">
-                            atOptions = {
-                                'key': '7416c14407226b70dfe1c1a8ef1ed288',
-                                'format': 'iframe',
-                                'height': 250,
-                                'width': 300,
-                                'params': {}
-                            };
+                            if (!/Android/i.test(navigator.userAgent)) {
+                                atOptions = {
+                                    'key': '7416c14407226b70dfe1c1a8ef1ed288',
+                                    'format': 'iframe',
+                                    'height': 250,
+                                    'width': 300,
+                                    'params': {}
+                                };
+                                document.write('<script type="text/javascript" src="https://www.highperformanceformat.com/7416c14407226b70dfe1c1a8ef1ed288/invoke.js"></scr' + 'ipt>');
+                            } else {
+                                document.getElementById('ad-sidebar-wrapper').style.display = 'none';
+                            }
                         </script>
-                        <script type="text/javascript"
-                            src="https://www.highperformanceformat.com/7416c14407226b70dfe1c1a8ef1ed288/invoke.js"></script>
                     </div>
 
                     <div class="elite-card glass-card p-10 rounded-3xl backdrop-blur-[40px] self-start shadow-2xl">

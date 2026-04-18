@@ -1,4 +1,5 @@
 import React from 'react';
+import { isAndroid } from '../utils/platform';
 
 interface AdBannerProps {
   id: string;
@@ -9,6 +10,11 @@ interface AdBannerProps {
 }
 
 const AdBanner: React.FC<AdBannerProps> = ({ height, width, adKey }) => {
+  // Block ads on Android
+  if (isAndroid()) {
+    return null;
+  }
+
   // We use srcDoc to create an isolated environment for the ad script.
   // This prevents scripts from clashing and works much better in React.
   const adContent = `
