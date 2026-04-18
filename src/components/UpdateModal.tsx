@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, AlertCircle, X } from 'lucide-react';
+import { Download, AlertCircle } from 'lucide-react';
 
 const CURRENT_VERSION = '1.0.0'; // Manually track version
 const VERSION_CHECK_URL = 'https://yknmovies.diaww.my.id/version.json';
