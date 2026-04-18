@@ -7,7 +7,7 @@ import MovieRow from '../components/MovieRow';
 import Footer from '../components/Footer';
 import YKNInstallBanner from '../components/YKNInstallBanner';
 import { movieService, type UnifiedMovie } from '../services/api';
-import { Search, X, ChevronLeft, ChevronRight, Sparkles, Trophy } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, Sparkles, Trophy, Play } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import MovieModal from '../components/MovieModal';
 import AdBanner from '../components/AdBanner';
@@ -327,6 +327,50 @@ const Home: React.FC = () => {
                       title={t('trending')}
                       movies={popularMovies}
                     />
+
+                    {/* NEW: Continue Watching Section */}
+                    {(() => {
+                      const lastWatched = localStorage.getItem('ykn_last_watched');
+                      if (!lastWatched) return null;
+                      const item = JSON.parse(lastWatched);
+                      return (
+                        <div className="px-[var(--container-padding)] animate-slide-up">
+                          <div className="flex items-center gap-2.5 mb-6">
+                            <div className="w-1.5 h-6 bg-netflix-red rounded-full shadow-[0_0_15px_rgba(229,9,20,0.5)]"></div>
+                            <h2 className="text-2xl font-black font-outfit text-white tracking-tight uppercase">
+                              Lanjutkan Menonton
+                            </h2>
+                          </div>
+                          
+                          <div 
+                            onClick={() => window.location.href = `/watch.html?id=${item.id}${item.type === 'tv' ? `&s=${item.season}&e=${item.episode}` : ''}`}
+                            className="group relative w-full md:w-[450px] aspect-[16/9] rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-netflix-red transition-all duration-500 shadow-2xl"
+                          >
+                            <img src={item.poster} alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="w-16 h-16 rounded-full bg-netflix-red flex items-center justify-center text-white scale-75 group-hover:scale-100 transition-transform duration-500">
+                                <Play fill="white" size={24} className="ml-1" />
+                              </div>
+                            </div>
+                            <div className="absolute bottom-6 left-6 right-6">
+                              <h3 className="text-xl font-black text-white mb-1 group-hover:text-netflix-red transition-colors">{item.title}</h3>
+                              <div className="flex items-center gap-3">
+                                <span className="text-[10px] font-black bg-netflix-red text-white px-2 py-0.5 rounded shadow-lg uppercase">
+                                  {item.type}
+                                </span>
+                                {item.type === 'tv' && (
+                                  <span className="text-xs font-bold text-white/60">
+                                    Season {item.season} • Episode {item.episode}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 h-1 bg-netflix-red w-[70%] shadow-[0_0_10px_rgba(229,9,20,0.8)]" />
+                          </div>
+                        </div>
+                      );
+                    })()}
 
 
                     <MovieRow

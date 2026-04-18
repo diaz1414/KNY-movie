@@ -880,6 +880,18 @@
                 const saveProgress = (s, e, serverIdx) => {
                     const data = { s, e, server: serverIdx, timestamp: Date.now() };
                     localStorage.setItem(getStorageKey(), JSON.stringify(data));
+                    
+                    // NEW: Global Progress for Home Page
+                    const globalData = {
+                        id: movieId,
+                        title: movieTitle,
+                        poster: `https://image.tmdb.org/t/p/w300${movie.poster_path}`,
+                        type: type,
+                        season: s,
+                        episode: e,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('ykn_last_watched', JSON.stringify(globalData));
                 };
                 const loadProgress = () => {
                     try {
@@ -1203,7 +1215,7 @@
                         const rating = m.vote_average ? m.vote_average.toFixed(1) : 'NR';
 
                         return `
-                            <div class="flex-[0_0_160px] md:flex-[0_0_200px] relative aspect-[2/3] rounded-xl overflow-hidden cursor-pointer transition-all duration-500 border border-white/10 shadow-2xl hover:scale-105 hover:-translate-y-2.5 hover:border-netflix-red hover:shadow-[0_20px_40px_rgba(229,9,20,0.4)] group" onclick="window.location.href='/watch?id=${m.id}'">
+                            <div class="flex-[0_0_160px] md:flex-[0_0_200px] relative aspect-[2/3] rounded-xl overflow-hidden cursor-pointer transition-all duration-500 border border-white/10 shadow-2xl hover:scale-105 hover:-translate-y-2.5 hover:border-netflix-red hover:shadow-[0_20px_40px_rgba(229,9,20,0.4)] group" onclick="window.location.href='/watch.html?id=${m.id}'">
                                 <img src="${poster}" alt="${title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                                     <div class="text-[0.85rem] font-bold text-white leading-tight font-outfit mb-1">${title}</div>
