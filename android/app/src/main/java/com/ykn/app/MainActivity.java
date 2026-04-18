@@ -1,10 +1,14 @@
 package com.ykn.app;
 
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.view.View;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import com.getcapacitor.BridgeActivity;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
@@ -12,21 +16,11 @@ import java.util.List;
 
 public class MainActivity extends BridgeActivity {
     
-    // Ad-blocking domain list (Basic common ones)
     private static final List<String> AD_DOMAINS = Arrays.asList(
-        "adsterra.com",
-        "doubleclick.net",
-        "googlesyndication.com",
-        "google-analytics.com",
-        "highperformanceformat.com",
-        "popads.net",
-        "popcash.net",
-        "exoclick.com",
-        "juicyads.com",
-        "onclickperformance.com",
-        "propellerads.com",
-        "creative.ak.kickads.com",
-        "adservice.google"
+        "adsterra.com", "doubleclick.net", "googlesyndication.com",
+        "google-analytics.com", "highperformanceformat.com", "popads.net",
+        "popcash.net", "exoclick.com", "juicyads.com", "onclickperformance.com",
+        "propellerads.com", "creative.ak.kickads.com", "adservice.google"
     );
 
     @Override
@@ -39,9 +33,9 @@ public class MainActivity extends BridgeActivity {
         super.onResume();
         
         WebView webView = getBridge().getWebView();
+        
+        // Anti-Redirect & Ad Blocker
         webView.setWebViewClient(new WebViewClient() {
-            
-            // Layer 1: Block top-level redirects (hijacking)
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
@@ -51,19 +45,50 @@ public class MainActivity extends BridgeActivity {
                 return true; 
             }
 
-            // Layer 2: Network-level Ad Blocker (Like Brave)
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString().toLowerCase();
-                
                 for (String domain : AD_DOMAINS) {
                     if (url.contains(domain)) {
-                        // Return an empty response to block the request
                         return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream("".getBytes()));
                     }
                 }
-                
                 return super.shouldInterceptRequest(view, request);
+            }
+        });
+
+        // Auto-Rotate to Landscape on Fullscreen
+        webView.setWebChromeClient(new WebChromeClient() {
+            private View customView;
+            private WebChromeClient.CustomViewCallback customViewCallback;
+            private int originalOrientation;
+
+            @Override
+            public void onShowCustomView(View view, CustomViewCallback callback) {
+                if (customView != null) {
+                    onHideCustomView();
+                    return;
+                }
+                customView = view;
+                originalOrientation = getRequestedOrientation();
+                customViewCallback = callback;
+                
+                // Force Landscape
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                
+                ((FrameLayout) getWindow().getDecorView()).addView(customView, new FrameLayout.LayoutParams(-1, -1));
+                getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                );
+            }
+
+            @Override
+            public void onHideCustomView() {
+                ((FrameLayout) getWindow().getDecorView()).removeView(customView);
+                customView = null;
+                setRequestedOrientation(originalOrientation);
+                customViewCallback.onCustomViewHidden();
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             }
         });
     }
