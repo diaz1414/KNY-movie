@@ -108,6 +108,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onClose }) => {
                     allowFullScreen
                     allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope"
                     title={movie.title}
+                    sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation-by-user-activation"
                   />
                 </div>
               )}

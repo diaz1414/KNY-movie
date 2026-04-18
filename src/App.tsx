@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -14,15 +14,40 @@ import NetflixIntro from './components/NetflixIntro';
 import NotFound from './pages/NotFound';
 import News from './pages/News';
 import OfflineOverlay from './components/OfflineOverlay';
+import { isAndroid } from './utils/platform';
+import { Network } from '@capacitor/network';
 
 const App: React.FC = () => {
+  const [isAndroidOffline, setIsAndroidOffline] = useState(false);
+
+  useEffect(() => {
+    if (isAndroid()) {
+      const checkStatus = async () => {
+        const status = await Network.getStatus();
+        setIsAndroidOffline(!status.connected);
+      };
+      checkStatus();
+
+      const listener = Network.addListener('networkStatusChange', status => {
+        setIsAndroidOffline(!status.connected);
+      });
+
+      return () => {
+        listener.then(l => l.remove());
+      };
+    }
+  }, []);
+
   // Maintenance Mode Logic:
-  // Only active in Production (e.g. Vercel) AND if the Env Var is set to 'true'
-  // This allows you to keep working locally even if maintenance is on for users.
   const isMaintenanceMode = import.meta.env.PROD && import.meta.env.VITE_MAINTENANCE_MODE === 'true';
 
   if (isMaintenanceMode) {
     return <Maintenance />;
+  }
+
+  // Strict Internet Requirement for Android
+  if (isAndroidOffline) {
+    return <OfflineOverlay />;
   }
 
   return (

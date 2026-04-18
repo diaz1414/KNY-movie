@@ -1,11 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WifiOff } from 'lucide-react';
+import { Network } from '@capacitor/network';
 
 const OfflineOverlay: React.FC = () => {
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
+    // Initial check
+    const checkStatus = async () => {
+      const status = await Network.getStatus();
+      setIsOffline(!status.connected);
+    };
+    checkStatus();
+
+    // Listen for network changes
+    const listener = Network.addListener('networkStatusChange', status => {
+      setIsOffline(!status.connected);
+    });
+
+    // Fallback for web if Capacitor is not providing status correctly
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
 
@@ -13,6 +27,7 @@ const OfflineOverlay: React.FC = () => {
     window.addEventListener('offline', handleOffline);
 
     return () => {
+      listener.then(l => l.remove());
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
