@@ -10,8 +10,9 @@ interface AdBannerProps {
 }
 
 const AdBanner: React.FC<AdBannerProps> = ({ height, width, adKey }) => {
-  // Block ads on Android
-  if (isAndroid()) {
+  // ADSTERRA BLOCKED TEMPORARILY
+  const isAdsBlocked = true;
+  if (isAdsBlocked || isAndroid()) {
     return null;
   }
 
