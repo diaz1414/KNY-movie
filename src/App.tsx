@@ -17,6 +17,8 @@ import OfflineOverlay from './components/OfflineOverlay';
 import { isAndroid } from './utils/platform';
 import { Network } from '@capacitor/network';
 
+import UpdateModal from './components/UpdateModal';
+
 const App: React.FC = () => {
   const [isAndroidOffline, setIsAndroidOffline] = useState(false);
 
@@ -52,6 +54,7 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider>
+      {isAndroid() && <UpdateModal />}
       <OfflineOverlay />
       <NetflixIntro />
       <Router>
