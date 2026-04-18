@@ -26,3 +26,4 @@ dist-ssr
 # Mobile Build Artifacts
 *.apk
 *.aab
+*.zip
