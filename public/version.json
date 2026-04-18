@@ -1,6 +1,6 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "downloadUrl": "https://drive.google.com/drive/folders/1FwuefbOuDoAGmteP60an6l1VqrZUy6mq?usp=sharing",
-  "changelog": "Initial release with Ad-Blocker, Auto-Landscape, and Offline Mode protection.",
-  "isCritical": false
+  "changelog": "Auto-Landscape Mode",
+  "isCritical": true
 }
