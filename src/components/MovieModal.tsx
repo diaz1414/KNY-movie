@@ -11,6 +11,15 @@ interface MovieModalProps {
   onClose: () => void;
 }
 
+const isComingSoon = (releaseDate?: string) => {
+  if (!releaseDate) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const release = new Date(releaseDate);
+  if (isNaN(release.getTime())) return false;
+  return release > today;
+};
+
 const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -352,15 +361,31 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                   className="pt-4 mt-auto"
                 >
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleWatch}
-                    className="w-full md:w-max bg-white text-black px-12 py-5 rounded-2xl font-black flex items-center justify-center gap-4 shadow-[0_25px_50px_rgba(255,255,255,0.15)] group/btn"
+                    whileHover={movie && isComingSoon(movie.releaseDate) ? {} : { scale: 1.05 }}
+                    whileTap={movie && isComingSoon(movie.releaseDate) ? {} : { scale: 0.95 }}
+                    onClick={movie && isComingSoon(movie.releaseDate) ? undefined : handleWatch}
+                    disabled={movie && isComingSoon(movie.releaseDate)}
+                    className={`w-full md:w-max px-12 py-5 rounded-2xl font-black flex items-center justify-center gap-4 group/btn transition-all ${
+                      movie && isComingSoon(movie.releaseDate)
+                        ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5 shadow-none'
+                        : 'bg-white text-black shadow-[0_25px_50px_rgba(255,255,255,0.15)]'
+                    }`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-netflix-red flex items-center justify-center text-white group-hover/btn:scale-110 transition-transform">
-                      <Play fill="white" size={20} className="ml-0.5" />
-                    </div>
-                    <span className="uppercase tracking-tighter text-xl">{t('watch_now')}</span>
+                    {movie && isComingSoon(movie.releaseDate) ? (
+                      <>
+                        <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-zinc-500">
+                          <Calendar size={20} />
+                        </div>
+                        <span className="uppercase tracking-tighter text-xl">{t('upcoming')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-10 h-10 rounded-full bg-netflix-red flex items-center justify-center text-white group-hover/btn:scale-110 transition-transform">
+                          <Play fill="white" size={20} className="ml-0.5" />
+                        </div>
+                        <span className="uppercase tracking-tighter text-xl">{t('watch_now')}</span>
+                      </>
+                    )}
                   </motion.button>
                 </motion.div>
 

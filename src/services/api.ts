@@ -67,6 +67,7 @@ export interface UnifiedMovie {
   rating: string;
   quality: string; // TMDB doesn't provide quality directly, we default to HD/4K
   type: 'movie' | 'series';
+  releaseDate?: string;
 }
 
 export interface CastMember {
@@ -128,7 +129,8 @@ const normalizeTMDB = (data: TMDBMovie): UnifiedMovie => ({
   backdrop: getImageUrl(data.backdrop_path, 'w1280'),
   rating: data.vote_average.toFixed(1),
   quality: '4K',
-  type: data.name ? 'series' : 'movie'
+  type: data.name ? 'series' : 'movie',
+  releaseDate: data.release_date || data.first_air_date || '',
 });
 
 // --- API Implementation ---

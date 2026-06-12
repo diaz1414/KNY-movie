@@ -19,6 +19,7 @@ const Home: React.FC = () => {
   const [popularMovies, setPopularMovies] = useState<UnifiedMovie[]>([]);
   const [recentMovies, setRecentMovies] = useState<UnifiedMovie[]>([]);
   const [popularSeries, setPopularSeries] = useState<UnifiedMovie[]>([]);
+  const [upcomingMovies, setUpcomingMovies] = useState<UnifiedMovie[]>([]);
   const [searchResults, setSearchResults] = useState<UnifiedMovie[] | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -37,6 +38,7 @@ const Home: React.FC = () => {
         popularMovies: savedPop,
         recentMovies: savedRecent,
         popularSeries: savedSeries,
+        upcomingMovies: savedUpcoming,
         exploreMovies: savedExplore,
         explorePage: savedPage,
         scrollY
@@ -48,6 +50,15 @@ const Home: React.FC = () => {
       setExploreMovies(savedExplore || []);
       setExplorePage(savedPage || 1);
       setLoading(false);
+
+      if (savedUpcoming && savedUpcoming.length > 0) {
+        setUpcomingMovies(savedUpcoming);
+      } else {
+        // Fallback fetch if upcoming was not stored in session previously
+        movieService.getUpcomingMovies()
+          .then(setUpcomingMovies)
+          .catch(err => console.error("Failed to fetch upcoming fallback", err));
+      }
 
       setTimeout(() => {
         window.scrollTo({
@@ -66,12 +77,14 @@ const Home: React.FC = () => {
       movieService.getPopularMovies(),
       movieService.getRecentMovies(),
       movieService.getPopularSeries(),
-      movieService.getRecentMovies(1) // Start Explore with Latest
-    ]).then(([popular, recent, series, latest]) => {
+      movieService.getRecentMovies(1), // Start Explore with Latest
+      movieService.getUpcomingMovies() // Fetch upcoming movies
+    ]).then(([popular, recent, series, latest, upcoming]) => {
       setPopularMovies(popular);
       setRecentMovies(recent);
       setPopularSeries(series);
       setExploreMovies(latest);
+      setUpcomingMovies(upcoming);
       setLoading(false);
     }).catch(err => {
       console.error(err);
@@ -131,7 +144,7 @@ const Home: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [popularMovies, recentMovies, popularSeries]);
+  }, [popularMovies, recentMovies, popularSeries, upcomingMovies]);
 
   // Save state
   useEffect(() => {
@@ -141,6 +154,7 @@ const Home: React.FC = () => {
           popularMovies,
           recentMovies,
           popularSeries,
+          upcomingMovies,
           exploreMovies,
           explorePage,
           scrollY: window.scrollY
@@ -162,7 +176,7 @@ const Home: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [popularMovies, recentMovies, popularSeries, exploreMovies, explorePage]);
+  }, [popularMovies, recentMovies, popularSeries, upcomingMovies, exploreMovies, explorePage]);
 
   // Listen for movie open events from Navbar search
   useEffect(() => {
@@ -270,6 +284,12 @@ const Home: React.FC = () => {
                     id="popular"
                     title={t('trending')}
                     movies={popularMovies}
+                  />
+
+                  <MovieRow
+                    id="upcoming"
+                    title={t('upcoming')}
+                    movies={upcomingMovies}
                   />
 
                   {/* Ad Leaderboard Top */}

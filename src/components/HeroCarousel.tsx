@@ -9,6 +9,15 @@ interface HeroCarouselProps {
   onMoreInfo: (movieId: string) => void;
 }
 
+const isComingSoon = (releaseDate?: string) => {
+  if (!releaseDate) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const release = new Date(releaseDate);
+  if (isNaN(release.getTime())) return false;
+  return release > today;
+};
+
 const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -137,13 +146,27 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
 
               <div className="flex flex-wrap gap-4 pt-4">
                 <motion.button
-                  whileHover={{ scale: 1.05, backgroundColor: '#f3f4f6' }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleWatch}
-                  className="bg-white text-black px-6 md:px-10 py-3.5 md:py-4 rounded-xl font-black flex items-center gap-3 transition-colors shadow-[0_15px_30px_rgba(255,255,255,0.1)] group/btn"
+                  whileHover={isComingSoon(currentMovie.releaseDate) ? {} : { scale: 1.05, backgroundColor: '#f3f4f6' }}
+                  whileTap={isComingSoon(currentMovie.releaseDate) ? {} : { scale: 0.95 }}
+                  onClick={isComingSoon(currentMovie.releaseDate) ? undefined : handleWatch}
+                  disabled={isComingSoon(currentMovie.releaseDate)}
+                  className={`px-6 md:px-10 py-3.5 md:py-4 rounded-xl font-black flex items-center gap-3 transition-colors shadow-[0_15px_30px_rgba(255,255,255,0.1)] group/btn ${
+                    isComingSoon(currentMovie.releaseDate)
+                      ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5 shadow-none'
+                      : 'bg-white text-black'
+                  }`}
                 >
-                  <Play fill="black" size={24} className="group-hover/btn:scale-110 transition-transform" />
-                  <span className="uppercase tracking-tighter text-base md:text-lg">{t('watch_now')}</span>
+                  {isComingSoon(currentMovie.releaseDate) ? (
+                    <>
+                      <Info size={24} />
+                      <span className="uppercase tracking-tighter text-base md:text-lg">{t('upcoming')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play fill="black" size={24} className="group-hover/btn:scale-110 transition-transform" />
+                      <span className="uppercase tracking-tighter text-base md:text-lg">{t('watch_now')}</span>
+                    </>
+                  )}
                 </motion.button>
 
                 <motion.button

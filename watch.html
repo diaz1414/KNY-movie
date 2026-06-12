@@ -735,6 +735,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const movieId = urlParams.get('id');
         let currentContentTitle = "";
+        let isComingSoon = false;
 
         function shareContent(platform) {
             const url = encodeURIComponent(window.location.href);
@@ -827,6 +828,52 @@
                 const originalTitle = movie.original_title || movie.original_name;
 
                 document.title = `Watch ${movieTitle} - YKN`;
+
+                // Check if unreleased (Coming Soon)
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const releaseDateStr = movie.release_date || movie.first_air_date;
+                const release = releaseDateStr ? new Date(releaseDateStr) : null;
+                isComingSoon = release && !isNaN(release.getTime()) && release > today;
+
+                if (isComingSoon) {
+                    // Hide server parent section
+                    const serverList = document.getElementById('server-list');
+                    if (serverList && serverList.parentElement) {
+                        serverList.parentElement.style.display = 'none';
+                    }
+                    // Hide auto-next toggle
+                    const autoNextWrapper = document.getElementById('autonext-toggle-wrapper');
+                    if (autoNextWrapper) {
+                        autoNextWrapper.style.display = 'none';
+                    }
+                    
+                    // Replace player container with a beautiful "Coming Soon" card
+                    const playerWrapper = document.getElementById('player-wrapper');
+                    if (playerWrapper) {
+                        const formattedReleaseDate = release ? release.toLocaleDateString(uiLang === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' }) : 'TBA';
+                        playerWrapper.innerHTML = `
+                            <div class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-zinc-950 via-zinc-900 to-black p-8 text-center z-10">
+                                <div class="relative mb-6">
+                                    <div class="absolute inset-0 bg-amber-500/20 blur-3xl opacity-50 rounded-full animate-pulse"></div>
+                                    <div class="relative w-20 h-20 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center text-amber-500">
+                                        <i data-lucide="calendar" class="w-10 h-10"></i>
+                                    </div>
+                                </div>
+                                <span class="text-[0.75rem] font-black tracking-[4px] uppercase text-amber-500 mb-3">${uiLang === 'id' ? 'SEGERA HADIR' : 'COMING SOON'}</span>
+                                <h3 class="text-2xl md:text-5xl font-black font-outfit text-white mb-4 leading-tight">${movieTitle}</h3>
+                                <p class="text-zinc-400 text-sm md:text-base font-medium max-w-md mb-8 leading-relaxed">${uiLang === 'id' ? 'Konten ini belum dirilis secara resmi. Silakan pantau tanggal rilis untuk info lebih lanjut.' : 'This content is not yet officially released. Keep an eye out for the release date.'}</p>
+                                <div class="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-white font-extrabold text-sm tracking-wider shadow-lg">
+                                    <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
+                                    <span>Release Date: ${formattedReleaseDate}</span>
+                                </div>
+                            </div>
+                        `;
+                        setTimeout(() => {
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                        }, 50);
+                    }
+                }
 
                 // Backdrop handling
                 const backdrop = document.getElementById('backdrop-image');
@@ -1148,6 +1195,7 @@
 
                 let servers = [];
                 function updatePlayerUrls() {
+                    if (isComingSoon) return;
                     const type = isTV ? 'tv' : 'movie';
                     servers = [
                         { name: 'Server 1 (Primary)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrcme.su', currentSeason, currentEp) : `https://vidsrcme.su/embed/movie/${movieId}` },

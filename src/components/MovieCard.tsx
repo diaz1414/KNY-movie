@@ -2,11 +2,25 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Star, Play } from 'lucide-react';
 import type { UnifiedMovie } from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 const MovieCard: React.FC<{ movie: UnifiedMovie; inRow?: boolean }> = ({ movie, inRow = false }) => {
+  const { t } = useTranslation();
+  
   const handleClick = () => {
     window.location.href = `/watch.html?id=${movie.id}`;
   };
+
+  const isComingSoon = (releaseDate?: string) => {
+    if (!releaseDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const release = new Date(releaseDate);
+    if (isNaN(release.getTime())) return false;
+    return release > today;
+  };
+
+  const showComingSoon = isComingSoon(movie.releaseDate);
 
   return (
     <motion.div
@@ -20,6 +34,13 @@ const MovieCard: React.FC<{ movie: UnifiedMovie; inRow?: boolean }> = ({ movie, 
       }`}
       onClick={handleClick}
     >
+      {showComingSoon && (
+        <div className="absolute top-3 left-3 bg-black/85 backdrop-blur-md border border-amber-500/30 text-amber-400 text-[9px] font-black px-2.5 py-1.5 rounded-lg uppercase tracking-wider shadow-lg flex items-center gap-1.5 z-20">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+          {t('upcoming')}
+        </div>
+      )}
+
       <img
         src={movie.poster}
         alt={movie.title}
