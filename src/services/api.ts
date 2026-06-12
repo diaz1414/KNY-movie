@@ -44,6 +44,7 @@ export interface CastMember {
 export interface UnifiedMovieDetail extends UnifiedMovie {
   synopsis: string;
   director: string;
+  directorId?: number;
   cast: string[];
   castMembers: CastMember[];
   genres: string[];
@@ -51,7 +52,34 @@ export interface UnifiedMovieDetail extends UnifiedMovie {
   releaseDate: string;
   streamSources: { name: string; url: string }[];
   voteCount: number;
+  trailerKey?: string;
+  originalLanguage?: string;
 }
+
+export interface PersonDetail {
+  id: number;
+  name: string;
+  biography: string;
+  birthday: string | null;
+  deathday: string | null;
+  placeOfBirth: string | null;
+  profilePath: string | null;
+  knownFor: string;
+  popularity: number;
+  credits: UnifiedMovie[];
+}
+
+// --- Language map ---
+const LANGUAGE_MAP: Record<string, string> = {
+  en: 'English', id: 'Indonesian', ko: 'Korean', ja: 'Japanese',
+  zh: 'Chinese', fr: 'French', de: 'German', es: 'Spanish',
+  pt: 'Portuguese', it: 'Italian', hi: 'Hindi', th: 'Thai',
+  ru: 'Russian', ar: 'Arabic', tr: 'Turkish', nl: 'Dutch',
+  sv: 'Swedish', da: 'Danish', fi: 'Finnish', no: 'Norwegian',
+};
+
+export const getLanguageName = (code: string): string =>
+  LANGUAGE_MAP[code] || code.toUpperCase();
 
 // --- Helpers ---
 
@@ -107,10 +135,12 @@ export const movieService = {
 
   getMovieDetail: async (id: string): Promise<UnifiedMovieDetail | null> => {
     try {
-      const res = await api.get(`/movie/${id}`, { params: { append_to_response: 'credits', language: 'en-US' } });
+      const res = await api.get(`/movie/${id}`, { params: { append_to_response: 'credits,videos', language: 'en-US' } });
       const movie = res.data;
 
-      const director = movie.credits?.crew?.find((c: any) => c.job === 'Director')?.name || 'Unknown';
+      const director = movie.credits?.crew?.find((c: any) => c.job === 'Director');
+      const directorName = director?.name || 'Unknown';
+      const directorId = director?.id;
       const cast = movie.credits?.cast?.slice(0, 5).map((c: any) => c.name) || [];
       const castMembers = movie.credits?.cast?.slice(0, 15).map((c: any) => ({
         id: c.id,
@@ -120,16 +150,26 @@ export const movieService = {
       })) || [];
       const genres = movie.genres?.map((g: any) => g.name) || [];
 
+      // Find YouTube trailer
+      const trailerVideo = movie.videos?.results?.find(
+        (v: any) => v.type === 'Trailer' && v.site === 'YouTube'
+      ) || movie.videos?.results?.find(
+        (v: any) => v.site === 'YouTube'
+      );
+
       return {
         ...normalizeTMDB(movie),
         synopsis: movie.overview,
-        director,
+        director: directorName,
+        directorId,
         cast,
         castMembers,
         genres,
         duration: movie.runtime ? `${movie.runtime}m` : '',
         releaseDate: movie.release_date,
         voteCount: movie.vote_count,
+        trailerKey: trailerVideo?.key,
+        originalLanguage: movie.original_language,
         streamSources: [
           { name: 'Server 1 (Primary)', url: `https://vidsrcme.su/embed/movie/${id}` },
           { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/movie/${id}` },
@@ -147,7 +187,7 @@ export const movieService = {
     } catch (e) {
       // Try TV if Movie fails
       try {
-        const res = await api.get(`/tv/${id}`, { params: { append_to_response: 'credits', language: 'en-US' } });
+        const res = await api.get(`/tv/${id}`, { params: { append_to_response: 'credits,videos', language: 'en-US' } });
         const tv = res.data;
         const cast = tv.credits?.cast?.slice(0, 5).map((c: any) => c.name) || [];
         const castMembers = tv.credits?.cast?.slice(0, 15).map((c: any) => ({
@@ -158,16 +198,28 @@ export const movieService = {
         })) || [];
         const genres = tv.genres?.map((g: any) => g.name) || [];
 
+        const trailerVideo = tv.videos?.results?.find(
+          (v: any) => v.type === 'Trailer' && v.site === 'YouTube'
+        ) || tv.videos?.results?.find(
+          (v: any) => v.site === 'YouTube'
+        );
+
+        // Find creator
+        const creator = tv.created_by?.[0];
+
         return {
           ...normalizeTMDB(tv),
           synopsis: tv.overview,
-          director: 'Various',
+          director: creator?.name || 'Various',
+          directorId: creator?.id,
           cast,
           castMembers,
           genres,
-          duration: `${tv.number_of_seasons} Seasons`,
+          duration: `${tv.number_of_seasons} Season${tv.number_of_seasons > 1 ? 's' : ''}`,
           releaseDate: tv.first_air_date,
           voteCount: tv.vote_count,
+          trailerKey: trailerVideo?.key,
+          originalLanguage: tv.original_language,
           streamSources: [
             { name: 'Server 1 (Primary)', url: `https://vidsrcme.su/embed/tv/${id}` },
             { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/tv/${id}` },
@@ -181,6 +233,53 @@ export const movieService = {
         console.error("Failed to fetch TMDB details", err);
         return null;
       }
+    }
+  },
+
+  getSimilarMovies: async (id: string, type: 'movie' | 'series' = 'movie'): Promise<UnifiedMovie[]> => {
+    try {
+      const endpoint = type === 'series' ? `/tv/${id}/similar` : `/movie/${id}/similar`;
+      const res = await api.get(endpoint, { params: { language: 'en-US', page: 1 } });
+      return res.data.results.slice(0, 12).map(normalizeTMDB);
+    } catch {
+      return [];
+    }
+  },
+
+  getPersonDetail: async (personId: string): Promise<PersonDetail | null> => {
+    try {
+      const res = await api.get(`/person/${personId}`, {
+        params: { append_to_response: 'combined_credits', language: 'en-US' }
+      });
+      const person = res.data;
+
+      // Get combined credits sorted by popularity, deduplicated
+      const seen = new Set<number>();
+      const credits: UnifiedMovie[] = (person.combined_credits?.cast || [])
+        .filter((c: any) => {
+          if (seen.has(c.id) || !c.poster_path) return false;
+          seen.add(c.id);
+          return true;
+        })
+        .sort((a: any, b: any) => b.popularity - a.popularity)
+        .slice(0, 24)
+        .map((c: any) => normalizeTMDB(c));
+
+      return {
+        id: person.id,
+        name: person.name,
+        biography: person.biography || '',
+        birthday: person.birthday,
+        deathday: person.deathday,
+        placeOfBirth: person.place_of_birth,
+        profilePath: person.profile_path ? getImageUrl(person.profile_path, 'w500') : null,
+        knownFor: person.known_for_department || 'Acting',
+        popularity: person.popularity,
+        credits,
+      };
+    } catch (err) {
+      console.error('Failed to fetch person detail', err);
+      return null;
     }
   },
 
@@ -216,5 +315,31 @@ export const movieService = {
   getTrendingMovies: async (page: number = 1) => {
     const res = await api.get('/trending/movie/week', { params: { language: 'en-US', page } });
     return res.data.results.map(normalizeTMDB);
-  }
+  },
+
+  getRandomByGenre: async (genreId?: string, type: 'movie' | 'series' | 'both' = 'both'): Promise<UnifiedMovie | null> => {
+    try {
+      const randomPage = Math.floor(Math.random() * 5) + 1;
+      const pickType = type === 'both' ? (Math.random() > 0.5 ? 'movie' : 'series') : type;
+      const endpoint = pickType === 'series' ? '/discover/tv' : '/discover/movie';
+
+      const params: Record<string, any> = {
+        language: 'en-US',
+        page: randomPage,
+        sort_by: 'vote_count.desc',
+        'vote_average.gte': 7,
+        'vote_count.gte': 500,
+      };
+      if (genreId) params.with_genres = genreId;
+
+      const res = await api.get(endpoint, { params });
+      const results = res.data.results.filter((m: any) => m.poster_path);
+      if (results.length === 0) return null;
+
+      const randomIndex = Math.floor(Math.random() * results.length);
+      return normalizeTMDB(results[randomIndex]);
+    } catch {
+      return null;
+    }
+  },
 };

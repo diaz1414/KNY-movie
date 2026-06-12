@@ -13,6 +13,7 @@ import ScrollToTop from './components/ScrollToTop';
 import NetflixIntro from './components/NetflixIntro';
 import NotFound from './pages/NotFound';
 import News from './pages/News';
+import PersonDetail from './pages/PersonDetail';
 import OfflineOverlay from './components/OfflineOverlay';
 import { isAndroid } from './utils/platform';
 import { Network } from '@capacitor/network';
@@ -104,6 +105,7 @@ const App: React.FC = () => {
           <Route path="/genre/:id" element={<Genre />} />
           <Route path="/series/genre/:id" element={<SeriesGenre />} />
           <Route path="/news" element={<News />} />
+          <Route path="/person/:id" element={<PersonDetail />} />
           {/* Catch-all route for Not Found (404) */}
           <Route path="*" element={<NotFound />} />
         </Routes>

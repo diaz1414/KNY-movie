@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { X, Play, Star, Calendar, Clock, Film } from 'lucide-react';
-import { movieService, type UnifiedMovieDetail } from '../services/api';
+import { X, Play, Star, Calendar, Clock, Film, Globe, Clapperboard, ChevronRight } from 'lucide-react';
+import { movieService, type UnifiedMovieDetail, type UnifiedMovie, getLanguageName } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import NetflixLoader from './NetflixLoader';
+import { useNavigate } from 'react-router-dom';
 
 interface MovieModalProps {
   movieId: string | null;
@@ -12,16 +13,32 @@ interface MovieModalProps {
 
 const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [movie, setMovie] = useState<UnifiedMovieDetail | null>(null);
+  const [similarMovies, setSimilarMovies] = useState<UnifiedMovie[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [activeMovieId, setActiveMovieId] = useState<string | null>(movieId);
 
   useEffect(() => {
-    if (movieId) {
+    setActiveMovieId(movieId);
+  }, [movieId]);
+
+  useEffect(() => {
+    if (activeMovieId) {
       setLoading(true);
-      movieService.getMovieDetail(movieId)
-        .then((detail) => {
+      setShowTrailer(false);
+      setSimilarMovies([]);
+      setMovie(null);
+
+      movieService.getMovieDetail(activeMovieId)
+        .then(async (detail) => {
           setMovie(detail);
           setLoading(false);
+          if (detail) {
+            const similar = await movieService.getSimilarMovies(activeMovieId, detail.type);
+            setSimilarMovies(similar);
+          }
         })
         .catch((err) => {
           console.error(err);
@@ -34,12 +51,17 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [movieId]);
+  }, [activeMovieId]);
 
   if (!movieId) return null;
 
   const handleWatch = () => {
-    window.location.href = `/watch.html?id=${movieId}`;
+    window.location.href = `/watch.html?id=${activeMovieId}`;
+  };
+
+  const handlePersonClick = (personId: number) => {
+    onClose();
+    navigate(`/person/${personId}`);
   };
 
   const containerVariants: Variants = {
@@ -76,7 +98,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="relative w-full max-w-5xl h-full sm:h-auto sm:max-h-[85vh] bg-[#0c0c0c] sm:rounded-[2.5rem] overflow-hidden shadow-[0_0_120px_rgba(0,0,0,1)] border-0 sm:border border-white/10 pointer-events-auto flex flex-col md:flex-row"
+          className="relative w-full max-w-5xl h-full sm:h-auto sm:max-h-[90vh] bg-[#0c0c0c] sm:rounded-[2.5rem] overflow-hidden shadow-[0_0_120px_rgba(0,0,0,1)] border-0 sm:border border-white/10 pointer-events-auto flex flex-col md:flex-row"
         >
           {loading ? (
             <div className="w-full h-[60vh] flex items-center justify-center">
@@ -111,7 +133,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
               </div>
 
               {/* Details Content Area */}
-              <div className="flex-1 overflow-y-auto premium-scroll px-6 py-10 md:px-14 md:py-16 flex flex-col gap-10">
+              <div className="flex-1 overflow-y-auto premium-scroll px-6 py-10 md:px-14 md:py-16 flex flex-col gap-8">
 
                 {/* Header Info */}
                 <motion.div
@@ -126,9 +148,21 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                     <span className="text-white/40 text-[10px] font-black tracking-widest uppercase border border-white/10 px-2 py-0.5 rounded">
                       {movie.quality}
                     </span>
+                    {/* Language Badge */}
+                    {movie.originalLanguage && (
+                      <span className="flex items-center gap-1 text-white/40 text-[10px] font-black tracking-widest uppercase border border-white/10 px-2 py-0.5 rounded">
+                        <Globe size={10} />
+                        {getLanguageName(movie.originalLanguage)}
+                      </span>
+                    )}
                     <div className="hidden md:flex items-center gap-1.5 text-yellow-500 font-black ml-2">
                       <Star size={18} fill="currentColor" />
                       <span className="text-lg">{movie.rating}</span>
+                      {movie.voteCount > 0 && (
+                        <span className="text-white/30 text-xs font-bold ml-1">
+                          ({movie.voteCount.toLocaleString()})
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -152,6 +186,40 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                   </div>
                 </motion.div>
 
+                {/* Trailer Button */}
+                {movie.trailerKey && (
+                  <motion.div variants={itemVariants} transition={{ delay: 0.15 }}>
+                    {!showTrailer ? (
+                      <button
+                        onClick={() => setShowTrailer(true)}
+                        className="flex items-center gap-3 px-5 py-3 bg-red-600/10 hover:bg-red-600/20 border border-red-600/30 hover:border-red-600/60 rounded-2xl text-white transition-all duration-300 group w-full md:w-auto"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-netflix-red flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                          <Clapperboard size={16} className="text-white" />
+                        </div>
+                        <span className="font-black text-sm uppercase tracking-wider">Tonton Trailer</span>
+                      </button>
+                    ) : (
+                      <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${movie.trailerKey}?rel=0&modestbranding=1&enablejsapi=1`}
+                          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                          allowFullScreen
+                          referrerPolicy="origin"
+                          className="absolute inset-0 w-full h-full"
+                          title={`${movie.title} Trailer`}
+                        />
+                        <button
+                          onClick={() => setShowTrailer(false)}
+                          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/80 flex items-center justify-center text-white hover:bg-netflix-red transition-colors"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
                 {/* Synopsis */}
                 <motion.div
                   variants={itemVariants}
@@ -167,7 +235,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                 </motion.div>
 
                 {/* Team & Cast Section */}
-                <div className="space-y-10">
+                <div className="space-y-8">
                   {/* Director Info (Compact) */}
                   <motion.div
                     variants={itemVariants}
@@ -176,7 +244,17 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                   >
                     <div className="space-y-1">
                       <h4 className="text-[10px] font-black uppercase tracking-[4px] text-netflix-red/80">{t('director')}</h4>
-                      <p className="text-white font-black text-xl md:text-2xl font-outfit">{movie.director}</p>
+                      {movie.directorId ? (
+                        <button
+                          onClick={() => handlePersonClick(movie.directorId!)}
+                          className="text-white font-black text-xl md:text-2xl font-outfit hover:text-netflix-red transition-colors text-left group flex items-center gap-2"
+                        >
+                          {movie.director}
+                          <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ) : (
+                        <p className="text-white font-black text-xl md:text-2xl font-outfit">{movie.director}</p>
+                      )}
                     </div>
                   </motion.div>
 
@@ -195,12 +273,13 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
 
                     <div className="flex gap-6 overflow-x-auto pb-4 premium-scroll snap-x">
                       {movie.castMembers.map((member, idx) => (
-                        <motion.div
+                        <motion.button
                           key={member.id}
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.05 * idx }}
-                          className="snap-start shrink-0 group/cast w-24 md:w-28 text-center"
+                          onClick={() => handlePersonClick(member.id)}
+                          className="snap-start shrink-0 group/cast w-24 md:w-28 text-center cursor-pointer"
                         >
                           <div className="relative aspect-square rounded-full overflow-hidden mb-3 border-2 border-white/5 group-hover/cast:border-netflix-red/50 transition-all duration-300 shadow-xl">
                             <img
@@ -211,20 +290,66 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover/cast:opacity-100 transition-opacity" />
                           </div>
                           <div className="space-y-0.5">
-                            <p className="text-white font-black text-[10px] md:text-xs truncate">{member.name}</p>
+                            <p className="text-white font-black text-[10px] md:text-xs truncate group-hover/cast:text-netflix-red transition-colors">{member.name}</p>
                             <p className="text-white/40 font-bold text-[8px] md:text-[9px] truncate tracking-tighter uppercase">{member.character}</p>
                           </div>
-                        </motion.div>
+                        </motion.button>
                       ))}
                     </div>
                   </motion.div>
                 </div>
 
+                {/* Similar Movies */}
+                {similarMovies.length > 0 && (
+                  <motion.div
+                    variants={itemVariants}
+                    transition={{ delay: 0.5 }}
+                    className="space-y-6"
+                  >
+                    <div className="flex items-center gap-3">
+                      <h4 className="text-[10px] md:text-[12px] font-black uppercase tracking-[5px] text-white/60">
+                        Film Serupa
+                      </h4>
+                      <div className="h-px flex-1 bg-white/5" />
+                    </div>
+                    <div className="flex gap-4 overflow-x-auto pb-4 premium-scroll snap-x">
+                      {similarMovies.map((sim, idx) => (
+                        <motion.button
+                          key={sim.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.04 * idx }}
+                          onClick={() => setActiveMovieId(sim.id)}
+                          className="snap-start shrink-0 w-28 md:w-36 group/sim text-left"
+                        >
+                          <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-2 border border-white/5 group-hover/sim:border-netflix-red/50 transition-all duration-300 shadow-lg">
+                            <img
+                              src={sim.poster}
+                              alt={sim.title}
+                              className="w-full h-full object-cover group-hover/sim:scale-110 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover/sim:opacity-100 transition-opacity flex items-end p-2">
+                              <div className="w-8 h-8 rounded-full bg-netflix-red flex items-center justify-center mx-auto">
+                                <Play fill="white" size={12} className="ml-0.5" />
+                              </div>
+                            </div>
+                            <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded text-yellow-400 text-[9px] font-black">
+                              <Star size={8} fill="currentColor" />
+                              {sim.rating}
+                            </div>
+                          </div>
+                          <p className="text-white/80 font-bold text-[10px] md:text-xs truncate group-hover/sim:text-netflix-red transition-colors">{sim.title}</p>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Actions */}
                 <motion.div
                   variants={itemVariants}
                   transition={{ delay: 0.4 }}
-                  className="pt-6 mt-auto"
+                  className="pt-4 mt-auto"
                 >
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -253,6 +378,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
           __html: `
           .premium-scroll::-webkit-scrollbar {
             width: 5px;
+            height: 5px;
           }
           .premium-scroll::-webkit-scrollbar-track {
             background: transparent;

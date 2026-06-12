@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import HeroCarousel from '../components/HeroCarousel';
@@ -7,10 +7,11 @@ import MovieRow from '../components/MovieRow';
 import Footer from '../components/Footer';
 import YKNInstallBanner from '../components/YKNInstallBanner';
 import { movieService, type UnifiedMovie } from '../services/api';
-import { Search, X, ChevronLeft, ChevronRight, Sparkles, Trophy, Play } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, Sparkles, Trophy, Play, Shuffle } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import MovieModal from '../components/MovieModal';
 import AdBanner from '../components/AdBanner';
+import RandomPickModal from '../components/RandomPickModal';
 
 const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -26,7 +27,10 @@ const Home: React.FC = () => {
   const [exploreMovies, setExploreMovies] = useState<UnifiedMovie[]>([]);
   const [explorePage, setExplorePage] = useState(1);
   const [exploreLoading, setExploreLoading] = useState(false);
+  const [showRandomModal, setShowRandomModal] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Restore state on mount
   useEffect(() => {
@@ -164,6 +168,7 @@ const Home: React.FC = () => {
   }, [popularMovies, recentMovies, popularSeries, exploreMovies, explorePage]);
 
   useEffect(() => {
+    setActiveIndex(-1);
     const timer = setTimeout(async () => {
       if (searchQuery.trim().length > 1) {
         const results = await movieService.search(searchQuery);
@@ -174,7 +179,6 @@ const Home: React.FC = () => {
         setShowSuggestions(false);
       }
     }, 300);
-
     return () => clearTimeout(timer);
   }, [searchQuery, i18n.language]);
 
@@ -182,15 +186,52 @@ const Home: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
+        setActiveIndex(-1);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex(i => Math.min(i + 1, suggestions.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex(i => Math.max(i - 1, -1));
+    } else if (e.key === 'Enter' && activeIndex >= 0) {
+      e.preventDefault();
+      const picked = suggestions[activeIndex];
+      setSearchQuery(picked.title);
+      setShowSuggestions(false);
+      setActiveIndex(-1);
+      setSelectedMovieId(picked.id);
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+      setActiveIndex(-1);
+    }
+  }, [showSuggestions, suggestions, activeIndex]);
+
+  // Helper: highlight matching text in suggestion
+  const highlightMatch = (text: string, query: string) => {
+    if (!query.trim()) return <span>{text}</span>;
+    const idx = text.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return <span>{text}</span>;
+    return (
+      <span>
+        {text.slice(0, idx)}
+        <span className="text-netflix-red font-black">{text.slice(idx, idx + query.length)}</span>
+        {text.slice(idx + query.length)}
+      </span>
+    );
+  };
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
+    setActiveIndex(-1);
     if (!searchQuery.trim()) {
       setSearchResults(null);
       return;
@@ -210,41 +251,47 @@ const Home: React.FC = () => {
             <div className="relative flex items-center">
               <Search className="absolute left-4 md:left-6 text-[var(--text-muted)] group-focus-within:text-netflix-red transition-colors" size={20} />
               <input
+                ref={inputRef}
                 type="text"
                 placeholder={t('search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
                 className="w-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-full py-3 md:py-5 pl-12 md:pl-16 pr-6 md:pr-8 outline-none focus:ring-0 transition-all text-base md:text-xl font-outfit shadow-2xl"
               />
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => { setSearchQuery(''); setSearchResults(null); setSuggestions([]); }}
+                  onClick={() => { setSearchQuery(''); setSearchResults(null); setSuggestions([]); setActiveIndex(-1); }}
                   className="absolute right-6 text-[var(--text-muted)] hover:text-netflix-red transition-colors"
                 >
                   <X className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
               )}
-              {/* Suggestions Dropdown - Simple Solid UI */}
+              {/* Suggestions Dropdown — with keyboard nav + text highlight */}
               {showSuggestions && suggestions.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-3 bg-[#111111] border border-zinc-800 rounded-2xl overflow-hidden z-[100] shadow-[0_20px_50px_rgba(0,0,0,0.8)] animate-in fade-in zoom-in-95 duration-200">
                   <div className="max-h-[480px] overflow-y-auto custom-scrollbar">
-                    {suggestions.map((movie) => (
+                    {suggestions.map((movie, idx) => (
                       <div
                         key={movie.id}
                         onClick={() => {
-                          setSearchQuery(movie.title);
-                          setSearchResults([movie]);
                           setShowSuggestions(false);
+                          setActiveIndex(-1);
+                          setSelectedMovieId(movie.id);
                         }}
-                        className="flex items-center gap-4 px-5 py-3 hover:bg-zinc-800 transition-colors border-b border-zinc-900 last:border-none cursor-pointer group"
+                        className={`flex items-center gap-4 px-5 py-3 transition-colors border-b border-zinc-900 last:border-none cursor-pointer group ${
+                          activeIndex === idx ? 'bg-zinc-800' : 'hover:bg-zinc-800/60'
+                        }`}
                       >
                         <div className="relative shrink-0">
                           <img src={movie.poster} alt="" className="w-12 h-16 object-cover rounded shadow-md group-hover:scale-105 transition-transform" />
                           <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded"></div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-white text-base truncate group-hover:text-netflix-red transition-colors">{movie.title}</h4>
+                          <h4 className="font-bold text-white text-base truncate">
+                            {highlightMatch(movie.title, searchQuery)}
+                          </h4>
                           <div className="flex items-center gap-3 mt-1.5">
                             <span className="text-[10px] font-black bg-netflix-red text-white px-2 py-0.5 rounded-sm tracking-tighter">{movie.type.toUpperCase()}</span>
                             <span className="text-xs text-zinc-500 font-bold flex items-center gap-1">
@@ -253,6 +300,9 @@ const Home: React.FC = () => {
                             </span>
                           </div>
                         </div>
+                        {activeIndex === idx && (
+                          <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest shrink-0">↵ Buka</span>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -260,7 +310,7 @@ const Home: React.FC = () => {
                     type="submit"
                     className="w-full py-4 text-sm font-black text-center text-zinc-400 hover:text-white hover:bg-zinc-800 border-t border-zinc-800 bg-zinc-900/50 transition-all"
                   >
-                    SEARCH FOR "{searchQuery.toUpperCase()}"
+                    CARI "{searchQuery.toUpperCase()}"
                   </button>
                 </div>
               )}
@@ -496,6 +546,26 @@ const Home: React.FC = () => {
 
       <YKNInstallBanner />
       <Footer />
+
+      {/* Floating Random Pick Button */}
+      <button
+        onClick={() => setShowRandomModal(true)}
+        className="fixed bottom-6 right-6 z-[990] flex items-center gap-2.5 px-5 py-3.5 bg-netflix-red hover:bg-red-600 text-white font-black rounded-full shadow-[0_8px_30px_rgba(229,9,20,0.5)] hover:shadow-[0_12px_40px_rgba(229,9,20,0.7)] transition-all duration-300 hover:scale-105 active:scale-95 group"
+        title="Pilihkan Aku!"
+      >
+        <Shuffle size={18} className="group-hover:rotate-180 transition-transform duration-500" />
+        <span className="text-sm uppercase tracking-wider hidden sm:inline">Pilihkan Aku!</span>
+      </button>
+
+      {/* Random Pick Modal */}
+      <RandomPickModal
+        isOpen={showRandomModal}
+        onClose={() => setShowRandomModal(false)}
+        onSelectMovie={(id) => {
+          setShowRandomModal(false);
+          setSelectedMovieId(id);
+        }}
+      />
     </div>
   );
 };

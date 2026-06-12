@@ -13,8 +13,26 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
 
   const updates = [
     {
+      date: 'June 12, 2026',
+      title: 'Discovery & Exploration Upgrade',
+      items: [
+        'Added YouTube trailer embed inside the movie detail modal — watch trailers without leaving the page.',
+        'Movie modal now shows similar/related titles in a horizontal scroll at the bottom.',
+        'Added original language badge and vote count display in movie details.',
+        'Cast and director cards are now clickable — navigate to a dedicated actor/director profile page.',
+        'New Actor Profile page (/person/:id) with biography, filmography grid split by movies and series.',
+        'Actor cards in the watch page are also now clickable links to their profile.',
+        'Search autocomplete now supports keyboard navigation (↑↓ to navigate, Enter to open, Esc to close).',
+        'Search suggestions now highlight the matching text in red.',
+        'Clicking a suggestion now opens the movie detail modal directly.',
+        'New "Pilihkan Aku!" random movie picker — choose genre & type, get a quality recommendation instantly.',
+        'Floating action button added for quick access to the random picker from any scroll position.'
+      ]
+    },
+    {
       date: 'April 17, 2026',
       title: 'Analytics & Monetization Infrastructure',
+
       items: [
         'Integrated Google Analytics 4 (GA4) for comprehensive visitor and event tracking.',
         'Implemented responsive advertising units with strategic banner placement.',
