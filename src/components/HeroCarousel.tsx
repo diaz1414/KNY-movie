@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Play, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { UnifiedMovie } from '../services/api';
 
@@ -29,7 +29,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
   }, [nextSlide, isPaused, movies.length]);
 
   if (!movies || movies.length === 0) {
-    return <div className="h-[60vh] md:h-[80vh] w-full bg-zinc-900 rounded-3xl animate-pulse" />;
+    return <div className="h-screen w-full bg-zinc-900 animate-pulse" />;
   }
 
   const currentMovie = movies[currentIndex];
@@ -38,9 +38,22 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
     window.location.href = `/watch.html?id=${currentMovie.id}`;
   };
 
+  const { scrollY } = useScroll();
+
+  // Background transform: translate slowly, scale up slightly, fade, blur
+  const yBg = useTransform(scrollY, [0, 800], [0, 320]);
+  const scaleBg = useTransform(scrollY, [0, 800], [1.05, 1.25]);
+  const opacityBg = useTransform(scrollY, [0, 600], [1, 0]);
+  const blurValue = useTransform(scrollY, [0, 600], [0, 16]);
+  const filterBg = useTransform(blurValue, (v) => `blur(${v}px)`);
+
+  // Content transform: translate faster, fade out sooner
+  const yContent = useTransform(scrollY, [0, 400], [0, 120]);
+  const opacityContent = useTransform(scrollY, [0, 400], [1, 0]);
+
   return (
-    <div 
-      className="relative h-[65vh] md:h-[80vh] w-full overflow-hidden rounded-3xl bg-black group shadow-2xl"
+    <div
+      className="relative h-full w-full overflow-hidden bg-black group"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -54,20 +67,34 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
           className="absolute inset-0"
         >
           {/* Backdrop Image */}
-          <div className="absolute inset-0 z-0">
+          <motion.div
+            className="absolute inset-0 z-0 origin-center"
+            style={{
+              y: yBg,
+              scale: scaleBg,
+              opacity: opacityBg,
+              filter: filterBg
+            }}
+          >
             <img
               src={currentMovie.backdrop}
               alt={currentMovie.title}
-              className="w-full h-full object-cover brightness-[0.6] scale-105"
+              className="w-full h-full object-cover brightness-[0.6]"
             />
             {/* Multi-layered Gradients for Cinematic Look */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#020202] via-[#020202]/30 to-transparent opacity-90" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#020202] via-[#020202]/40 to-transparent opacity-100" />
             <div className="absolute inset-0 bg-gradient-to-l from-black/20 via-transparent to-black/20" />
-          </div>
+          </motion.div>
 
           {/* Content Wrapper */}
-          <div className="relative h-full w-full flex items-center px-[var(--container-padding)] z-10">
+          <motion.div
+            className="relative h-full w-full flex items-end px-[var(--container-padding)] z-10 pb-28 md:pb-32 pt-24"
+            style={{
+              y: yContent,
+              opacity: opacityContent
+            }}
+          >
             <motion.div
               initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
@@ -130,9 +157,12 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
                 </motion.button>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         </motion.div>
       </AnimatePresence>
+
+      {/* Static deep bottom gradient overlay for seamless dark transition */}
+      <div className="absolute inset-x-0 bottom-0 h-[25vh] bg-gradient-to-t from-black via-black/85 to-transparent z-[5] pointer-events-none" />
 
       {/* Manual Navigation Controls - Hidden on mobile, visible on hover desktop */}
       <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-6 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">

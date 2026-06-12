@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shuffle, Play, Star, ChevronRight, Sparkles } from 'lucide-react';
 import { movieService, type UnifiedMovie } from '../services/api';
@@ -9,28 +10,8 @@ interface RandomPickModalProps {
   onSelectMovie: (id: string) => void;
 }
 
-const GENRE_OPTIONS = [
-  { id: '', label: '🎲 Bebas (Semua Genre)' },
-  { id: '28', label: '💥 Action' },
-  { id: '35', label: '😂 Comedy' },
-  { id: '27', label: '👻 Horror' },
-  { id: '10749', label: '💕 Romance' },
-  { id: '878', label: '🚀 Sci-Fi' },
-  { id: '53', label: '😱 Thriller' },
-  { id: '18', label: '🎭 Drama' },
-  { id: '14', label: '🧙 Fantasy' },
-  { id: '16', label: '✨ Animation' },
-  { id: '80', label: '🔫 Crime' },
-  { id: '12', label: '🗺️ Adventure' },
-];
-
-const TYPE_OPTIONS = [
-  { id: 'both' as const, label: '🎬 Semua' },
-  { id: 'movie' as const, label: '🎥 Film' },
-  { id: 'series' as const, label: '📺 Series' },
-];
-
 const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSelectMovie }) => {
+  const { t } = useTranslation();
   const [selectedGenre, setSelectedGenre] = useState('');
   const [selectedType, setSelectedType] = useState<'movie' | 'series' | 'both'>('both');
   const [result, setResult] = useState<UnifiedMovie | null>(null);
@@ -38,11 +19,32 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
   const [spinText, setSpinText] = useState('');
   const [phase, setPhase] = useState<'pick' | 'result'>('pick');
 
+  const GENRE_OPTIONS = [
+    { id: '', label: `🎲 ${t('random_genre_all', 'Bebas (Semua Genre)')}` },
+    { id: '28', label: `💥 ${t('genre_action', 'Action')}` },
+    { id: '35', label: `😂 ${t('genre_comedy', 'Comedy')}` },
+    { id: '27', label: `👻 ${t('genre_horror', 'Horror')}` },
+    { id: '10749', label: `💕 ${t('genre_romance', 'Romance')}` },
+    { id: '878', label: `🚀 ${t('genre_scifi', 'Sci-Fi')}` },
+    { id: '53', label: `😱 ${t('genre_thriller', 'Thriller')}` },
+    { id: '18', label: `🎭 ${t('genre_drama', 'Drama')}` },
+    { id: '14', label: `🧙 ${t('genre_fantasy', 'Fantasy')}` },
+    { id: '16', label: `✨ ${t('genre_animation', 'Animation')}` },
+    { id: '80', label: `🔫 ${t('genre_crime', 'Crime')}` },
+    { id: '12', label: `🗺️ ${t('genre_adventure', 'Adventure')}` },
+  ];
+
+  const TYPE_OPTIONS = [
+    { id: 'both' as const, label: `🎬 ${t('random_type_all', 'Semua')}` },
+    { id: 'movie' as const, label: `🎥 ${t('movies', 'Film')}` },
+    { id: 'series' as const, label: `📺 ${t('series', 'Series')}` },
+  ];
+
   const SPIN_MESSAGES = [
-    '🎲 Mengocok pilihan...',
-    '🎬 Memilih dari ribuan film...',
-    '✨ Menemukan yang terbaik...',
-    '🍿 Hampir selesai...',
+    t('random_spin_1', '🎲 Mengocok pilihan...'),
+    t('random_spin_2', '🎬 Memilih dari ribuan film...'),
+    t('random_spin_3', '✨ Menemukan yang terbaik...'),
+    t('random_spin_4', '🍿 Hampir selesai...'),
   ];
 
   const handlePick = async () => {
@@ -72,11 +74,11 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
         setResult(movie);
         setPhase('result');
       } else {
-        setSpinText('Hmm, tidak ketemu. Coba lagi!');
+        setSpinText(t('random_no_match', 'Hmm, tidak ketemu. Coba lagi!'));
       }
     } catch {
       clearInterval(msgInterval);
-      setSpinText('Terjadi kesalahan. Coba lagi!');
+      setSpinText(t('random_error', 'Terjadi kesalahan. Coba lagi!'));
     } finally {
       setIsSpinning(false);
     }
@@ -123,8 +125,8 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
                   <Sparkles size={20} className="text-netflix-red" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-white tracking-tight">Pilihkan Aku!</h2>
-                  <p className="text-xs text-white/40 font-bold">Biar kami yang pilihkan untukmu 🍿</p>
+                  <h2 className="text-xl font-black text-white tracking-tight">{t('random_pick_title', 'Pilihkan Aku!')}</h2>
+                  <p className="text-xs text-white/40 font-bold">{t('random_pick_desc', 'Biar kami yang pilihkan untukmu 🍿')}</p>
                 </div>
               </div>
               <button
@@ -147,7 +149,7 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
                   >
                     {/* Type Selector */}
                     <div className="space-y-3">
-                      <p className="text-[10px] font-black uppercase tracking-[4px] text-white/40">Tipe Konten</p>
+                      <p className="text-[10px] font-black uppercase tracking-[4px] text-white/40">{t('random_content_type', 'Tipe Konten')}</p>
                       <div className="flex gap-2">
                         {TYPE_OPTIONS.map(opt => (
                           <button
@@ -167,7 +169,7 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
 
                     {/* Genre Selector */}
                     <div className="space-y-3">
-                      <p className="text-[10px] font-black uppercase tracking-[4px] text-white/40">Genre</p>
+                      <p className="text-[10px] font-black uppercase tracking-[4px] text-white/40">{t('random_genre', 'Genre')}</p>
                       <div className="grid grid-cols-2 gap-2 max-h-52 overflow-y-auto premium-scroll pr-1">
                         {GENRE_OPTIONS.map(opt => (
                           <button
@@ -211,7 +213,7 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
                       className="w-full py-5 bg-netflix-red hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl font-black text-white text-base uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_8px_30px_rgba(229,9,20,0.4)] transition-all"
                     >
                       <Shuffle size={20} className={isSpinning ? 'animate-spin' : ''} />
-                      {isSpinning ? 'Memilih...' : 'Pilihkan Aku!'}
+                      {isSpinning ? t('random_spinning', 'Memilih...') : t('random_pick_title', 'Pilihkan Aku!')}
                     </motion.button>
                   </motion.div>
                 ) : (
@@ -228,7 +230,7 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
                       <>
                         <div className="text-center space-y-1">
                           <p className="text-xs font-black uppercase tracking-[5px] text-netflix-red animate-pulse">
-                            ✨ Pilihan Untukmu!
+                            {t('random_result_title', '✨ Pilihan Untukmu!')}
                           </p>
                         </div>
 
@@ -264,7 +266,7 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
                             <div className="w-7 h-7 rounded-full bg-netflix-red flex items-center justify-center">
                               <Play size={14} className="ml-0.5 fill-white text-white" />
                             </div>
-                            Lihat Detail Film
+                            {t('random_watch_detail', 'Lihat Detail Film')}
                             <ChevronRight size={18} />
                           </motion.button>
 
@@ -273,7 +275,7 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
                             className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl font-bold text-white/60 hover:text-white flex items-center justify-center gap-2 transition-all text-sm"
                           >
                             <Shuffle size={16} />
-                            Acak Lagi
+                            {t('random_reshuffle', 'Acak Lagi')}
                           </button>
                         </div>
                       </>
@@ -295,6 +297,5 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
     </AnimatePresence>
   );
 };
-
 
 export default RandomPickModal;

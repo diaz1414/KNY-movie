@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import HeroCarousel from '../components/HeroCarousel';
 import MovieCard from '../components/MovieCard';
@@ -7,7 +8,7 @@ import MovieRow from '../components/MovieRow';
 import Footer from '../components/Footer';
 import YKNInstallBanner from '../components/YKNInstallBanner';
 import { movieService, type UnifiedMovie } from '../services/api';
-import { Search, X, ChevronLeft, ChevronRight, Sparkles, Trophy, Play, Shuffle } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Sparkles, Trophy, Play, Shuffle } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import MovieModal from '../components/MovieModal';
 import AdBanner from '../components/AdBanner';
@@ -20,17 +21,13 @@ const Home: React.FC = () => {
   const [popularSeries, setPopularSeries] = useState<UnifiedMovie[]>([]);
   const [searchResults, setSearchResults] = useState<UnifiedMovie[] | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<UnifiedMovie[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedMovieId, setSelectedMovieId] = useState<string | null>(null);
   const [exploreMovies, setExploreMovies] = useState<UnifiedMovie[]>([]);
   const [explorePage, setExplorePage] = useState(1);
   const [exploreLoading, setExploreLoading] = useState(false);
   const [showRandomModal, setShowRandomModal] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [searchParams] = useSearchParams();
 
   // Restore state on mount
   useEffect(() => {
@@ -167,175 +164,84 @@ const Home: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [popularMovies, recentMovies, popularSeries, exploreMovies, explorePage]);
 
+  // Listen for movie open events from Navbar search
   useEffect(() => {
-    setActiveIndex(-1);
-    const timer = setTimeout(async () => {
-      if (searchQuery.trim().length > 1) {
-        const results = await movieService.search(searchQuery);
-        setSuggestions(results.slice(0, 8));
-        setShowSuggestions(true);
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery, i18n.language]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-        setActiveIndex(-1);
-      }
+    const handler = (e: Event) => {
+      const id = (e as CustomEvent).detail?.id;
+      if (id) setSelectedMovieId(id);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener('navbar-open-movie', handler);
+    return () => window.removeEventListener('navbar-open-movie', handler);
   }, []);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showSuggestions || suggestions.length === 0) return;
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setActiveIndex(i => Math.min(i + 1, suggestions.length - 1));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setActiveIndex(i => Math.max(i - 1, -1));
-    } else if (e.key === 'Enter' && activeIndex >= 0) {
-      e.preventDefault();
-      const picked = suggestions[activeIndex];
-      setSearchQuery(picked.title);
-      setShowSuggestions(false);
-      setActiveIndex(-1);
-      setSelectedMovieId(picked.id);
-    } else if (e.key === 'Escape') {
-      setShowSuggestions(false);
-      setActiveIndex(-1);
-    }
-  }, [showSuggestions, suggestions, activeIndex]);
-
-  // Helper: highlight matching text in suggestion
-  const highlightMatch = (text: string, query: string) => {
-    if (!query.trim()) return <span>{text}</span>;
-    const idx = text.toLowerCase().indexOf(query.toLowerCase());
-    if (idx === -1) return <span>{text}</span>;
-    return (
-      <span>
-        {text.slice(0, idx)}
-        <span className="text-netflix-red font-black">{text.slice(idx, idx + query.length)}</span>
-        {text.slice(idx + query.length)}
-      </span>
-    );
-  };
-
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setShowSuggestions(false);
-    setActiveIndex(-1);
-    if (!searchQuery.trim()) {
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
       setSearchResults(null);
       return;
     }
-    const results = await movieService.search(searchQuery);
+    const results = await movieService.search(query);
     setSearchResults(results);
+    setSearchQuery(query);
   };
+
+  // Handle ?search= query param from navbar reactively using searchParams
+  useEffect(() => {
+    const q = searchParams.get('search');
+    if (q) {
+      handleSearch(q);
+    } else {
+      setSearchResults(null);
+      setSearchQuery('');
+    }
+  }, [searchParams]);
+
+  // Handle ?movie= query param from URL (e.g., from Navbar search on other pages)
+  useEffect(() => {
+    const movieVal = searchParams.get('movie');
+    if (movieVal) {
+      setSelectedMovieId(movieVal);
+    }
+  }, [searchParams]);
+
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <Navbar />
 
       <main className="pb-20">
-        <div className="pt-24 px-[var(--container-padding)] max-w-7xl mx-auto" ref={searchRef}>
-          <form onSubmit={handleSearch} className="relative mb-16 group">
-            <div className={`absolute -inset-1 bg-gradient-to-r from-netflix-red to-red-800 rounded-full blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200`}></div>
-            <div className="relative flex items-center">
-              <Search className="absolute left-4 md:left-6 text-[var(--text-muted)] group-focus-within:text-netflix-red transition-colors" size={20} />
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder={t('search')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-full py-3 md:py-5 pl-12 md:pl-16 pr-6 md:pr-8 outline-none focus:ring-0 transition-all text-base md:text-xl font-outfit shadow-2xl"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => { setSearchQuery(''); setSearchResults(null); setSuggestions([]); setActiveIndex(-1); }}
-                  className="absolute right-6 text-[var(--text-muted)] hover:text-netflix-red transition-colors"
-                >
-                  <X className="w-5 h-5 md:w-6 md:h-6" />
-                </button>
-              )}
-              {/* Suggestions Dropdown — with keyboard nav + text highlight */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-3 bg-[#111111] border border-zinc-800 rounded-2xl overflow-hidden z-[100] shadow-[0_20px_50px_rgba(0,0,0,0.8)] animate-in fade-in zoom-in-95 duration-200">
-                  <div className="max-h-[480px] overflow-y-auto custom-scrollbar">
-                    {suggestions.map((movie, idx) => (
-                      <div
-                        key={movie.id}
-                        onClick={() => {
-                          setShowSuggestions(false);
-                          setActiveIndex(-1);
-                          setSelectedMovieId(movie.id);
-                        }}
-                        className={`flex items-center gap-4 px-5 py-3 transition-colors border-b border-zinc-900 last:border-none cursor-pointer group ${
-                          activeIndex === idx ? 'bg-zinc-800' : 'hover:bg-zinc-800/60'
-                        }`}
-                      >
-                        <div className="relative shrink-0">
-                          <img src={movie.poster} alt="" className="w-12 h-16 object-cover rounded shadow-md group-hover:scale-105 transition-transform" />
-                          <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded"></div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-white text-base truncate">
-                            {highlightMatch(movie.title, searchQuery)}
-                          </h4>
-                          <div className="flex items-center gap-3 mt-1.5">
-                            <span className="text-[10px] font-black bg-netflix-red text-white px-2 py-0.5 rounded-sm tracking-tighter">{movie.type.toUpperCase()}</span>
-                            <span className="text-xs text-zinc-500 font-bold flex items-center gap-1">
-                              <svg className="w-3 h-3 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                              {movie.rating}
-                            </span>
-                          </div>
-                        </div>
-                        {activeIndex === idx && (
-                          <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest shrink-0">↵ Buka</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full py-4 text-sm font-black text-center text-zinc-400 hover:text-white hover:bg-zinc-800 border-t border-zinc-800 bg-zinc-900/50 transition-all"
-                  >
-                    CARI "{searchQuery.toUpperCase()}"
-                  </button>
-                </div>
-              )}
-            </div>
-          </form>
+        {/* Fullscreen Hero — no top padding, goes behind navbar */}
+        {!searchResults && !loading && (
+          <div className="relative w-full" style={{ height: '100svh' }}>
+            <HeroCarousel
+              movies={popularMovies.slice(0, 7)}
+              onMoreInfo={(id) => setSelectedMovieId(id)}
+            />
+          </div>
+        )}
 
-          {/* Ad Leaderboard Top */}
-          <AdBanner
-            id="ad-top"
-            format="iframe"
-            height={90}
-            width={728}
-            adKey="9eb1c807951034d8d5dba6629c6bb6ed"
-          />
+        {/* Movie Info Modal */}
+        <MovieModal
+          movieId={selectedMovieId}
+          onClose={() => setSelectedMovieId(null)}
+        />
 
-
+        <div className="max-w-7xl mx-auto w-full">
+          {/* Search Results */}
           {searchResults ? (
-            <div className="fade-in pb-20">
+            <div className="fade-in pb-20 pt-28 px-[var(--container-padding)]">
               <div className="flex justify-between items-end mb-10">
                 <h2 className="text-3xl font-bold font-outfit text-[var(--text-primary)]">
                   {t('search_results')} <span className="text-netflix-red">"{searchQuery}"</span>
                 </h2>
-                <p className="text-[var(--text-muted)] mb-1">
-                  {searchResults.length} {t('results')}
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-[var(--text-muted)] mb-1">{searchResults.length} {t('results')}</p>
+                  <button
+                    onClick={() => { setSearchResults(null); setSearchQuery(''); }}
+                    className="text-xs font-black text-zinc-500 hover:text-white border border-zinc-700 px-3 py-1.5 rounded-full transition-colors"
+                  >
+                    ✕ Tutup
+                  </button>
+                </div>
               </div>
 
               {searchResults.length > 0 ? (
@@ -355,28 +261,29 @@ const Home: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-12">
+            <div className="space-y-16 pt-12">
               {loading ? (
                 <NetflixLoader fullScreen />
               ) : (
                 <>
-                  <HeroCarousel
-                    movies={popularMovies.slice(0, 7)}
-                    onMoreInfo={(id) => setSelectedMovieId(id)}
+                  <MovieRow
+                    id="popular"
+                    title={t('trending')}
+                    movies={popularMovies}
                   />
 
-                  {/* Movie Info Modal */}
-                  <MovieModal
-                    movieId={selectedMovieId}
-                    onClose={() => setSelectedMovieId(null)}
-                  />
-
-                  <div className="relative z-10 -mt-20 md:-mt-32 space-y-8">
-                    <MovieRow
-                      id="popular"
-                      title={t('trending')}
-                      movies={popularMovies}
-                    />
+                  {/* Ad Leaderboard Top */}
+                  <div className="flex justify-center py-4 px-[var(--container-padding)]">
+                    <div className="rounded-2xl overflow-hidden border border-white/5 shadow-2xl p-1 bg-white/[0.02] backdrop-blur-xl max-w-full">
+                      <AdBanner
+                        id="ad-top"
+                        format="iframe"
+                        height={90}
+                        width={728}
+                        adKey="9eb1c807951034d8d5dba6629c6bb6ed"
+                      />
+                    </div>
+                  </div>
 
                     {/* NEW: Continue Watching Section */}
                     {(() => {
@@ -438,13 +345,17 @@ const Home: React.FC = () => {
                     />
 
                     {/* Ad Rectangle Middle */}
-                    <AdBanner
-                      id="ad-middle"
-                      format="iframe"
-                      height={250}
-                      width={300}
-                      adKey="7416c14407226b70dfe1c1a8ef1ed288"
-                    />
+                    <div className="flex justify-center py-6 px-[var(--container-padding)]">
+                      <div className="rounded-2xl overflow-hidden border border-white/5 shadow-2xl p-1 bg-white/[0.02] backdrop-blur-xl">
+                        <AdBanner
+                          id="ad-middle"
+                          format="iframe"
+                          height={250}
+                          width={300}
+                          adKey="7416c14407226b70dfe1c1a8ef1ed288"
+                        />
+                      </div>
+                    </div>
 
                     {/* Explore More Section */}
                     <div id="explore-section" className="pt-20 space-y-10 px-[var(--container-padding)]">
@@ -490,14 +401,14 @@ const Home: React.FC = () => {
                       </div>
 
                       {/* Pagination Controls Bottom */}
-                      <div className="pt-10 flex flex-col items-center gap-8 pb-32">
-                        <div className="flex items-center justify-center gap-2 md:gap-4 max-w-full px-4 py-2">
+                      <div className="pt-10 flex flex-col items-center gap-6 pb-32">
+                        <div className="flex items-center justify-center gap-1.5 p-1.5 rounded-full bg-[#111111]/80 backdrop-blur-xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.6)] max-w-full overflow-x-auto no-scrollbar">
                           <button
                             onClick={() => loadExploreContent(explorePage - 1)}
                             disabled={explorePage === 1}
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-netflix-red hover:border-netflix-red transition-all disabled:opacity-20 shadow-xl shrink-0"
+                            className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 disabled:opacity-20 disabled:pointer-events-none transition-all duration-300 shrink-0 cursor-pointer"
                           >
-                            <ChevronLeft size={20} />
+                            <ChevronLeft size={18} strokeWidth={2.5} />
                           </button>
 
                           {(() => {
@@ -513,10 +424,11 @@ const Home: React.FC = () => {
                               <button
                                 key={p}
                                 onClick={() => loadExploreContent(p)}
-                                className={`shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl font-black font-outfit text-sm md:text-lg transition-all shadow-xl ${explorePage === p
-                                  ? 'bg-netflix-red text-white scale-110 ring-4 ring-netflix-red/20'
-                                  : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border border-white/10'
-                                  }`}
+                                className={`shrink-0 w-10 h-10 md:w-11 md:h-11 rounded-full font-black font-outfit text-sm transition-all duration-300 cursor-pointer ${
+                                  explorePage === p
+                                    ? 'bg-netflix-red text-white shadow-[0_0_15px_rgba(229,9,20,0.4)] scale-105'
+                                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                }`}
                               >
                                 {p}
                               </button>
@@ -525,18 +437,17 @@ const Home: React.FC = () => {
 
                           <button
                             onClick={() => loadExploreContent(explorePage + 1)}
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-netflix-red hover:border-netflix-red transition-all shadow-xl shrink-0"
+                            className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 transition-all duration-300 shrink-0 cursor-pointer"
                           >
-                            <ChevronRight size={20} />
+                            <ChevronRight size={18} strokeWidth={2.5} />
                           </button>
                         </div>
 
-                        <p className="text-[var(--text-muted)] text-sm font-bold tracking-widest uppercase">
+                        <p className="text-[10px] font-black tracking-[0.25em] text-[var(--text-muted)] uppercase">
                           PAGE {explorePage} OF AMAZING CONTENT
                         </p>
                       </div>
                     </div>
-                  </div>
                 </>
               )}
             </div>
@@ -551,10 +462,10 @@ const Home: React.FC = () => {
       <button
         onClick={() => setShowRandomModal(true)}
         className="fixed bottom-6 right-6 z-[990] flex items-center gap-2.5 px-5 py-3.5 bg-netflix-red hover:bg-red-600 text-white font-black rounded-full shadow-[0_8px_30px_rgba(229,9,20,0.5)] hover:shadow-[0_12px_40px_rgba(229,9,20,0.7)] transition-all duration-300 hover:scale-105 active:scale-95 group"
-        title="Pilihkan Aku!"
+        title={t('random_pick_title', 'Pilihkan Aku!')}
       >
         <Shuffle size={18} className="group-hover:rotate-180 transition-transform duration-500" />
-        <span className="text-sm uppercase tracking-wider hidden sm:inline">Pilihkan Aku!</span>
+        <span className="text-sm uppercase tracking-wider hidden sm:inline">{t('random_pick_title', 'Pilihkan Aku!')}</span>
       </button>
 
       {/* Random Pick Modal */}

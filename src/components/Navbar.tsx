@@ -1,17 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { Sun, Moon, Globe, X, Film } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Sun, Moon, Globe, X, Film, Search } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useRegion } from '../context/RegionContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { movieService, type UnifiedMovie } from '../services/api';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const { countryCode } = useRegion();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<UnifiedMovie[]>([]);
+  const [activeIdx, setActiveIdx] = useState(-1);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,6 +28,70 @@ const Navbar: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close search on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchOpen(false);
+        setSuggestions([]);
+        setActiveIdx(-1);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Autocomplete
+  useEffect(() => {
+    setActiveIdx(-1);
+    const t = setTimeout(async () => {
+      if (searchQuery.trim().length > 1) {
+        const res = await movieService.search(searchQuery);
+        setSuggestions(res.slice(0, 7));
+      } else {
+        setSuggestions([]);
+      }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [searchQuery, i18n.language]);
+
+  const openSearch = () => {
+    setSearchOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setSearchQuery('');
+    setSuggestions([]);
+    setActiveIdx(-1);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIdx(i => Math.min(i + 1, suggestions.length - 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx(i => Math.max(i - 1, -1)); }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeIdx >= 0 && suggestions[activeIdx]) {
+        navigate(`/?search=${encodeURIComponent(suggestions[activeIdx].title)}`);
+        closeSearch();
+      } else if (searchQuery.trim()) {
+        navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+        closeSearch();
+      }
+    } else if (e.key === 'Escape') closeSearch();
+  };
+
+  const handleSuggestionClick = (movie: UnifiedMovie) => {
+    if (window.location.pathname !== '/') {
+      navigate(`/?movie=${movie.id}`);
+    } else {
+      // Dispatch custom event to Home.tsx to open modal
+      window.dispatchEvent(new CustomEvent('navbar-open-movie', { detail: { id: movie.id } }));
+    }
+    closeSearch();
+  };
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -129,6 +201,68 @@ const Navbar: React.FC = () => {
                 </Link>
               );
             })}
+          </div>
+
+          {/* Navbar Search Bar (Desktop) */}
+          <div ref={searchRef} className="hidden md:flex items-center relative">
+            <AnimatePresence mode="wait">
+              {searchOpen ? (
+                <motion.div
+                  key="search-open"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 280, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                  className="relative overflow-visible"
+                >
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 z-10" />
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                    placeholder="Cari film, serial..."
+                    className="w-full bg-white/10 border border-white/20 rounded-full py-2 pl-9 pr-8 text-sm text-white placeholder-white/40 outline-none focus:border-netflix-red/60 transition-colors"
+                  />
+                  <button onClick={closeSearch} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                    <X size={14} />
+                  </button>
+
+                  {/* Suggestions */}
+                  {suggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#111] border border-zinc-800 rounded-2xl overflow-hidden z-[2000] shadow-[0_20px_50px_rgba(0,0,0,0.9)]">
+                      {suggestions.map((movie, idx) => (
+                        <div
+                          key={movie.id}
+                          onClick={() => handleSuggestionClick(movie)}
+                          className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer border-b border-zinc-900 last:border-none transition-colors ${
+                            activeIdx === idx ? 'bg-zinc-800' : 'hover:bg-zinc-800/60'
+                          }`}
+                        >
+                          <img src={movie.poster} alt="" className="w-8 h-12 object-cover rounded shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-xs font-bold truncate">{movie.title}</p>
+                            <p className="text-zinc-500 text-[10px] font-bold uppercase">{movie.type} · ⭐ {movie.rating}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              ) : (
+                <motion.button
+                  key="search-icon"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={openSearch}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  <Search size={20} />
+                </motion.button>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 

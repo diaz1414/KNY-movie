@@ -1,4 +1,39 @@
 import axios from 'axios';
+import i18n from '../i18n';
+
+const getLangCode = () => {
+  const lng = i18n.language || 'en';
+  const map: Record<string, string> = {
+    id: 'id-ID',
+    en: 'en-US',
+    ja: 'ja-JP',
+    ko: 'ko-KR',
+    es: 'es-ES',
+    fr: 'fr-FR',
+    de: 'de-DE',
+    zh: 'zh-CN',
+    ar: 'ar-SA',
+    ru: 'ru-RU'
+  };
+  return map[lng] || 'en-US';
+};
+
+const getRegionCode = () => {
+  const lng = i18n.language || 'en';
+  const map: Record<string, string> = {
+    id: 'ID',
+    en: 'US',
+    ja: 'JP',
+    ko: 'KR',
+    es: 'ES',
+    fr: 'FR',
+    de: 'DE',
+    zh: 'CN',
+    ar: 'SA',
+    ru: 'RU'
+  };
+  return map[lng] || 'US';
+};
 
 // --- Configuration ---
 
@@ -107,27 +142,27 @@ const api = axios.create({
 
 export const movieService = {
   getPopularMovies: async (page: number = 1) => {
-    const res = await api.get('/movie/popular', { params: { language: 'en-US', region: 'US', page } });
+    const res = await api.get('/movie/popular', { params: { language: getLangCode(), region: getRegionCode(), page } });
     return res.data.results.map(normalizeTMDB);
   },
 
   getRecentMovies: async (page: number = 1) => {
-    const res = await api.get('/movie/now_playing', { params: { language: 'en-US', region: 'US', page } });
+    const res = await api.get('/movie/now_playing', { params: { language: getLangCode(), region: getRegionCode(), page } });
     return res.data.results.map(normalizeTMDB);
   },
 
   getTopRatedMovies: async (page: number = 1) => {
-    const res = await api.get('/movie/top_rated', { params: { language: 'en-US', region: 'US', page } });
+    const res = await api.get('/movie/top_rated', { params: { language: getLangCode(), region: getRegionCode(), page } });
     return res.data.results.map(normalizeTMDB);
   },
 
   getPopularSeries: async (page: number = 1) => {
-    const res = await api.get('/tv/popular', { params: { language: 'en-US', region: 'US', page } });
+    const res = await api.get('/tv/popular', { params: { language: getLangCode(), region: getRegionCode(), page } });
     return res.data.results.map(normalizeTMDB);
   },
 
   search: async (query: string) => {
-    const res = await api.get('/search/multi', { params: { query, language: 'en-US' } });
+    const res = await api.get('/search/multi', { params: { query, language: getLangCode() } });
     return res.data.results
       .filter((item: any) => item.media_type !== 'person')
       .map(normalizeTMDB);
@@ -135,7 +170,7 @@ export const movieService = {
 
   getMovieDetail: async (id: string): Promise<UnifiedMovieDetail | null> => {
     try {
-      const res = await api.get(`/movie/${id}`, { params: { append_to_response: 'credits,videos', language: 'en-US' } });
+      const res = await api.get(`/movie/${id}`, { params: { append_to_response: 'credits,videos', language: getLangCode() } });
       const movie = res.data;
 
       const director = movie.credits?.crew?.find((c: any) => c.job === 'Director');
@@ -187,7 +222,7 @@ export const movieService = {
     } catch (e) {
       // Try TV if Movie fails
       try {
-        const res = await api.get(`/tv/${id}`, { params: { append_to_response: 'credits,videos', language: 'en-US' } });
+        const res = await api.get(`/tv/${id}`, { params: { append_to_response: 'credits,videos', language: getLangCode() } });
         const tv = res.data;
         const cast = tv.credits?.cast?.slice(0, 5).map((c: any) => c.name) || [];
         const castMembers = tv.credits?.cast?.slice(0, 15).map((c: any) => ({
@@ -239,7 +274,7 @@ export const movieService = {
   getSimilarMovies: async (id: string, type: 'movie' | 'series' = 'movie'): Promise<UnifiedMovie[]> => {
     try {
       const endpoint = type === 'series' ? `/tv/${id}/similar` : `/movie/${id}/similar`;
-      const res = await api.get(endpoint, { params: { language: 'en-US', page: 1 } });
+      const res = await api.get(endpoint, { params: { language: getLangCode(), page: 1 } });
       return res.data.results.slice(0, 12).map(normalizeTMDB);
     } catch {
       return [];
@@ -249,7 +284,7 @@ export const movieService = {
   getPersonDetail: async (personId: string): Promise<PersonDetail | null> => {
     try {
       const res = await api.get(`/person/${personId}`, {
-        params: { append_to_response: 'combined_credits', language: 'en-US' }
+        params: { append_to_response: 'combined_credits', language: getLangCode() }
       });
       const person = res.data;
 
@@ -287,7 +322,7 @@ export const movieService = {
     const res = await api.get('/discover/movie', {
       params: {
         with_genres: genreId,
-        language: 'en-US',
+        language: getLangCode(),
         page: page,
         sort_by: 'popularity.desc'
       }
@@ -299,7 +334,7 @@ export const movieService = {
     const res = await api.get('/discover/tv', {
       params: {
         with_genres: genreId,
-        language: 'en-US',
+        language: getLangCode(),
         page: page,
         sort_by: 'popularity.desc'
       }
@@ -308,12 +343,12 @@ export const movieService = {
   },
 
   getUpcomingMovies: async (page: number = 1) => {
-    const res = await api.get('/movie/upcoming', { params: { language: 'en-US', region: 'US', page } });
+    const res = await api.get('/movie/upcoming', { params: { language: getLangCode(), region: getRegionCode(), page } });
     return res.data.results.map(normalizeTMDB);
   },
 
   getTrendingMovies: async (page: number = 1) => {
-    const res = await api.get('/trending/movie/week', { params: { language: 'en-US', page } });
+    const res = await api.get('/trending/movie/week', { params: { language: getLangCode(), page } });
     return res.data.results.map(normalizeTMDB);
   },
 
@@ -324,7 +359,7 @@ export const movieService = {
       const endpoint = pickType === 'series' ? '/discover/tv' : '/discover/movie';
 
       const params: Record<string, any> = {
-        language: 'en-US',
+        language: getLangCode(),
         page: randomPage,
         sort_by: 'vote_count.desc',
         'vote_average.gte': 7,
