@@ -14,6 +14,17 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
   const updates = [
     {
       date: 'June 12, 2026',
+      title: 'Upcoming Releases & Coming Soon System',
+      items: [
+        'Added a dedicated "Akan Datang" / "Coming Soon" movies row directly under Trending Now on the Home page.',
+        'Implemented dynamic "Coming Soon" badging with a pulsing amber indicator on upcoming movie cards.',
+        'Refactored the watch page player to display a beautiful unreleased/coming soon splash screen with the official release date instead of broken video streams.',
+        'Disabled direct streaming for upcoming movies in details modals, transforming the watch action into an inactive "Coming Soon" calendar indicator.',
+        'Integrated language translation keys and fallback fetch mechanisms for seamless state restoration of upcoming movies.'
+      ]
+    },
+    {
+      date: 'June 12, 2026',
       title: 'Discovery & Exploration Upgrade',
       items: [
         'Added YouTube trailer embed inside the movie detail modal — watch trailers without leaving the page.',

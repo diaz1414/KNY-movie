@@ -1,6 +1,6 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "downloadUrl": "https://drive.google.com/drive/folders/1FwuefbOuDoAGmteP60an6l1VqrZUy6mq?usp=sharing",
-  "changelog": "Update: Added Continue Watching history and Swipe Navigation (Back/Forward) for Android.",
+  "changelog": "Update: Added dynamic Coming Soon badges, unreleased play limitations, and Home page Upcoming Movies row.",
   "isCritical": false
 }
