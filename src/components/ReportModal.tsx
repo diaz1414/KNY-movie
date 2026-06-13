@@ -32,6 +32,34 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, defaultMovie
     { id: 'other' as const, label: `💬 ${t('report_cat_other', 'Bug Lain / Masukan')}` },
   ];
 
+  const getDeviceOS = () => {
+    const ua = navigator.userAgent;
+    if (ua.includes('Windows')) return 'Windows';
+    if (ua.includes('Macintosh') || ua.includes('Mac OS X')) return 'macOS';
+    if (ua.includes('Android')) return 'Android';
+    if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+    if (ua.includes('Linux')) return 'Linux';
+    return 'OS Tidak Dikenal';
+  };
+
+  const getDeviceBrowser = () => {
+    const ua = navigator.userAgent;
+    if (ua.includes('Edg/')) return 'Microsoft Edge';
+    if (ua.includes('Chrome/')) return 'Google Chrome';
+    if (ua.includes('Firefox/')) return 'Mozilla Firefox';
+    if (ua.includes('Safari/') && !ua.includes('Chrome')) return 'Apple Safari';
+    return 'Browser Tidak Dikenal';
+  };
+
+  const getCategoryColor = (cat: 'broken' | 'subtitle' | 'info' | 'other') => {
+    switch (cat) {
+      case 'broken': return 15010068; // Red (#E50914)
+      case 'subtitle': return 16096779; // Amber (#F59E0B)
+      case 'info': return 3900150; // Blue (#3B82F6)
+      default: return 9133302; // Purple (#8B5CF6)
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!description.trim()) return;
@@ -40,19 +68,50 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, defaultMovie
 
     try {
       const selectedLabel = CATEGORY_OPTIONS.find(opt => opt.id === category)?.label || category;
+      const cleanCategory = selectedLabel.replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, '').trim();
+
+      const embedDescription = [
+        '🎬 **DETAIL KONTEN**',
+        '```yaml',
+        `Judul    : ${movieTitle.trim() || 'Tidak disebutkan (General)'}`,
+        `Kategori : ${cleanCategory}`,
+        '```',
+        '💻 **DATA PERANGKAT**',
+        '```yaml',
+        `Sistem   : ${getDeviceOS()}`,
+        `Browser  : ${getDeviceBrowser()}`,
+        '```',
+        '🌐 **DATA NAVIGASI**',
+        '```yaml',
+        `URL      : ${window.location.href}`,
+        '```',
+        `🔗 **Link Aktif:** [Klik untuk Buka Halaman Laporan](${window.location.href})`,
+        '',
+        '💬 **DESKRIPSI MASALAH**',
+        '```',
+        description.trim(),
+        '```'
+      ].join('\n');
 
       const payload = {
-        content: '📢 **Laporan Masalah Baru (New Issue Report)**',
+        username: 'Yuk Kita Nonton - Report Bot',
+        avatar_url: 'https://yknmovies.diaww.my.id/logo.png',
         embeds: [
           {
-            title: `📌 Kategori: ${selectedLabel.substring(3)}`, // strip emoji
-            description: description,
-            color: 15010068, // Netflix Red hex equivalent (#E50914)
-            fields: [
-              { name: '🎬 Judul Film/Series', value: movieTitle.trim() || 'Tidak disebutkan (General)', inline: true },
-              { name: '🌐 URL Halaman', value: window.location.href, inline: true },
-              { name: '📱 User Agent', value: navigator.userAgent }
-            ],
+            author: {
+              name: '🍿 Yuk Kita Nonton - Report',
+              icon_url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=150&h=150&q=80'
+            },
+            title: '🚨 NEW REPORT',
+            description: embedDescription,
+            color: getCategoryColor(category),
+            thumbnail: {
+              url: 'https://yknmovies.diaww.my.id/logo.png'
+            },
+            footer: {
+              text: 'Yuk Kita Nonton Logs • Sistem Tiket Otomatis',
+              icon_url: 'https://yknmovies.diaww.my.id/logo.png'
+            },
             timestamp: new Date().toISOString()
           }
         ]
@@ -184,11 +243,10 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, defaultMovie
                               key={opt.id}
                               type="button"
                               onClick={() => setCategory(opt.id)}
-                              className={`text-left py-3 sm:py-3.5 px-3.5 sm:px-4 rounded-2xl text-[11px] sm:text-xs leading-tight font-black font-outfit transition-all duration-300 border cursor-pointer select-none ${
-                                isSelected
-                                  ? 'bg-gradient-to-br from-netflix-red to-red-700 border-netflix-red text-white shadow-[0_0_25px_rgba(229,9,20,0.3)] scale-[1.02]'
-                                  : 'bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/15 hover:scale-[1.01]'
-                              }`}
+                              className={`text-left py-3 sm:py-3.5 px-3.5 sm:px-4 rounded-2xl text-[11px] sm:text-xs leading-tight font-black font-outfit transition-all duration-300 border cursor-pointer select-none ${isSelected
+                                ? 'bg-gradient-to-br from-netflix-red to-red-700 border-netflix-red text-white shadow-[0_0_25px_rgba(229,9,20,0.3)] scale-[1.02]'
+                                : 'bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/15 hover:scale-[1.01]'
+                                }`}
                             >
                               {opt.label}
                             </button>
