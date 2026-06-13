@@ -32,7 +32,7 @@ const Home: React.FC = () => {
 
   // Restore state on mount
   useEffect(() => {
-    const savedState = sessionStorage.getItem('home_state');
+    const savedState = sessionStorage.getItem('home_state_v1.0.3');
     if (savedState) {
       const {
         popularMovies: savedPop,
@@ -134,8 +134,8 @@ const Home: React.FC = () => {
     // Scroll handling for state restoration only
     const handleScroll = () => {
       if (popularMovies.length > 0) {
-        const current = JSON.parse(sessionStorage.getItem('home_state') || '{}');
-        sessionStorage.setItem('home_state', JSON.stringify({
+        const current = JSON.parse(sessionStorage.getItem('home_state_v1.0.3') || '{}');
+        sessionStorage.setItem('home_state_v1.0.3', JSON.stringify({
           ...current,
           scrollY: window.scrollY
         }));
@@ -150,7 +150,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const handleSaveState = () => {
       if (popularMovies.length > 0) {
-        sessionStorage.setItem('home_state', JSON.stringify({
+        sessionStorage.setItem('home_state_v1.0.3', JSON.stringify({
           popularMovies,
           recentMovies,
           popularSeries,
@@ -166,8 +166,8 @@ const Home: React.FC = () => {
 
     const handleScroll = () => {
       if (popularMovies.length > 0) {
-        const current = JSON.parse(sessionStorage.getItem('home_state') || '{}');
-        sessionStorage.setItem('home_state', JSON.stringify({
+        const current = JSON.parse(sessionStorage.getItem('home_state_v1.0.3') || '{}');
+        sessionStorage.setItem('home_state_v1.0.3', JSON.stringify({
           ...current,
           scrollY: window.scrollY
         }));
