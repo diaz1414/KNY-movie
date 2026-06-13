@@ -18,22 +18,7 @@ const getLangCode = () => {
   return map[lng] || 'en-US';
 };
 
-const getRegionCode = () => {
-  const lng = i18n.language || 'en';
-  const map: Record<string, string> = {
-    id: 'ID',
-    en: 'US',
-    ja: 'JP',
-    ko: 'KR',
-    es: 'ES',
-    fr: 'FR',
-    de: 'DE',
-    zh: 'CN',
-    ar: 'SA',
-    ru: 'RU'
-  };
-  return map[lng] || 'US';
-};
+
 
 // --- Configuration ---
 
@@ -144,22 +129,22 @@ const api = axios.create({
 
 export const movieService = {
   getPopularMovies: async (page: number = 1) => {
-    const res = await api.get('/movie/popular', { params: { language: getLangCode(), region: getRegionCode(), page } });
+    const res = await api.get('/movie/popular', { params: { language: getLangCode(), page } });
     return res.data.results.map(normalizeTMDB);
   },
 
   getRecentMovies: async (page: number = 1) => {
-    const res = await api.get('/movie/now_playing', { params: { language: getLangCode(), region: getRegionCode(), page } });
+    const res = await api.get('/movie/now_playing', { params: { language: getLangCode(), page } });
     return res.data.results.map(normalizeTMDB);
   },
 
   getTopRatedMovies: async (page: number = 1) => {
-    const res = await api.get('/movie/top_rated', { params: { language: getLangCode(), region: getRegionCode(), page } });
+    const res = await api.get('/movie/top_rated', { params: { language: getLangCode(), page } });
     return res.data.results.map(normalizeTMDB);
   },
 
   getPopularSeries: async (page: number = 1) => {
-    const res = await api.get('/tv/popular', { params: { language: getLangCode(), region: getRegionCode(), page } });
+    const res = await api.get('/tv/popular', { params: { language: getLangCode(), page } });
     return res.data.results.map(normalizeTMDB);
   },
 
@@ -405,7 +390,7 @@ export const movieService = {
   },
 
   getUpcomingMovies: async (page: number = 1) => {
-    const res = await api.get('/movie/upcoming', { params: { language: getLangCode(), region: getRegionCode(), page } });
+    const res = await api.get('/movie/upcoming', { params: { language: getLangCode(), page } });
     return res.data.results.map(normalizeTMDB);
   },
 
