@@ -472,8 +472,8 @@ const Home: React.FC = () => {
                               key={p}
                               onClick={() => loadExploreContent(p)}
                               className={`shrink-0 w-10 h-10 md:w-11 md:h-11 rounded-full font-black font-outfit text-sm transition-all duration-300 cursor-pointer ${explorePage === p
-                                  ? 'bg-netflix-red text-white shadow-[0_0_15px_rgba(229,9,20,0.4)] scale-105'
-                                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-netflix-red text-white shadow-[0_0_15px_rgba(229,9,20,0.4)] scale-105'
+                                : 'text-zinc-400 hover:text-white hover:bg-white/5'
                                 }`}
                             >
                               {p}
