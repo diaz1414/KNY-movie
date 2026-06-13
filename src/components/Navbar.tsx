@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { Sun, Moon, Globe, X, Film, Search, Zap, Smile, Ghost, Heart, Rocket, AlertCircle, Drama, Wand2, Sparkles, Skull, Compass, CheckIcon, ChevronDown, Tv, Clapperboard } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { Globe, X, Film, Search, Zap, Smile, Ghost, Heart, Rocket, AlertCircle, Drama, Wand2, Sparkles, Skull, Compass, CheckIcon, ChevronDown, Tv, Clapperboard } from 'lucide-react';
 import { useRegion } from '../context/RegionContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { movieService, type UnifiedMovie } from '../services/api';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { theme, toggleTheme } = useTheme();
   useRegion(); // Keep for side effects (region detection), but countryCode not displayed
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -151,7 +149,7 @@ const Navbar: React.FC = () => {
             borderBottom: '1px solid rgba(255, 255, 255, 0)',
           },
           scrolled: {
-            backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
             height: '70px',
             backdropFilter: 'blur(20px) saturate(180%)',
             borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
@@ -368,14 +366,6 @@ const Navbar: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 border border-white/10 cursor-pointer opacity-70 hover:opacity-100 hover:bg-white/10 transition-all duration-300"
-            >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
           </div>
 
           {/* Removed old select menu for a better experience in the mobile overlay */}
@@ -542,25 +532,8 @@ const Navbar: React.FC = () => {
                   </div>
                 </motion.div>
               </div>
-
-              {/* Bottom Controls */}
-              <div className="w-full max-w-xs space-y-10">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="space-y-4"
-                >
-                  <p className="text-[9px] font-black text-white/30 uppercase tracking-[6px] text-center">Appearance</p>
-                  <button
-                    onClick={toggleTheme}
-                    className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl bg-white/5 border border-white/8 text-white active:scale-95 transition-all font-bold text-sm"
-                  >
-                    {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-blue-400" />}
-                    {theme === 'dark' ? t('light_mode') : t('dark_mode')}
-                  </button>
-                </motion.div>
-
+              {/* Language Selector */}
+              <div className="w-full max-w-xs pb-10">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
