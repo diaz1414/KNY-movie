@@ -32,7 +32,7 @@ const Home: React.FC = () => {
 
   // Restore state on mount
   useEffect(() => {
-    const savedState = sessionStorage.getItem('home_state_v1.0.3');
+    const savedState = sessionStorage.getItem('home_state');
     if (savedState) {
       const {
         popularMovies: savedPop,
@@ -134,8 +134,8 @@ const Home: React.FC = () => {
     // Scroll handling for state restoration only
     const handleScroll = () => {
       if (popularMovies.length > 0) {
-        const current = JSON.parse(sessionStorage.getItem('home_state_v1.0.3') || '{}');
-        sessionStorage.setItem('home_state_v1.0.3', JSON.stringify({
+        const current = JSON.parse(sessionStorage.getItem('home_state') || '{}');
+        sessionStorage.setItem('home_state', JSON.stringify({
           ...current,
           scrollY: window.scrollY
         }));
@@ -150,7 +150,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const handleSaveState = () => {
       if (popularMovies.length > 0) {
-        sessionStorage.setItem('home_state_v1.0.3', JSON.stringify({
+        sessionStorage.setItem('home_state', JSON.stringify({
           popularMovies,
           recentMovies,
           popularSeries,
@@ -166,8 +166,8 @@ const Home: React.FC = () => {
 
     const handleScroll = () => {
       if (popularMovies.length > 0) {
-        const current = JSON.parse(sessionStorage.getItem('home_state_v1.0.3') || '{}');
-        sessionStorage.setItem('home_state_v1.0.3', JSON.stringify({
+        const current = JSON.parse(sessionStorage.getItem('home_state') || '{}');
+        sessionStorage.setItem('home_state', JSON.stringify({
           ...current,
           scrollY: window.scrollY
         }));
@@ -310,169 +310,168 @@ const Home: React.FC = () => {
                     </div>
                   </div>
 
-                    {/* NEW: Continue Watching Section */}
-                    {(() => {
-                      const lastWatched = localStorage.getItem('ykn_last_watched');
-                      if (!lastWatched) return null;
-                      const item = JSON.parse(lastWatched);
-                      return (
-                        <div className="px-[var(--container-padding)] animate-slide-up">
-                          <div className="flex items-center gap-2.5 mb-6">
-                            <div className="w-1.5 h-6 bg-netflix-red rounded-full shadow-[0_0_15px_rgba(229,9,20,0.5)]"></div>
-                            <h2 className="text-2xl font-black font-outfit text-white tracking-tight uppercase">
-                              Lanjutkan Menonton
-                            </h2>
-                          </div>
-                          
-                          <div 
-                            onClick={() => window.location.href = `/watch.html?id=${item.id}${item.type === 'tv' ? `&s=${item.season}&e=${item.episode}` : ''}`}
-                            className="group relative w-full md:w-[450px] aspect-[16/9] rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-netflix-red transition-all duration-500 shadow-2xl"
-                          >
-                            <img src={item.poster} alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="w-16 h-16 rounded-full bg-netflix-red flex items-center justify-center text-white scale-75 group-hover:scale-100 transition-transform duration-500">
-                                <Play fill="white" size={24} className="ml-1" />
-                              </div>
-                            </div>
-                            <div className="absolute bottom-6 left-6 right-6">
-                              <h3 className="text-xl font-black text-white mb-1 group-hover:text-netflix-red transition-colors">{item.title}</h3>
-                              <div className="flex items-center gap-3">
-                                <span className="text-[10px] font-black bg-netflix-red text-white px-2 py-0.5 rounded shadow-lg uppercase">
-                                  {item.type}
-                                </span>
-                                {item.type === 'tv' && (
-                                  <span className="text-xs font-bold text-white/60">
-                                    Season {item.season} • Episode {item.episode}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="absolute bottom-0 left-0 h-1 bg-netflix-red w-[70%] shadow-[0_0_10px_rgba(229,9,20,0.8)]" />
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-
-                    <MovieRow
-                      id="movies"
-                      title={t('new_releases')}
-                      movies={recentMovies}
-                    />
-
-
-
-                    <MovieRow
-                      id="series"
-                      title={t('popular_series')}
-                      movies={popularSeries}
-                    />
-
-                    {/* Ad Rectangle Middle */}
-                    <div className="flex justify-center py-6 px-[var(--container-padding)]">
-                      <div className="rounded-2xl overflow-hidden border border-white/5 shadow-2xl p-1 bg-white/[0.02] backdrop-blur-xl">
-                        <AdBanner
-                          id="ad-middle"
-                          format="iframe"
-                          height={250}
-                          width={300}
-                          adKey="7416c14407226b70dfe1c1a8ef1ed288"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Explore More Section */}
-                    <div id="explore-section" className="pt-20 space-y-10 px-[var(--container-padding)]">
-                      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <div className="flex flex-col gap-3">
-                          <span className="text-netflix-red text-xs md:text-sm font-black uppercase tracking-[4px] md:tracking-[6px] animate-pulse flex items-center gap-2">
-                            {explorePage <= 10 ? <Sparkles size={16} /> : <Trophy size={16} />}
-                            {explorePage <= 10 ? t('new_releases') : t('top_rated')}
-                          </span>
-                          <h2 className="text-3xl md:text-6xl font-black font-outfit text-white tracking-tighter leading-tight">
-                            {explorePage <= 10 ? t('latest_explore') : t('explore_more')}
+                  {/* NEW: Continue Watching Section */}
+                  {(() => {
+                    const lastWatched = localStorage.getItem('ykn_last_watched');
+                    if (!lastWatched) return null;
+                    const item = JSON.parse(lastWatched);
+                    return (
+                      <div className="px-[var(--container-padding)] animate-slide-up">
+                        <div className="flex items-center gap-2.5 mb-6">
+                          <div className="w-1.5 h-6 bg-netflix-red rounded-full shadow-[0_0_15px_rgba(229,9,20,0.5)]"></div>
+                          <h2 className="text-2xl font-black font-outfit text-white tracking-tight uppercase">
+                            Lanjutkan Menonton
                           </h2>
                         </div>
 
-                        {/* Pagination Controls Top (Optional but premium) */}
-                        <div className="flex items-center self-start md:self-auto bg-[#111111]/80 backdrop-blur-md border border-white/5 p-1 rounded-full shadow-2xl">
-                          <button
-                            onClick={() => loadExploreContent(explorePage - 1)}
-                            disabled={explorePage === 1}
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white hover:bg-white/10 disabled:opacity-30 transition-all"
-                          >
-                            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-                          </button>
-                          <span className="w-10 h-10 md:w-14 h-10 flex items-center justify-center font-black font-outfit text-lg md:text-xl text-netflix-red">
-                            {explorePage}
-                          </span>
-                          <button
-                            onClick={() => loadExploreContent(explorePage + 1)}
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all"
-                          >
-                            <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
-                          </button>
+                        <div
+                          onClick={() => window.location.href = `/watch.html?id=${item.id}${item.type === 'tv' ? `&s=${item.season}&e=${item.episode}` : ''}`}
+                          className="group relative w-full md:w-[450px] aspect-[16/9] rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-netflix-red transition-all duration-500 shadow-2xl"
+                        >
+                          <img src={item.poster} alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="w-16 h-16 rounded-full bg-netflix-red flex items-center justify-center text-white scale-75 group-hover:scale-100 transition-transform duration-500">
+                              <Play fill="white" size={24} className="ml-1" />
+                            </div>
+                          </div>
+                          <div className="absolute bottom-6 left-6 right-6">
+                            <h3 className="text-xl font-black text-white mb-1 group-hover:text-netflix-red transition-colors">{item.title}</h3>
+                            <div className="flex items-center gap-3">
+                              <span className="text-[10px] font-black bg-netflix-red text-white px-2 py-0.5 rounded shadow-lg uppercase">
+                                {item.type}
+                              </span>
+                              {item.type === 'tv' && (
+                                <span className="text-xs font-bold text-white/60">
+                                  Season {item.season} • Episode {item.episode}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="absolute bottom-0 left-0 h-1 bg-netflix-red w-[70%] shadow-[0_0_10px_rgba(229,9,20,0.8)]" />
                         </div>
                       </div>
+                    );
+                  })()}
 
-                      <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 gap-y-12 transition-all duration-500 ${exploreLoading ? 'opacity-30 blur-sm pointer-events-none' : 'opacity-100'}`}>
-                        {exploreMovies.map((movie, index) => (
-                          <MovieCard
-                            key={`${movie.id}-${index}`}
-                            movie={movie}
-                          />
-                        ))}
+
+                  <MovieRow
+                    id="movies"
+                    title={t('new_releases')}
+                    movies={recentMovies}
+                  />
+
+
+
+                  <MovieRow
+                    id="series"
+                    title={t('popular_series')}
+                    movies={popularSeries}
+                  />
+
+                  {/* Ad Rectangle Middle */}
+                  <div className="flex justify-center py-6 px-[var(--container-padding)]">
+                    <div className="rounded-2xl overflow-hidden border border-white/5 shadow-2xl p-1 bg-white/[0.02] backdrop-blur-xl">
+                      <AdBanner
+                        id="ad-middle"
+                        format="iframe"
+                        height={250}
+                        width={300}
+                        adKey="7416c14407226b70dfe1c1a8ef1ed288"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Explore More Section */}
+                  <div id="explore-section" className="pt-20 space-y-10 px-[var(--container-padding)]">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                      <div className="flex flex-col gap-3">
+                        <span className="text-netflix-red text-xs md:text-sm font-black uppercase tracking-[4px] md:tracking-[6px] animate-pulse flex items-center gap-2">
+                          {explorePage <= 10 ? <Sparkles size={16} /> : <Trophy size={16} />}
+                          {explorePage <= 10 ? t('new_releases') : t('top_rated')}
+                        </span>
+                        <h2 className="text-3xl md:text-6xl font-black font-outfit text-white tracking-tighter leading-tight">
+                          {explorePage <= 10 ? t('latest_explore') : t('explore_more')}
+                        </h2>
                       </div>
 
-                      {/* Pagination Controls Bottom */}
-                      <div className="pt-10 flex flex-col items-center gap-6 pb-32">
-                        <div className="flex items-center justify-center gap-1.5 p-1.5 rounded-full bg-[#111111]/80 backdrop-blur-xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.6)] max-w-full overflow-x-auto no-scrollbar">
-                          <button
-                            onClick={() => loadExploreContent(explorePage - 1)}
-                            disabled={explorePage === 1}
-                            className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 disabled:opacity-20 disabled:pointer-events-none transition-all duration-300 shrink-0 cursor-pointer"
-                          >
-                            <ChevronLeft size={18} strokeWidth={2.5} />
-                          </button>
-
-                          {(() => {
-                            const pages = [];
-                            const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-                            const maxVisible = isMobile ? 5 : 10;
-                            const startPage = Math.max(1, explorePage - Math.floor(maxVisible / 2));
-                            const endPage = startPage + maxVisible - 1;
-                            for (let p = startPage; p <= endPage; p++) {
-                              pages.push(p);
-                            }
-                            return pages.map((p) => (
-                              <button
-                                key={p}
-                                onClick={() => loadExploreContent(p)}
-                                className={`shrink-0 w-10 h-10 md:w-11 md:h-11 rounded-full font-black font-outfit text-sm transition-all duration-300 cursor-pointer ${
-                                  explorePage === p
-                                    ? 'bg-netflix-red text-white shadow-[0_0_15px_rgba(229,9,20,0.4)] scale-105'
-                                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
-                                }`}
-                              >
-                                {p}
-                              </button>
-                            ));
-                          })()}
-
-                          <button
-                            onClick={() => loadExploreContent(explorePage + 1)}
-                            className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 transition-all duration-300 shrink-0 cursor-pointer"
-                          >
-                            <ChevronRight size={18} strokeWidth={2.5} />
-                          </button>
-                        </div>
-
-                        <p className="text-[10px] font-black tracking-[0.25em] text-[var(--text-muted)] uppercase">
-                          PAGE {explorePage} OF AMAZING CONTENT
-                        </p>
+                      {/* Pagination Controls Top (Optional but premium) */}
+                      <div className="flex items-center self-start md:self-auto bg-[#111111]/80 backdrop-blur-md border border-white/5 p-1 rounded-full shadow-2xl">
+                        <button
+                          onClick={() => loadExploreContent(explorePage - 1)}
+                          disabled={explorePage === 1}
+                          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white hover:bg-white/10 disabled:opacity-30 transition-all"
+                        >
+                          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+                        </button>
+                        <span className="w-10 h-10 md:w-14 h-10 flex items-center justify-center font-black font-outfit text-lg md:text-xl text-netflix-red">
+                          {explorePage}
+                        </span>
+                        <button
+                          onClick={() => loadExploreContent(explorePage + 1)}
+                          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all"
+                        >
+                          <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+                        </button>
                       </div>
                     </div>
+
+                    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 gap-y-12 transition-all duration-500 ${exploreLoading ? 'opacity-30 blur-sm pointer-events-none' : 'opacity-100'}`}>
+                      {exploreMovies.map((movie, index) => (
+                        <MovieCard
+                          key={`${movie.id}-${index}`}
+                          movie={movie}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Pagination Controls Bottom */}
+                    <div className="pt-10 flex flex-col items-center gap-6 pb-32">
+                      <div className="flex items-center justify-center gap-1.5 p-1.5 rounded-full bg-[#111111]/80 backdrop-blur-xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.6)] max-w-full overflow-x-auto no-scrollbar">
+                        <button
+                          onClick={() => loadExploreContent(explorePage - 1)}
+                          disabled={explorePage === 1}
+                          className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 disabled:opacity-20 disabled:pointer-events-none transition-all duration-300 shrink-0 cursor-pointer"
+                        >
+                          <ChevronLeft size={18} strokeWidth={2.5} />
+                        </button>
+
+                        {(() => {
+                          const pages = [];
+                          const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+                          const maxVisible = isMobile ? 5 : 10;
+                          const startPage = Math.max(1, explorePage - Math.floor(maxVisible / 2));
+                          const endPage = startPage + maxVisible - 1;
+                          for (let p = startPage; p <= endPage; p++) {
+                            pages.push(p);
+                          }
+                          return pages.map((p) => (
+                            <button
+                              key={p}
+                              onClick={() => loadExploreContent(p)}
+                              className={`shrink-0 w-10 h-10 md:w-11 md:h-11 rounded-full font-black font-outfit text-sm transition-all duration-300 cursor-pointer ${explorePage === p
+                                  ? 'bg-netflix-red text-white shadow-[0_0_15px_rgba(229,9,20,0.4)] scale-105'
+                                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                }`}
+                            >
+                              {p}
+                            </button>
+                          ));
+                        })()}
+
+                        <button
+                          onClick={() => loadExploreContent(explorePage + 1)}
+                          className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 transition-all duration-300 shrink-0 cursor-pointer"
+                        >
+                          <ChevronRight size={18} strokeWidth={2.5} />
+                        </button>
+                      </div>
+
+                      <p className="text-[10px] font-black tracking-[0.25em] text-[var(--text-muted)] uppercase">
+                        PAGE {explorePage} OF AMAZING CONTENT
+                      </p>
+                    </div>
+                  </div>
                 </>
               )}
             </div>
