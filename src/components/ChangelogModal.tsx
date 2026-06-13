@@ -19,7 +19,7 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
         'Implemented a premium floating report button with responsive width expansion on desktop and minimal touch sizing on mobile.',
         'Developed a beautiful glassmorphic Report Modal featuring responsive input scaling and Netflix-themed gradient glows.',
         'Integrated Discord Webhook system with custom logo branding and dynamic color indicators.',
-        'Formatted Discord alert embeds with professional FiveM log-style aligned-colon structures, device OS/browser details, and active navigation links.',
+        'Formatted Discord alert embeds with professional aligned-colon structures (design by diaww), device OS/browser details, and active navigation links.',
         'Added a search button next to the burger menu on mobile layout for better accessibility.',
         'Refactored the mobile search overlay with a solid black background, preventing overlay collisions with logo and burger button.',
         'Fixed overlapping TMDB ID routing where TV series and movies sharing the same ID would load incorrect content.',
