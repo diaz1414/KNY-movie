@@ -155,16 +155,16 @@
         }
 
         // --- ANTI-REDIRECT & ANTI-POPUP SYSTEM ---
-        (function() {
+        (function () {
             const originalOpen = window.open;
-            window.open = function() {
+            window.open = function () {
                 console.log("Blocked a popup attempt.");
                 return null;
             };
 
             // Prevent programmatic top-level navigation from iframes
             // This is a second layer of defense alongside the sandbox attribute
-            window.onbeforeunload = function() {
+            window.onbeforeunload = function () {
                 // If the app is redirecting itself (e.g. back to home), allow it.
                 // But if it's an external domain, we might want to alert or block.
                 // However, onbeforeunload is limited.
@@ -243,15 +243,28 @@
     </div>
 
     <!-- Android Offline Overlay -->
-    <div id="android-offline-overlay" style="display: none;" class="fixed inset-0 z-[20000] bg-black flex flex-col items-center justify-center p-6 text-center">
+    <div id="android-offline-overlay" style="display: none;"
+        class="fixed inset-0 z-[20000] bg-black flex flex-col items-center justify-center p-6 text-center">
         <div class="relative mb-8">
             <div class="absolute inset-0 bg-red-600 blur-3xl opacity-30 animate-pulse rounded-full"></div>
-            <div class="relative w-24 h-24 bg-red-900/40 border border-red-500/50 rounded-3xl flex items-center justify-center shadow-2xl">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+            <div
+                class="relative w-24 h-24 bg-red-900/40 border border-red-500/50 rounded-3xl flex items-center justify-center shadow-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="text-red-500">
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                    <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+                    <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+                    <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+                    <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                    <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                </svg>
             </div>
         </div>
         <h2 class="text-3xl font-black text-white mb-4 uppercase tracking-tighter font-outfit">Connection Lost</h2>
-        <p class="text-zinc-400 text-lg font-medium leading-relaxed mb-8 max-w-sm">Oops! It looks like you've been disconnected. Please check your internet settings to continue streaming.</p>
+        <p class="text-zinc-400 text-lg font-medium leading-relaxed mb-8 max-w-sm">Oops! It looks like you've been
+            disconnected. Please check your internet settings to continue streaming.</p>
     </div>
 
     <script>
@@ -381,16 +394,24 @@
             <div id="trailer-section" class="mb-14 animate-slide-up [animation-delay:0.35s]" style="display: none;">
                 <div class="flex items-center gap-2.5 mb-5">
                     <i data-lucide="clapperboard" class="w-3.5 h-3.5 text-netflix-red"></i>
-                    <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Official Trailer</span>
+                    <span class="text-[0.7rem] font-black tracking-[4px] uppercase text-netflix-red">Official
+                        Trailer</span>
                 </div>
-                <button id="trailer-btn" class="flex items-center gap-3 px-6 py-3.5 bg-netflix-red/10 hover:bg-netflix-red/20 border border-netflix-red/30 hover:border-netflix-red/60 rounded-2xl text-white font-black text-sm uppercase tracking-wider transition-all duration-300 group mb-5">
-                    <div class="w-8 h-8 rounded-full bg-netflix-red flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                <button id="trailer-btn"
+                    class="flex items-center gap-3 px-6 py-3.5 bg-netflix-red/10 hover:bg-netflix-red/20 border border-netflix-red/30 hover:border-netflix-red/60 rounded-2xl text-white font-black text-sm uppercase tracking-wider transition-all duration-300 group mb-5">
+                    <div
+                        class="w-8 h-8 rounded-full bg-netflix-red flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                         <i data-lucide="play" class="w-4 h-4 text-white fill-white"></i>
                     </div>
                     <span class="trailer-btn-text">Tonton Trailer</span>
                 </button>
-                <div id="trailer-box" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl" style="display: none;">
-                    <iframe id="trailer-iframe" src="" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="origin" class="absolute inset-0 w-full h-full border-none"></iframe>
+                <div id="trailer-box"
+                    class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl"
+                    style="display: none;">
+                    <iframe id="trailer-iframe" src=""
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                        allowfullscreen referrerpolicy="origin"
+                        class="absolute inset-0 w-full h-full border-none"></iframe>
                 </div>
             </div>
 
@@ -449,7 +470,8 @@
                         onclick="scrollArea('season-list', 'prev')">
                         <i data-lucide="chevron-left" class="w-6 h-6"></i>
                     </button>
-                    <div id="season-list" class="season-list flex overflow-x-auto gap-4 pt-4 pb-6 px-1 no-scrollbar"></div>
+                    <div id="season-list" class="season-list flex overflow-x-auto gap-4 pt-4 pb-6 px-1 no-scrollbar">
+                    </div>
                     <button
                         class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
                         onclick="scrollArea('season-list', 'next')">
@@ -596,8 +618,7 @@
                 </div>
                 <h2 class="font-outfit text-white text-[2rem] font-black mb-6">More Like This</h2>
                 <div class="rec-container relative">
-                    <button
-                        id="rec-prev-btn"
+                    <button id="rec-prev-btn"
                         class="nav-btn prev absolute top-1/2 -translate-y-1/2 -left-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
                         onclick="scrollRecs('prev')">
                         <i data-lucide="chevron-left" class="w-6 h-6"></i>
@@ -607,8 +628,7 @@
                             class="loader-label text-[0.6rem] font-extrabold tracking-[6px] text-white/40 uppercase my-8">
                             FINDING SIMILAR CONTENT...</div>
                     </div>
-                    <button
-                        id="rec-next-btn"
+                    <button id="rec-next-btn"
                         class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
                         onclick="scrollRecs('next')">
                         <i data-lucide="chevron-right" class="w-6 h-6"></i>
@@ -874,7 +894,7 @@
                     if (autoNextWrapper) {
                         autoNextWrapper.style.display = 'none';
                     }
-                    
+
                     // Replace player container with a beautiful "Coming Soon" card
                     const playerWrapper = document.getElementById('player-wrapper');
                     if (playerWrapper) {
@@ -1000,7 +1020,7 @@
                         const sbUrl = 'https://amdhbxowpnpwhtxxayuj.supabase.co';
                         const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtZGhieG93cG5wd2h0eHhheXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNzQ0NzIsImV4cCI6MjA4Nzg1MDQ3Mn0.SW4U3CS-GrChptrtKyZnKy5x-wiIaNIXHULPGO56DFo';
                         const sb = supabase.createClient(sbUrl, sbKey);
-                        
+
                         async function logWatchView() {
                             try {
                                 const { data } = await sb
@@ -1043,7 +1063,7 @@
                 const saveProgress = (s, e, serverIdx) => {
                     const data = { s, e, server: serverIdx, timestamp: Date.now() };
                     localStorage.setItem(getStorageKey(), JSON.stringify(data));
-                    
+
                     // NEW: Global Progress for Home Page
                     const globalData = {
                         id: movieId,
@@ -1109,7 +1129,7 @@
                     window.changeSeason = (sNum, el) => {
                         currentSeason = sNum;
                         currentEp = 1; // Reset to ep 1 when season changes
-                        
+
                         // Manage active styling on inner posters
                         document.querySelectorAll('.season-card').forEach(c => {
                             const poster = c.querySelector('.season-poster');
