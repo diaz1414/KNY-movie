@@ -487,12 +487,12 @@ const Home: React.FC = () => {
       {/* Floating Report Button */}
       <button
         onClick={() => setShowReportModal(true)}
-        className="fixed bottom-[5.5rem] right-6 z-[990] flex items-center justify-start w-12 hover:w-48 h-12 bg-zinc-950/90 hover:bg-netflix-red border border-white/10 hover:border-netflix-red/50 text-zinc-300 hover:text-white rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 ease-out group cursor-pointer overflow-hidden"
+        className="fixed bottom-[5.5rem] right-6 z-[990] flex items-center justify-center sm:justify-start w-12 sm:hover:w-48 h-12 bg-zinc-950/90 hover:bg-netflix-red border border-white/10 hover:border-netflix-red/50 text-zinc-300 hover:text-white rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 ease-out group cursor-pointer overflow-hidden"
         title={t('report_title', 'Laporkan Masalah')}
       >
         <div className="flex items-center gap-2.5 px-3.5 whitespace-nowrap">
           <AlertTriangle size={18} className="shrink-0 group-hover:rotate-12 transition-transform duration-300" />
-          <span className="text-[11px] font-black uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="text-[11px] font-black uppercase tracking-wider hidden sm:inline-block opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             {t('report_title', 'Laporkan Masalah')}
           </span>
         </div>

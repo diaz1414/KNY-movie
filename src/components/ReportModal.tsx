@@ -184,7 +184,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, defaultMovie
                               key={opt.id}
                               type="button"
                               onClick={() => setCategory(opt.id)}
-                              className={`text-left py-3.5 px-4 rounded-2xl text-[12px] font-black font-outfit transition-all duration-300 border cursor-pointer select-none ${
+                              className={`text-left py-3 sm:py-3.5 px-3.5 sm:px-4 rounded-2xl text-[11px] sm:text-xs leading-tight font-black font-outfit transition-all duration-300 border cursor-pointer select-none ${
                                 isSelected
                                   ? 'bg-gradient-to-br from-netflix-red to-red-700 border-netflix-red text-white shadow-[0_0_25px_rgba(229,9,20,0.3)] scale-[1.02]'
                                   : 'bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/15 hover:scale-[1.01]'
