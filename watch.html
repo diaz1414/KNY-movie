@@ -192,6 +192,13 @@
             filter: blur(60px) brightness(0.25);
             transform: scale(1.1);
         }
+
+        /* Force hide navigation scroll buttons on mobile/tablet viewports to prevent inline override bugs */
+        @media (max-width: 1023px) {
+            .nav-btn {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 
@@ -1379,6 +1386,8 @@
                         document.getElementById('main-container').style.display = 'block';
                         // Re-initialize icons after container is visible
                         lucide.createIcons();
+                        // Dispatch a resize event to trigger scroll button calculations once elements have visible dimensions
+                        window.dispatchEvent(new Event('resize'));
                     }, 800);
                 }, 1500);
 
@@ -1525,13 +1534,18 @@
         const recNext = document.getElementById('rec-next-btn');
         if (recGrid && recPrev && recNext) {
             const updateRecBtns = () => {
-                recPrev.style.opacity = recGrid.scrollLeft > 5 ? '1' : '0.25';
-                recPrev.style.pointerEvents = recGrid.scrollLeft > 5 ? 'auto' : 'none';
-                const atEnd = recGrid.scrollLeft + recGrid.clientWidth >= recGrid.scrollWidth - 5;
-                recNext.style.opacity = atEnd ? '0.25' : '1';
-                recNext.style.pointerEvents = atEnd ? 'none' : 'auto';
+                const hasOverflow = recGrid.scrollWidth > recGrid.clientWidth;
+                if (hasOverflow) {
+                    recPrev.style.display = recGrid.scrollLeft > 5 ? 'flex' : 'none';
+                    const atEnd = recGrid.scrollLeft + recGrid.clientWidth >= recGrid.scrollWidth - 5;
+                    recNext.style.display = atEnd ? 'none' : 'flex';
+                } else {
+                    recPrev.style.display = 'none';
+                    recNext.style.display = 'none';
+                }
             };
             recGrid.addEventListener('scroll', updateRecBtns);
+            window.addEventListener('resize', updateRecBtns);
             new MutationObserver(() => setTimeout(updateRecBtns, 100)).observe(recGrid, { childList: true });
             setTimeout(updateRecBtns, 800);
         }
