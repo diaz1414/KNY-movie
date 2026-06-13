@@ -391,7 +391,25 @@ export const movieService = {
 
   getUpcomingMovies: async (page: number = 1) => {
     const res = await api.get('/movie/upcoming', { params: { language: getLangCode(), region: 'US', page } });
-    return res.data.results.map(normalizeTMDB);
+    const movies = res.data.results.map(normalizeTMDB);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return movies.filter((movie: UnifiedMovie) => {
+      if (!movie.releaseDate) return false;
+      const parts = movie.releaseDate.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+          const release = new Date(year, month, day);
+          return release > today;
+        }
+      }
+      const fallback = new Date(movie.releaseDate);
+      return !isNaN(fallback.getTime()) && fallback > today;
+    });
   },
 
   getTrendingMovies: async (page: number = 1) => {
