@@ -20,24 +20,24 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
   const [phase, setPhase] = useState<'pick' | 'result'>('pick');
 
   const GENRE_OPTIONS = [
-    { id: '', label: `🎲 ${t('random_genre_all', 'Bebas (Semua Genre)')}` },
-    { id: '28', label: `💥 ${t('genre_action', 'Action')}` },
-    { id: '35', label: `😂 ${t('genre_comedy', 'Comedy')}` },
-    { id: '27', label: `👻 ${t('genre_horror', 'Horror')}` },
-    { id: '10749', label: `💕 ${t('genre_romance', 'Romance')}` },
-    { id: '878', label: `🚀 ${t('genre_scifi', 'Sci-Fi')}` },
-    { id: '53', label: `😱 ${t('genre_thriller', 'Thriller')}` },
-    { id: '18', label: `🎭 ${t('genre_drama', 'Drama')}` },
-    { id: '14', label: `🧙 ${t('genre_fantasy', 'Fantasy')}` },
-    { id: '16', label: `✨ ${t('genre_animation', 'Animation')}` },
-    { id: '80', label: `🔫 ${t('genre_crime', 'Crime')}` },
-    { id: '12', label: `🗺️ ${t('genre_adventure', 'Adventure')}` },
+    { id: '', label: t('random_genre_all', 'Semua Genre'), icon: '🎦' },
+    { id: '28', label: t('genre_action', 'Action'), icon: '💥' },
+    { id: '35', label: t('genre_comedy', 'Comedy'), icon: '😂' },
+    { id: '27', label: t('genre_horror', 'Horror'), icon: '👻' },
+    { id: '10749', label: t('genre_romance', 'Romance'), icon: '💕' },
+    { id: '878', label: t('genre_scifi', 'Sci-Fi'), icon: '🚀' },
+    { id: '53', label: t('genre_thriller', 'Thriller'), icon: '😱' },
+    { id: '18', label: t('genre_drama', 'Drama'), icon: '🎭' },
+    { id: '14', label: t('genre_fantasy', 'Fantasy'), icon: '🧙' },
+    { id: '16', label: t('genre_animation', 'Animation'), icon: '✨' },
+    { id: '80', label: t('genre_crime', 'Crime'), icon: '🔫' },
+    { id: '12', label: t('genre_adventure', 'Adventure'), icon: '🗺️' },
   ];
 
   const TYPE_OPTIONS = [
-    { id: 'both' as const, label: `🎬 ${t('random_type_all', 'Semua')}` },
-    { id: 'movie' as const, label: `🎥 ${t('movies', 'Film')}` },
-    { id: 'series' as const, label: `📺 ${t('series', 'Series')}` },
+    { id: 'both' as const, label: t('random_type_all', 'Semua'), icon: '🎬' },
+    { id: 'movie' as const, label: t('movies', 'Film'), icon: '🎥' },
+    { id: 'series' as const, label: t('series', 'Series'), icon: '📺' },
   ];
 
   const SPIN_MESSAGES = [
@@ -149,18 +149,19 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
                   >
                     {/* Type Selector */}
                     <div className="space-y-3">
-                      <p className="text-[10px] font-black uppercase tracking-[4px] text-white/40">{t('random_content_type', 'Tipe Konten')}</p>
-                      <div className="flex gap-2">
+                      <p className="text-[9px] font-black uppercase tracking-[5px] text-white/30">Tipe Konten</p>
+                      <div className="flex gap-2 p-1 bg-white/[0.04] rounded-2xl border border-white/8">
                         {TYPE_OPTIONS.map(opt => (
                           <button
                             key={opt.id}
                             onClick={() => setSelectedType(opt.id)}
-                            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all border ${
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all duration-200 ${
                               selectedType === opt.id
-                                ? 'bg-netflix-red border-netflix-red text-white shadow-lg shadow-red-900/30'
-                                : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white'
+                                ? 'bg-netflix-red text-white shadow-lg shadow-red-900/30'
+                                : 'text-white/40 hover:text-white'
                             }`}
                           >
+                            <span className="text-sm">{opt.icon}</span>
                             {opt.label}
                           </button>
                         ))}
@@ -169,19 +170,20 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
 
                     {/* Genre Selector */}
                     <div className="space-y-3">
-                      <p className="text-[10px] font-black uppercase tracking-[4px] text-white/40">{t('random_genre', 'Genre')}</p>
-                      <div className="grid grid-cols-2 gap-2 max-h-52 overflow-y-auto premium-scroll pr-1">
+                      <p className="text-[9px] font-black uppercase tracking-[5px] text-white/30">Genre</p>
+                      <div className="grid grid-cols-4 gap-1.5">
                         {GENRE_OPTIONS.map(opt => (
                           <button
                             key={opt.id}
                             onClick={() => setSelectedGenre(opt.id)}
-                            className={`text-left py-2.5 px-4 rounded-xl text-xs font-bold transition-all border ${
+                            className={`flex flex-col items-center gap-1.5 py-3 px-1.5 rounded-xl border transition-all duration-200 ${
                               selectedGenre === opt.id
-                                ? 'bg-netflix-red/20 border-netflix-red/50 text-white'
-                                : 'bg-white/5 border-white/5 text-white/50 hover:bg-white/10 hover:text-white hover:border-white/20'
+                                ? 'bg-netflix-red border-netflix-red text-white shadow-md shadow-red-900/30'
+                                : 'bg-white/[0.03] border-white/6 text-white/50 hover:border-white/20 hover:text-white'
                             }`}
                           >
-                            {opt.label}
+                            <span className="text-lg leading-none">{opt.icon}</span>
+                            <span className="text-[8px] font-black uppercase tracking-wide leading-none text-center">{opt.label}</span>
                           </button>
                         ))}
                       </div>

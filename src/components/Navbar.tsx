@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { Sun, Moon, Globe, X, Film, Search } from 'lucide-react';
+import { Sun, Moon, Globe, X, Film, Search, Zap, Smile, Ghost, Heart, Rocket, AlertCircle, Drama, Wand2, Sparkles, Skull, Compass, CheckIcon, ChevronDown, Tv, Clapperboard } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useRegion } from '../context/RegionContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,7 +10,7 @@ import { movieService, type UnifiedMovie } from '../services/api';
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
-  const { countryCode } = useRegion();
+  useRegion(); // Keep for side effects (region detection), but countryCode not displayed
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -107,34 +107,34 @@ const Navbar: React.FC = () => {
   ];
 
   const languages = [
-    { code: 'id', name: 'Indonesia' },
-    { code: 'en', name: 'English' },
-    { code: 'ja', name: '日本語' },
-    { code: 'ko', name: '한국어' },
-    { code: 'es', name: 'Español' },
-    { code: 'fr', name: 'Français' },
-    { code: 'de', name: 'Deutsch' },
-    { code: 'zh', name: '中文' },
-    { code: 'ar', name: 'العربية' },
-    { code: 'ru', name: 'Русский' },
+    { code: 'id', name: 'Indonesia', flag: '🇮🇩' },
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'ja', name: '日本語', flag: '🇯🇵' },
+    { code: 'ko', name: '한국어', flag: '🇰🇷' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+    { code: 'zh', name: '中文', flag: '🇨🇳' },
+    { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
   ];
 
   const genres = [
-    { name: 'Action', path: '/genre/28' },
-    { name: 'Comedy', path: '/genre/35' },
-    { name: 'Horror', path: '/genre/27' },
-    { name: 'Romance', path: '/genre/10749' },
-    { name: 'Sci-Fi', path: '/genre/878' },
-    { name: 'Thriller', path: '/genre/53' },
+    { name: 'Action', path: '/genre/28', icon: <Zap size={16} strokeWidth={2.5} /> },
+    { name: 'Comedy', path: '/genre/35', icon: <Smile size={16} strokeWidth={2} /> },
+    { name: 'Horror', path: '/genre/27', icon: <Ghost size={16} strokeWidth={2} /> },
+    { name: 'Romance', path: '/genre/10749', icon: <Heart size={16} strokeWidth={2} /> },
+    { name: 'Sci-Fi', path: '/genre/878', icon: <Rocket size={16} strokeWidth={2} /> },
+    { name: 'Thriller', path: '/genre/53', icon: <Skull size={16} strokeWidth={2} /> },
   ];
 
   const seriesGenres = [
-    { name: 'Drama', path: '/series/genre/18' },
-    { name: 'Crime', path: '/series/genre/80' },
-    { name: 'Animation', path: '/series/genre/16' },
-    { name: 'Reality', path: '/series/genre/10764' },
-    { name: 'Sci-Fi & Fantasy', path: '/series/genre/10765' },
-    { name: 'Action & Adventure', path: '/series/genre/10759' },
+    { name: 'Drama', path: '/series/genre/18', icon: <Drama size={16} strokeWidth={2} /> },
+    { name: 'Crime', path: '/series/genre/80', icon: <AlertCircle size={16} strokeWidth={2} /> },
+    { name: 'Animation', path: '/series/genre/16', icon: <Sparkles size={16} strokeWidth={2} /> },
+    { name: 'Reality', path: '/series/genre/10764', icon: <Tv size={16} strokeWidth={2} /> },
+    { name: 'Sci-Fi & Fantasy', path: '/series/genre/10765', icon: <Wand2 size={16} strokeWidth={2} /> },
+    { name: 'Action & Adventure', path: '/series/genre/10759', icon: <Compass size={16} strokeWidth={2} /> },
   ];
 
 
@@ -278,44 +278,57 @@ const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center gap-6 text-[var(--text-primary)]">
             {/* Genres Dropdown */}
             <div className="group relative">
-              <span className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity font-bold text-sm flex items-center gap-1 uppercase tracking-widest">
+              <span className="cursor-pointer opacity-60 hover:opacity-100 transition-all duration-300 font-bold text-xs flex items-center gap-1.5 uppercase tracking-[0.15em] hover:text-netflix-red">
                 Genres
+                <ChevronDown size={10} strokeWidth={3} className="opacity-50 group-hover:rotate-180 transition-transform duration-300" />
               </span>
-              <div className="absolute right-0 top-full pt-2 w-80 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300">
-                <div className="glass rounded-2xl overflow-hidden py-3 shadow-2xl border border-white/10">
-                  {/* Movies Section */}
-                  <div className="px-4 pb-1">
-                    <p className="text-[9px] font-black uppercase tracking-[4px] text-netflix-red/70 mb-1">🎬 Movies</p>
-                  </div>
-                  <div className="grid grid-cols-2">
-                    {genres.map((genre) => (
-                      <Link
-                        key={genre.name}
-                        to={genre.path}
-                        className="block w-full text-left px-4 py-2 text-xs font-bold hover:bg-netflix-red hover:text-white transition-colors text-[var(--text-primary)] uppercase tracking-tighter"
-                      >
-                        {genre.name}
-                      </Link>
-                    ))}
-                  </div>
+              <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[340px] opacity-0 translate-y-3 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+                <div className="relative bg-[#0e0e0e]/95 backdrop-blur-2xl rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.8)] border border-white/8">
+                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#0e0e0e] border-t border-l border-white/8 rotate-45" />
+                  <div className="p-4">
+                    {/* Movies */}
+                    <div className="mb-3">
+                      <div className="flex items-center gap-2 mb-2.5">
+                        <Clapperboard size={10} strokeWidth={2.5} className="text-netflix-red" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-netflix-red">Film</span>
+                        <div className="flex-1 h-px bg-white/5" />
+                      </div>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {genres.map((genre) => (
+                          <Link
+                            key={genre.name}
+                            to={genre.path}
+                            className="group/item flex flex-col items-center gap-2 py-3 px-2 rounded-xl bg-white/[0.04] hover:bg-netflix-red border border-white/5 hover:border-netflix-red transition-all duration-200 text-center"
+                          >
+                            <span className="text-white/50 group-hover/item:text-white transition-colors">{genre.icon}</span>
+                            <span className="text-[9px] font-black text-white/50 group-hover/item:text-white uppercase tracking-wider leading-none transition-colors">{genre.name}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
 
-                  {/* Divider */}
-                  <div className="mx-4 my-2 h-px bg-white/5" />
+                    <div className="h-px bg-white/5 my-3" />
 
-                  {/* Series Section */}
-                  <div className="px-4 pb-1">
-                    <p className="text-[9px] font-black uppercase tracking-[4px] text-netflix-red/70 mb-1">📺 Series</p>
-                  </div>
-                  <div className="grid grid-cols-2">
-                    {seriesGenres.map((genre) => (
-                      <Link
-                        key={genre.name}
-                        to={genre.path}
-                        className="block w-full text-left px-4 py-2 text-xs font-bold hover:bg-netflix-red hover:text-white transition-colors text-[var(--text-primary)] uppercase tracking-tighter"
-                      >
-                        {genre.name}
-                      </Link>
-                    ))}
+                    {/* Series */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2.5">
+                        <Tv size={10} strokeWidth={2.5} className="text-netflix-red" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-netflix-red">Series</span>
+                        <div className="flex-1 h-px bg-white/5" />
+                      </div>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {seriesGenres.map((genre) => (
+                          <Link
+                            key={genre.name}
+                            to={genre.path}
+                            className="group/item flex flex-col items-center gap-2 py-3 px-2 rounded-xl bg-white/[0.04] hover:bg-netflix-red border border-white/5 hover:border-netflix-red transition-all duration-200 text-center"
+                          >
+                            <span className="text-white/50 group-hover/item:text-white transition-colors">{genre.icon}</span>
+                            <span className="text-[9px] font-black text-white/50 group-hover/item:text-white uppercase tracking-wider leading-none transition-colors">{genre.name}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -323,25 +336,35 @@ const Navbar: React.FC = () => {
 
             {/* Language Selector */}
             <div className="group relative">
-              <div className="p-2 rounded-full hover:bg-white/10 transition-colors cursor-pointer opacity-70 hover:opacity-100 flex items-center gap-2">
-                <Globe size={20} />
-                {countryCode && (
-                  <span className="text-[9px] font-black bg-netflix-red text-white px-1.5 py-0.5 rounded leading-none transition-all duration-300">
-                    {countryCode}
-                  </span>
-                )}
+              <div className="flex items-center gap-1.5 cursor-pointer opacity-60 hover:opacity-100 transition-all duration-300 hover:text-netflix-red">
+                <Globe size={16} />
+                <span className="text-xs font-black uppercase tracking-[0.15em] hidden lg:inline">
+                  {languages.find(l => l.code === i18n.language)?.flag || '🌐'} {(i18n.language || 'en').toUpperCase()}
+                </span>
+                <ChevronDown size={10} strokeWidth={3} className="opacity-50 group-hover:rotate-180 transition-transform duration-300" />
               </div>
-              <div className="absolute right-0 top-full pt-2 w-48 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300">
-                <div className="glass rounded-2xl overflow-hidden py-2 shadow-2xl border border-white/10 max-h-[60vh] overflow-y-auto premium-scroll">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => changeLanguage(lang.code)}
-                      className="w-full text-left px-5 py-2.5 text-xs font-bold hover:bg-netflix-red hover:text-white transition-colors text-[var(--text-primary)] uppercase tracking-tighter"
-                    >
-                      {lang.name}
-                    </button>
-                  ))}
+              <div className="absolute right-0 top-full pt-3 w-52 opacity-0 translate-y-3 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+                <div className="relative bg-[#0e0e0e]/95 backdrop-blur-2xl rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.8)] border border-white/8">
+                  <div className="absolute -top-1.5 right-4 w-3 h-3 bg-[#0e0e0e] border-t border-l border-white/8 rotate-45" />
+                  <div className="p-2">
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => changeLanguage(lang.code)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${
+                          i18n.language === lang.code
+                            ? 'bg-netflix-red text-white'
+                            : 'text-white/60 hover:text-white hover:bg-white/8'
+                        }`}
+                      >
+                        <span className="text-base leading-none shrink-0">{lang.flag}</span>
+                        <span className="tracking-wide">{lang.name}</span>
+                        {i18n.language === lang.code && (
+                          <CheckIcon size={12} strokeWidth={3} className="ml-auto" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -466,27 +489,28 @@ const Navbar: React.FC = () => {
               </div>
 
               {/* Genres Section Mobile */}
-              <div className="w-full max-w-sm mb-16 space-y-10">
+              <div className="w-full max-w-sm mb-12 space-y-8">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                   className="space-y-4"
                 >
-                  <div className="flex items-center gap-3 justify-center">
-                    <div className="h-px flex-1 bg-white/10" />
-                    <p className="text-[10px] font-black text-netflix-red uppercase tracking-[4px]">🎬 Movies Genres</p>
-                    <div className="h-px flex-1 bg-white/10" />
+                  <div className="flex items-center gap-3">
+                    <div className="h-px flex-1 bg-white/8" />
+                    <p className="text-[9px] font-black text-netflix-red uppercase tracking-[5px]">🎬 Film</p>
+                    <div className="h-px flex-1 bg-white/8" />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {genres.map((g) => (
                       <Link
                         key={g.name}
                         to={g.path}
                         onClick={() => setIsOpen(false)}
-                        className="p-4 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold text-zinc-400 hover:bg-netflix-red hover:text-white transition-all uppercase tracking-widest"
+                        className="flex flex-col items-center gap-2 py-4 px-2 bg-white/[0.04] border border-white/8 rounded-2xl active:bg-netflix-red active:text-white transition-all group"
                       >
-                        {g.name}
+                        <span className="text-white/50 group-active:text-white transition-colors">{g.icon}</span>
+                        <span className="text-[9px] font-black text-white/50 uppercase tracking-wider leading-none">{g.name}</span>
                       </Link>
                     ))}
                   </div>
@@ -498,20 +522,21 @@ const Navbar: React.FC = () => {
                   transition={{ delay: 0.5 }}
                   className="space-y-4"
                 >
-                  <div className="flex items-center gap-3 justify-center">
-                    <div className="h-px flex-1 bg-white/10" />
-                    <p className="text-[10px] font-black text-netflix-red uppercase tracking-[4px]">📺 Series Genres</p>
-                    <div className="h-px flex-1 bg-white/10" />
+                  <div className="flex items-center gap-3">
+                    <div className="h-px flex-1 bg-white/8" />
+                    <p className="text-[9px] font-black text-netflix-red uppercase tracking-[5px]">📺 Series</p>
+                    <div className="h-px flex-1 bg-white/8" />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {seriesGenres.map((g) => (
                       <Link
                         key={g.name}
                         to={g.path}
                         onClick={() => setIsOpen(false)}
-                        className="p-4 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold text-zinc-400 hover:bg-netflix-red hover:text-white transition-all uppercase tracking-widest"
+                        className="flex flex-col items-center gap-2 py-4 px-2 bg-white/[0.04] border border-white/8 rounded-2xl active:bg-netflix-red active:text-white transition-all group"
                       >
-                        {g.name}
+                        <span className="text-white/50 group-active:text-white transition-colors">{g.icon}</span>
+                        <span className="text-[9px] font-black text-white/50 uppercase tracking-wider leading-none text-center">{g.name}</span>
                       </Link>
                     ))}
                   </div>
@@ -519,19 +544,19 @@ const Navbar: React.FC = () => {
               </div>
 
               {/* Bottom Controls */}
-              <div className="w-full max-w-xs space-y-12">
+              <div className="w-full max-w-xs space-y-10">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
                   className="space-y-4"
                 >
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[6px]">Appearance</p>
+                  <p className="text-[9px] font-black text-white/30 uppercase tracking-[6px] text-center">Appearance</p>
                   <button
                     onClick={toggleTheme}
-                    className="flex items-center justify-center gap-4 w-full p-5 rounded-2xl bg-white/5 border border-white/10 text-white active:scale-95 transition-all text-lg font-bold"
+                    className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl bg-white/5 border border-white/8 text-white active:scale-95 transition-all font-bold text-sm"
                   >
-                    {theme === 'dark' ? <Sun size={24} className="text-yellow-400" /> : <Moon size={24} className="text-blue-400" />}
+                    {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-blue-400" />}
                     {theme === 'dark' ? t('light_mode') : t('dark_mode')}
                   </button>
                 </motion.div>
@@ -542,20 +567,20 @@ const Navbar: React.FC = () => {
                   transition={{ delay: 0.6 }}
                   className="space-y-4"
                 >
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[6px]">
-                    {t('Select Language')} {countryCode && <span className="text-netflix-red ml-2 font-bold">[{countryCode}]</span>}
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {languages.slice(0, 4).map((l) => (
+                  <p className="text-[9px] font-black text-white/30 uppercase tracking-[6px] text-center">Language</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {languages.map((l) => (
                       <button
                         key={l.code}
                         onClick={() => { changeLanguage(l.code); setIsOpen(false); }}
-                        className={`px-4 py-4 rounded-xl border text-xs font-black transition-all ${i18n.language === l.code
-                          ? 'bg-netflix-red border-netflix-red text-white shadow-xl shadow-red-900/40'
-                          : 'bg-white/5 border-white/10 text-zinc-400'
-                          }`}
+                        className={`flex items-center gap-2.5 px-4 py-3.5 rounded-2xl border text-xs font-bold transition-all ${
+                          i18n.language === l.code
+                            ? 'bg-netflix-red border-netflix-red text-white shadow-lg shadow-red-900/30'
+                            : 'bg-white/[0.04] border-white/8 text-white/50 active:bg-white/10'
+                        }`}
                       >
-                        {l.name}
+                        <span className="text-lg leading-none">{l.flag}</span>
+                        <span className="truncate">{l.name}</span>
                       </button>
                     ))}
                   </div>
