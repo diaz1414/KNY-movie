@@ -264,7 +264,7 @@ const FilmographySection: React.FC<{
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.03 * idx }}
-          onClick={() => onSelect(item.id)}
+          onClick={() => onSelect(item.type ? `${item.type}-${item.id}` : item.id)}
           className="group text-left"
         >
           <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-2 border border-white/5 group-hover:border-netflix-red/50 transition-all duration-300 shadow-lg">

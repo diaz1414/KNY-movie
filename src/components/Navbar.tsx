@@ -85,10 +85,10 @@ const Navbar: React.FC = () => {
 
   const handleSuggestionClick = (movie: UnifiedMovie) => {
     if (window.location.pathname !== '/') {
-      navigate(`/?movie=${movie.id}`);
+      navigate(`/?movie=${movie.id}&type=${movie.type}`);
     } else {
       // Dispatch custom event to Home.tsx to open modal
-      window.dispatchEvent(new CustomEvent('navbar-open-movie', { detail: { id: movie.id } }));
+      window.dispatchEvent(new CustomEvent('navbar-open-movie', { detail: { id: movie.id, type: movie.type } }));
     }
     closeSearch();
   };
@@ -241,7 +241,7 @@ const Navbar: React.FC = () => {
                     <div className="absolute top-full left-0 right-0 mt-2 bg-[#111111] border border-zinc-800 rounded-2xl overflow-hidden z-[2000] shadow-[0_20px_50px_rgba(0,0,0,0.9)] max-h-[60vh] overflow-y-auto premium-scroll">
                       {suggestions.map((movie, idx) => (
                         <div
-                          key={movie.id}
+                          key={`${movie.type}-${movie.id}`}
                           onClick={() => handleSuggestionClick(movie)}
                           className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer border-b border-zinc-900 last:border-none transition-colors ${
                             activeIdx === idx ? 'bg-zinc-800' : 'hover:bg-zinc-800/60'
