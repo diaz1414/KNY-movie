@@ -449,7 +449,7 @@
                         onclick="scrollArea('season-list', 'prev')">
                         <i data-lucide="chevron-left" class="w-6 h-6"></i>
                     </button>
-                    <div id="season-list" class="season-list flex overflow-x-auto gap-4 pb-6 no-scrollbar"></div>
+                    <div id="season-list" class="season-list flex overflow-x-auto gap-4 pt-4 pb-6 px-1 no-scrollbar"></div>
                     <button
                         class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
                         onclick="scrollArea('season-list', 'next')">
@@ -1049,11 +1049,12 @@
                         .filter(s => s.season_number > 0)
                         .map(s => {
                             const poster = s.poster_path ? `https://image.tmdb.org/t/p/w200${s.poster_path}` : 'https://via.placeholder.com/200x300/222/555?text=Poster';
+                            const isActive = s.season_number === currentSeason;
                             return `
-                                <div class="season-card group flex-[0_0_140px] md:flex-[0_0_180px] cursor-pointer transition-all duration-500 ${s.season_number === currentSeason ? 'ring-2 ring-netflix-red scale-[1.02]' : ''}" 
+                                <div class="season-card group flex-[0_0_140px] md:flex-[0_0_180px] cursor-pointer transition-all duration-500" 
                                      data-season="${s.season_number}"
                                      onclick="changeSeason(${s.season_number}, this)">
-                                    <div class="aspect-[2/3] rounded-xl bg-cover bg-center border border-white/10 shadow-xl transition-all duration-500 group-hover:border-netflix-red/50 group-hover:scale-[1.05]" style="background-image: url('${poster}')"></div>
+                                    <div class="season-poster aspect-[2/3] rounded-xl bg-cover bg-center border border-white/10 shadow-xl transition-all duration-500 group-hover:border-netflix-red/50 group-hover:scale-[1.05] ${isActive ? 'ring-2 ring-netflix-red scale-[1.02]' : ''}" style="background-image: url('${poster}')"></div>
                                     <div class="mt-3 text-[0.85rem] font-bold text-center text-white/70 group-hover:text-white transition-colors">${s.name}</div>
                                 </div>
                             `;
@@ -1062,8 +1063,21 @@
                     window.changeSeason = (sNum, el) => {
                         currentSeason = sNum;
                         currentEp = 1; // Reset to ep 1 when season changes
-                        document.querySelectorAll('.season-card').forEach(c => c.classList.remove('active'));
-                        el.classList.add('active');
+                        
+                        // Manage active styling on inner posters
+                        document.querySelectorAll('.season-card').forEach(c => {
+                            const poster = c.querySelector('.season-poster');
+                            if (poster) {
+                                poster.classList.remove('ring-2', 'ring-netflix-red', 'scale-[1.02]');
+                            }
+                        });
+                        if (el) {
+                            const activePoster = el.querySelector('.season-poster');
+                            if (activePoster) {
+                                activePoster.classList.add('ring-2', 'ring-netflix-red', 'scale-[1.02]');
+                            }
+                        }
+
                         loadEpisodes(sNum);
                         updateUrlState();
                     };
@@ -1079,8 +1093,8 @@
                             const isActive = ep.episode_number === currentEp && seasonNum === currentSeason;
 
                             return `
-                                <div class="ep-card flex-[0_0_220px] md:flex-[0_0_280px] group cursor-pointer transition-all duration-500 hover:-translate-y-1.5 ${isActive ? 'ring-2 ring-netflix-red' : ''}" data-ep="${ep.episode_number}" onclick="changeEpisode(${seasonNum}, ${ep.episode_number}, this)">
-                                    <div class="relative aspect-video rounded-xl bg-cover bg-center border border-white/10 overflow-hidden shadow-lg" style="background-image: url('${thumb}')">
+                                <div class="ep-card flex-[0_0_220px] md:flex-[0_0_280px] group cursor-pointer transition-all duration-500 hover:-translate-y-1.5" data-ep="${ep.episode_number}" onclick="changeEpisode(${seasonNum}, ${ep.episode_number}, this)">
+                                    <div class="ep-thumb relative aspect-video rounded-xl bg-cover bg-center border border-white/10 overflow-hidden shadow-lg ${isActive ? 'ring-2 ring-netflix-red' : ''}" style="background-image: url('${thumb}')">
                                         <div class="absolute top-2 left-2 px-2 py-0.5 bg-netflix-red text-white text-[0.6rem] font-black tracking-widest uppercase rounded">EP ${ep.episode_number}</div>
                                         <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="play" class="w-8 h-8 text-white fill-white"></i></div>
                                     </div>
@@ -1100,8 +1114,21 @@
                     window.changeEpisode = (s, e, el) => {
                         currentSeason = s;
                         currentEp = e;
-                        document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
-                        if (el) el.classList.add('active');
+
+                        // Manage active styling on inner thumbs
+                        document.querySelectorAll('.ep-card').forEach(c => {
+                            const thumb = c.querySelector('.ep-thumb');
+                            if (thumb) {
+                                thumb.classList.remove('ring-2', 'ring-netflix-red');
+                            }
+                        });
+                        if (el) {
+                            const activeThumb = el.querySelector('.ep-thumb');
+                            if (activeThumb) {
+                                activeThumb.classList.add('ring-2', 'ring-netflix-red');
+                            }
+                        }
+
                         updatePlayerUrls();
                         updateUrlState();
                     };
@@ -1371,6 +1398,44 @@
             });
         };
 
+        // Helper to dynamically show/hide navigation chevrons based on scroll area overflow & position
+        window.setupScrollButtons = (containerId, prevBtnSelector, nextBtnSelector) => {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const parent = container.parentElement;
+            if (!parent) return;
+            const prevBtn = parent.querySelector(prevBtnSelector);
+            const nextBtn = parent.querySelector(nextBtnSelector);
+            if (!prevBtn || !nextBtn) return;
+
+            const update = () => {
+                const hasOverflow = container.scrollWidth > container.clientWidth;
+                if (hasOverflow) {
+                    const scrollLeft = container.scrollLeft;
+                    const scrollWidth = container.scrollWidth;
+                    const clientWidth = container.clientWidth;
+
+                    prevBtn.style.display = scrollLeft > 5 ? 'flex' : 'none';
+                    nextBtn.style.display = (scrollLeft + clientWidth < scrollWidth - 5) ? 'flex' : 'none';
+                } else {
+                    prevBtn.style.display = 'none';
+                    nextBtn.style.display = 'none';
+                }
+            };
+
+            // Register event listeners
+            container.addEventListener('scroll', update);
+            window.addEventListener('resize', update);
+
+            // Observe dynamic card mounting inside container
+            const observer = new MutationObserver(update);
+            observer.observe(container, { childList: true, subtree: true });
+
+            // Initial updates
+            setTimeout(update, 150);
+            setTimeout(update, 600);
+        };
+
         // Handle Scroll To Top Visibility
         window.addEventListener('scroll', () => {
             const btn = document.getElementById('back-to-top');
@@ -1382,6 +1447,13 @@
         });
 
         init();
+
+        // Setup dynamic scroll nav buttons
+        setupScrollButtons('season-list', '.prev', '.next');
+        setupScrollButtons('episode-grid', '.prev', '.next');
+        setupScrollButtons('cast-scroll', '.prev', '.next');
+        setupScrollButtons('recommendations-grid', '.prev', '.next');
+
         lucide.createIcons();
     </script>
 
