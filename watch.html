@@ -992,6 +992,50 @@
                 let currentServerIndex = 0;
                 let currentSeasonData = null; // Store episodes for auto-next logic
 
+                // --- SUPABASE WATCH VIEWS TRACKING ---
+                try {
+                    if (typeof supabase !== 'undefined' && supabase.createClient) {
+                        const sbUrl = 'https://amdhbxowpnpwhtxxayuj.supabase.co';
+                        const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtZGhieG93cG5wd2h0eHhheXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNzQ0NzIsImV4cCI6MjA4Nzg1MDQ3Mn0.SW4U3CS-GrChptrtKyZnKy5x-wiIaNIXHULPGO56DFo';
+                        const sb = supabase.createClient(sbUrl, sbKey);
+                        
+                        async function logWatchView() {
+                            try {
+                                const { data } = await sb
+                                    .from('movie_views')
+                                    .select('view_count')
+                                    .eq('tmdb_id', movieId.toString())
+                                    .maybeSingle();
+
+                                let count = 1;
+                                if (data) count = (data.view_count || 0) + 1;
+
+                                const poster = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '';
+                                const backdrop = movie.backdrop_path ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}` : '';
+                                const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'NR';
+
+                                await sb
+                                    .from('movie_views')
+                                    .upsert({
+                                        tmdb_id: movieId.toString(),
+                                        title: movieTitle,
+                                        poster_path: poster,
+                                        backdrop_path: backdrop,
+                                        rating: rating,
+                                        type: type === 'tv' || type === 'series' ? 'series' : 'movie',
+                                        view_count: count,
+                                        updated_at: new Date()
+                                    }, { onConflict: 'tmdb_id' });
+                            } catch (e) {
+                                console.warn("Supabase view log inner error:", e);
+                            }
+                        }
+                        logWatchView();
+                    }
+                } catch (e) {
+                    console.warn("Supabase initialization error:", e);
+                }
+
                 // --- PROGRESS TRACKING ---
                 const getStorageKey = () => `ykn_progress_${movieId}`;
                 const saveProgress = (s, e, serverIdx) => {

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
+import Movies from './pages/Movies';
+import Series from './pages/Series';
+import Popular from './pages/Popular';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Terms from './pages/Terms';
@@ -104,6 +107,9 @@ const App: React.FC = () => {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/genre/:id" element={<Genre />} />
           <Route path="/series/genre/:id" element={<SeriesGenre />} />
+          <Route path="/movies" element={<Movies />} />
+          <Route path="/series" element={<Series />} />
+          <Route path="/popular" element={<Popular />} />
           <Route path="/news" element={<News />} />
           <Route path="/person/:id" element={<PersonDetail />} />
           {/* Catch-all route for Not Found (404) */}

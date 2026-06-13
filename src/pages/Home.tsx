@@ -21,6 +21,7 @@ const Home: React.FC = () => {
   const [recentMovies, setRecentMovies] = useState<UnifiedMovie[]>([]);
   const [popularSeries, setPopularSeries] = useState<UnifiedMovie[]>([]);
   const [upcomingMovies, setUpcomingMovies] = useState<UnifiedMovie[]>([]);
+  const [topRatedMovies, setTopRatedMovies] = useState<UnifiedMovie[]>([]);
   const [searchResults, setSearchResults] = useState<UnifiedMovie[] | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -34,13 +35,14 @@ const Home: React.FC = () => {
 
   // Restore state on mount
   useEffect(() => {
-    const savedState = sessionStorage.getItem('home_state');
+    const savedState = sessionStorage.getItem('home_state_v2');
     if (savedState) {
       const {
         popularMovies: savedPop,
         recentMovies: savedRecent,
         popularSeries: savedSeries,
         upcomingMovies: savedUpcoming,
+        topRatedMovies: savedTopRated,
         exploreMovies: savedExplore,
         explorePage: savedPage,
         scrollY
@@ -62,6 +64,15 @@ const Home: React.FC = () => {
           .catch(err => console.error("Failed to fetch upcoming fallback", err));
       }
 
+      if (savedTopRated && savedTopRated.length > 0) {
+        setTopRatedMovies(savedTopRated);
+      } else {
+        // Fallback fetch if top rated was not stored in session previously
+        movieService.getTopRatedMovies()
+          .then(setTopRatedMovies)
+          .catch(err => console.error("Failed to fetch top rated fallback", err));
+      }
+
       setTimeout(() => {
         window.scrollTo({
           top: scrollY,
@@ -80,13 +91,15 @@ const Home: React.FC = () => {
       movieService.getRecentMovies(),
       movieService.getPopularSeries(),
       movieService.getRecentMovies(1), // Start Explore with Latest
-      movieService.getUpcomingMovies() // Fetch upcoming movies
-    ]).then(([popular, recent, series, latest, upcoming]) => {
+      movieService.getUpcomingMovies(), // Fetch upcoming movies
+      movieService.getTopRatedMovies() // Fetch top rated movies
+    ]).then(([popular, recent, series, latest, upcoming, topRated]) => {
       setPopularMovies(popular);
       setRecentMovies(recent);
       setPopularSeries(series);
       setExploreMovies(latest);
       setUpcomingMovies(upcoming);
+      setTopRatedMovies(topRated);
       setLoading(false);
     }).catch(err => {
       console.error(err);
@@ -136,8 +149,8 @@ const Home: React.FC = () => {
     // Scroll handling for state restoration only
     const handleScroll = () => {
       if (popularMovies.length > 0) {
-        const current = JSON.parse(sessionStorage.getItem('home_state') || '{}');
-        sessionStorage.setItem('home_state', JSON.stringify({
+        const current = JSON.parse(sessionStorage.getItem('home_state_v2') || '{}');
+        sessionStorage.setItem('home_state_v2', JSON.stringify({
           ...current,
           scrollY: window.scrollY
         }));
@@ -146,17 +159,18 @@ const Home: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [popularMovies, recentMovies, popularSeries, upcomingMovies]);
+  }, [popularMovies, recentMovies, popularSeries, upcomingMovies, topRatedMovies]);
 
   // Save state
   useEffect(() => {
     const handleSaveState = () => {
       if (popularMovies.length > 0) {
-        sessionStorage.setItem('home_state', JSON.stringify({
+        sessionStorage.setItem('home_state_v2', JSON.stringify({
           popularMovies,
           recentMovies,
           popularSeries,
           upcomingMovies,
+          topRatedMovies,
           exploreMovies,
           explorePage,
           scrollY: window.scrollY
@@ -168,8 +182,8 @@ const Home: React.FC = () => {
 
     const handleScroll = () => {
       if (popularMovies.length > 0) {
-        const current = JSON.parse(sessionStorage.getItem('home_state') || '{}');
-        sessionStorage.setItem('home_state', JSON.stringify({
+        const current = JSON.parse(sessionStorage.getItem('home_state_v2') || '{}');
+        sessionStorage.setItem('home_state_v2', JSON.stringify({
           ...current,
           scrollY: window.scrollY
         }));
@@ -178,7 +192,7 @@ const Home: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [popularMovies, recentMovies, popularSeries, upcomingMovies, exploreMovies, explorePage]);
+  }, [popularMovies, recentMovies, popularSeries, upcomingMovies, topRatedMovies, exploreMovies, explorePage]);
 
   // Listen for movie open events from Navbar search
   useEffect(() => {
@@ -234,7 +248,7 @@ const Home: React.FC = () => {
         {!searchResults && !loading && (
           <div className="relative w-full" style={{ height: '100svh' }}>
             <HeroCarousel
-              movies={popularMovies.slice(0, 7)}
+              movies={topRatedMovies.slice(0, 7)}
               onMoreInfo={(id) => setSelectedMovieId(id)}
             />
           </div>
@@ -287,6 +301,12 @@ const Home: React.FC = () => {
                 <NetflixLoader fullScreen />
               ) : (
                 <>
+                  <MovieRow
+                    id="top-rated"
+                    title={t('top_rated')}
+                    movies={topRatedMovies}
+                  />
+
                   <MovieRow
                     id="popular"
                     title={t('trending')}

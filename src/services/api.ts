@@ -1,5 +1,6 @@
 import axios from 'axios';
 import i18n from '../i18n';
+import { supabase } from './supabase';
 
 const getLangCode = () => {
   const lng = i18n.language || 'en';
@@ -129,8 +130,51 @@ const api = axios.create({
 
 export const movieService = {
   getPopularMovies: async (page: number = 1) => {
-    const res = await api.get('/movie/popular', { params: { language: getLangCode(), region: 'US', page } });
-    return res.data.results.map(normalizeTMDB);
+    try {
+      // 1. Fetch top viewed items from Supabase
+      const { data: supabaseData, error } = await supabase
+        .from('movie_views')
+        .select('*')
+        .order('view_count', { ascending: false })
+        .range((page - 1) * 20, page * 20 - 1);
+
+      // 2. Fetch popular movies from TMDB as backup/padding
+      const res = await api.get('/movie/popular', { params: { language: getLangCode(), region: 'US', page } });
+      const tmdbMovies = res.data.results.map(normalizeTMDB);
+
+      if (error || !supabaseData || supabaseData.length === 0) {
+        // Fallback to TMDB if Supabase fails or is empty
+        return tmdbMovies;
+      }
+
+      // Map Supabase data to UnifiedMovie
+      const watchedMovies: UnifiedMovie[] = supabaseData.map((item: any) => ({
+        id: item.tmdb_id,
+        title: item.title,
+        poster: item.poster_path || '',
+        backdrop: item.backdrop_path || '',
+        rating: item.rating || '8.0',
+        quality: '4K',
+        type: (item.type || 'movie') as 'movie' | 'series',
+        releaseDate: ''
+      }));
+
+      // Combine and deduplicate: prioritize watchedMovies
+      const combined = [...watchedMovies];
+      const seenIds = new Set(watchedMovies.map(m => m.id));
+
+      for (const m of tmdbMovies) {
+        if (!seenIds.has(m.id)) {
+          combined.push(m);
+        }
+      }
+
+      return combined.slice(0, 20);
+    } catch (err) {
+      console.error('Failed to get popular/trending movies from Supabase:', err);
+      const res = await api.get('/movie/popular', { params: { language: getLangCode(), region: 'US', page } });
+      return res.data.results.map(normalizeTMDB);
+    }
   },
 
   getRecentMovies: async (page: number = 1) => {
@@ -139,8 +183,46 @@ export const movieService = {
   },
 
   getTopRatedMovies: async (page: number = 1) => {
-    const res = await api.get('/movie/top_rated', { params: { language: getLangCode(), region: 'US', page } });
-    return res.data.results.map(normalizeTMDB);
+    try {
+      const currentYear = new Date().getFullYear();
+      const startYear = currentYear - 2; // e.g. 2024 if 2026
+      const startDate = `${startYear}-01-01`;
+
+      const [moviesRes, tvRes] = await Promise.all([
+        api.get('/discover/movie', {
+          params: {
+            language: getLangCode(),
+            region: 'US',
+            sort_by: 'vote_average.desc',
+            'vote_count.gte': 300,
+            'primary_release_date.gte': startDate,
+            page
+          }
+        }),
+        api.get('/discover/tv', {
+          params: {
+            language: getLangCode(),
+            sort_by: 'vote_average.desc',
+            'vote_count.gte': 150,
+            'first_air_date.gte': startDate,
+            page
+          }
+        })
+      ]);
+
+      const movies = moviesRes.data.results.map((m: any) => ({ ...m, name: undefined }));
+      const tvs = tvRes.data.results;
+
+      const combined = [...movies, ...tvs]
+        .map(normalizeTMDB)
+        .sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
+
+      return combined.slice(0, 20);
+    } catch (err) {
+      console.error('Failed to fetch top rated mixed content:', err);
+      const res = await api.get('/movie/top_rated', { params: { language: getLangCode(), region: 'US', page } });
+      return res.data.results.map(normalizeTMDB);
+    }
   },
 
   getPopularSeries: async (page: number = 1) => {

@@ -3,8 +3,8 @@ import * as cheerio from 'cheerio';
 import { createClient } from '@supabase/supabase-js';
 
 // --- CONFIGURATION ---
-const SUPABASE_URL = 'https://ymdaacydpsznzbobppvk.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltZGFhY3lkcHN6bnpib2JwcHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzcwNzcsImV4cCI6MjA5MTMxMzA3N30.DAvImMrafbZiPp-GDDMwvxyL8qKXRzrpMHaCG58Q-ic';
+const SUPABASE_URL = 'https://amdhbxowpnpwhtxxayuj.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtZGhieG93cG5wd2h0eHhheXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNzQ0NzIsImV4cCI6MjA4Nzg1MDQ3Mn0.SW4U3CS-GrChptrtKyZnKy5x-wiIaNIXHULPGO56DFo';
 const TMDB_API_KEY = 'f76f5f908dd164d45ec92431b0517a3a';
 const TARGET_URL = 'http://139.59.44.214/country/indonesia/';
 

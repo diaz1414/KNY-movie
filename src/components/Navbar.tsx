@@ -99,11 +99,11 @@ const Navbar: React.FC = () => {
   };
 
   const navLinks = [
-    { name: t('home'), path: '/#' },
+    { name: t('home'), path: '/' },
     { name: t('news'), path: '/news' },
-    { name: t('movies'), path: '/#movies' },
-    { name: t('series'), path: '/#series' },
-    { name: t('popular'), path: '/#popular' },
+    { name: t('movies'), path: '/movies' },
+    { name: t('series'), path: '/series' },
+    { name: t('popular'), path: '/popular' },
   ];
 
   const languages = [
