@@ -597,16 +597,18 @@
                 <h2 class="font-outfit text-white text-[2rem] font-black mb-6">More Like This</h2>
                 <div class="rec-container relative">
                     <button
+                        id="rec-prev-btn"
                         class="nav-btn prev absolute top-1/2 -translate-y-1/2 -left-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
                         onclick="scrollRecs('prev')">
                         <i data-lucide="chevron-left" class="w-6 h-6"></i>
                     </button>
-                    <div id="recommendations-grid" class="rec-grid flex overflow-x-auto gap-5 pb-10 no-scrollbar">
+                    <div id="recommendations-grid" class="rec-grid flex overflow-x-auto gap-4 pb-10 no-scrollbar">
                         <div
                             class="loader-label text-[0.6rem] font-extrabold tracking-[6px] text-white/40 uppercase my-8">
                             FINDING SIMILAR CONTENT...</div>
                     </div>
                     <button
+                        id="rec-next-btn"
                         class="nav-btn next absolute top-1/2 -translate-y-1/2 -right-6 w-11 h-11 bg-black/60 border border-white/10 text-netflix-red flex items-center justify-center cursor-pointer z-10 backdrop-blur-md transition-all duration-300 rounded-lg hover:bg-netflix-red hover:text-white hover:scale-110 max-lg:hidden"
                         onclick="scrollRecs('next')">
                         <i data-lucide="chevron-right" class="w-6 h-6"></i>
@@ -1492,11 +1494,27 @@
 
         init();
 
-        // Setup dynamic scroll nav buttons
+        // Setup dynamic scroll nav buttons (only for season/episode/cast)
         setupScrollButtons('season-list', '.prev', '.next');
         setupScrollButtons('episode-grid', '.prev', '.next');
         setupScrollButtons('cast-scroll', '.prev', '.next');
-        setupScrollButtons('recommendations-grid', '.prev', '.next');
+
+        // Recommendations: dedicated simple scroll handler (always visible on desktop)
+        const recGrid = document.getElementById('recommendations-grid');
+        const recPrev = document.getElementById('rec-prev-btn');
+        const recNext = document.getElementById('rec-next-btn');
+        if (recGrid && recPrev && recNext) {
+            const updateRecBtns = () => {
+                recPrev.style.opacity = recGrid.scrollLeft > 5 ? '1' : '0.25';
+                recPrev.style.pointerEvents = recGrid.scrollLeft > 5 ? 'auto' : 'none';
+                const atEnd = recGrid.scrollLeft + recGrid.clientWidth >= recGrid.scrollWidth - 5;
+                recNext.style.opacity = atEnd ? '0.25' : '1';
+                recNext.style.pointerEvents = atEnd ? 'none' : 'auto';
+            };
+            recGrid.addEventListener('scroll', updateRecBtns);
+            new MutationObserver(() => setTimeout(updateRecBtns, 100)).observe(recGrid, { childList: true });
+            setTimeout(updateRecBtns, 800);
+        }
 
         lucide.createIcons();
     </script>
