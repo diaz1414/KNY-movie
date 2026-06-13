@@ -14,8 +14,12 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
   const updates = [
     {
       date: 'June 13, 2026',
-      title: 'Mobile Navigation & Timezone Patches',
+      title: 'User Reporting, Mobile Navigation & Timezone Patches',
       items: [
+        'Implemented a premium floating report button with responsive width expansion on desktop and minimal touch sizing on mobile.',
+        'Developed a beautiful glassmorphic Report Modal featuring responsive input scaling and Netflix-themed gradient glows.',
+        'Integrated Discord Webhook system with custom logo branding and dynamic color indicators.',
+        'Formatted Discord alert embeds with professional FiveM log-style aligned-colon structures, device OS/browser details, and active navigation links.',
         'Added a search button next to the burger menu on mobile layout for better accessibility.',
         'Refactored the mobile search overlay with a solid black background, preventing overlay collisions with logo and burger button.',
         'Fixed overlapping TMDB ID routing where TV series and movies sharing the same ID would load incorrect content.',
@@ -24,19 +28,13 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
     },
     {
       date: 'June 12, 2026',
-      title: 'Upcoming Releases & Coming Soon System',
+      title: 'Upcoming Releases, Discovery & Exploration System',
       items: [
         'Added a dedicated "Akan Datang" / "Coming Soon" movies row directly under Trending Now on the Home page.',
         'Implemented dynamic "Coming Soon" badging with a pulsing amber indicator on upcoming movie cards.',
         'Refactored the watch page player to display a beautiful unreleased/coming soon splash screen with the official release date instead of broken video streams.',
         'Disabled direct streaming for upcoming movies in details modals, transforming the watch action into an inactive "Coming Soon" calendar indicator.',
-        'Integrated language translation keys and fallback fetch mechanisms for seamless state restoration of upcoming movies.'
-      ]
-    },
-    {
-      date: 'June 12, 2026',
-      title: 'Discovery & Exploration Upgrade',
-      items: [
+        'Integrated language translation keys and fallback fetch mechanisms for seamless state restoration of upcoming movies.',
         'Added YouTube trailer embed inside the movie detail modal — watch trailers without leaving the page.',
         'Movie modal now shows similar/related titles in a horizontal scroll at the bottom.',
         'Added original language badge and vote count display in movie details.',
