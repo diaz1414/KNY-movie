@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, AlertCircle } from 'lucide-react';
 
-const CURRENT_VERSION = '1.0.2'; // Manually track version
+const CURRENT_VERSION = '1.0.3'; // Manually track version
 const VERSION_CHECK_URL = 'https://yknmovies.diaww.my.id/version.json';
 
 interface UpdateInfo {

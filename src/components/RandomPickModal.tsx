@@ -7,7 +7,7 @@ import { movieService, type UnifiedMovie } from '../services/api';
 interface RandomPickModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectMovie: (id: string) => void;
+  onSelectMovie: (id: string, type?: 'movie' | 'series') => void;
 }
 
 const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSelectMovie }) => {
@@ -92,7 +92,7 @@ const RandomPickModal: React.FC<RandomPickModalProps> = ({ isOpen, onClose, onSe
 
   const handleWatch = () => {
     if (result) {
-      onSelectMovie(result.id);
+      onSelectMovie(result.id, result.type);
       onClose();
     }
   };

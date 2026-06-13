@@ -9,12 +9,26 @@ interface HeroCarouselProps {
   onMoreInfo: (movieId: string) => void;
 }
 
+const parseLocalDate = (dateStr: string): Date | null => {
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+      return new Date(year, month, day);
+    }
+  }
+  const fallback = new Date(dateStr);
+  return isNaN(fallback.getTime()) ? null : fallback;
+};
+
 const isComingSoon = (releaseDate?: string) => {
   if (!releaseDate) return false;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const release = new Date(releaseDate);
-  if (isNaN(release.getTime())) return false;
+  const release = parseLocalDate(releaseDate);
+  if (!release) return false;
   return release > today;
 };
 
@@ -44,7 +58,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
   const currentMovie = movies[currentIndex];
 
   const handleWatch = () => {
-    window.location.href = `/watch.html?id=${currentMovie.id}`;
+    window.location.href = `/watch.html?id=${currentMovie.id}&type=${currentMovie.type}`;
   };
 
   const { scrollY } = useScroll();
@@ -172,7 +186,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
                 <motion.button
                   whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.15)' }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => onMoreInfo(currentMovie.id)}
+                  onClick={() => onMoreInfo(`${currentMovie.type}-${currentMovie.id}`)}
                   className="bg-zinc-800/60 backdrop-blur-xl text-white border border-white/10 px-6 md:px-10 py-3.5 md:py-4 rounded-xl font-black flex items-center gap-3 transition-colors"
                 >
                   <Info size={24} />

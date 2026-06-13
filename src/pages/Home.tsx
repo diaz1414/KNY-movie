@@ -181,8 +181,12 @@ const Home: React.FC = () => {
   // Listen for movie open events from Navbar search
   useEffect(() => {
     const handler = (e: Event) => {
-      const id = (e as CustomEvent).detail?.id;
-      if (id) setSelectedMovieId(id);
+      const detail = (e as CustomEvent).detail;
+      const id = detail?.id;
+      const type = detail?.type;
+      if (id) {
+        setSelectedMovieId(type ? `${type}-${id}` : id);
+      }
     };
     window.addEventListener('navbar-open-movie', handler);
     return () => window.removeEventListener('navbar-open-movie', handler);
@@ -212,8 +216,9 @@ const Home: React.FC = () => {
   // Handle ?movie= query param from URL (e.g., from Navbar search on other pages)
   useEffect(() => {
     const movieVal = searchParams.get('movie');
+    const typeVal = searchParams.get('type');
     if (movieVal) {
-      setSelectedMovieId(movieVal);
+      setSelectedMovieId(typeVal ? `${typeVal}-${movieVal}` : movieVal);
     }
   }, [searchParams]);
 
@@ -492,9 +497,9 @@ const Home: React.FC = () => {
       <RandomPickModal
         isOpen={showRandomModal}
         onClose={() => setShowRandomModal(false)}
-        onSelectMovie={(id) => {
+        onSelectMovie={(id, type) => {
           setShowRandomModal(false);
-          setSelectedMovieId(id);
+          setSelectedMovieId(type ? `${type}-${id}` : id);
         }}
       />
     </div>

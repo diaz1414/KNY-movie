@@ -8,19 +8,34 @@ import { useNavigate } from 'react-router-dom';
 
 interface MovieModalProps {
   movieId: string | null;
+  movieType?: 'movie' | 'series';
   onClose: () => void;
 }
+
+const parseLocalDate = (dateStr: string): Date | null => {
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+      return new Date(year, month, day);
+    }
+  }
+  const fallback = new Date(dateStr);
+  return isNaN(fallback.getTime()) ? null : fallback;
+};
 
 const isComingSoon = (releaseDate?: string) => {
   if (!releaseDate) return false;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const release = new Date(releaseDate);
-  if (isNaN(release.getTime())) return false;
+  const release = parseLocalDate(releaseDate);
+  if (!release) return false;
   return release > today;
 };
 
-const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
+const MovieModal: React.FC<MovieModalProps> = ({ movieId, movieType, onClose }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [movie, setMovie] = useState<UnifiedMovieDetail | null>(null);
@@ -40,7 +55,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
       setSimilarMovies([]);
       setMovie(null);
 
-      movieService.getMovieDetail(activeMovieId)
+      movieService.getMovieDetail(activeMovieId, movieType)
         .then(async (detail) => {
           setMovie(detail);
           setLoading(false);
@@ -60,12 +75,14 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [activeMovieId]);
+  }, [activeMovieId, movieType]);
 
   if (!movieId) return null;
 
   const handleWatch = () => {
-    window.location.href = `/watch.html?id=${activeMovieId}`;
+    const cleanId = activeMovieId ? activeMovieId.replace(/^(movie|series|tv)-/, '') : '';
+    const type = movie?.type || movieType || (activeMovieId?.startsWith('tv-') || activeMovieId?.startsWith('series-') ? 'series' : 'movie');
+    window.location.href = `/watch.html?id=${cleanId}&type=${type}`;
   };
 
   const handlePersonClick = (personId: number) => {
@@ -328,7 +345,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, onClose }) => {
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.04 * idx }}
-                          onClick={() => setActiveMovieId(sim.id)}
+                          onClick={() => setActiveMovieId(`${sim.type}-${sim.id}`)}
                           className="snap-start shrink-0 w-28 md:w-36 group/sim text-left"
                         >
                           <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-2 border border-white/5 group-hover/sim:border-netflix-red/50 transition-all duration-300 shadow-lg">

@@ -203,19 +203,26 @@ const Navbar: React.FC = () => {
             })}
           </div>
 
-          {/* Navbar Search Bar (Desktop) */}
-          <div ref={searchRef} className="hidden md:flex items-center relative">
+          {/* Navbar Search Bar */}
+          <div 
+            ref={searchRef} 
+            className={`${
+              searchOpen 
+                ? 'absolute inset-0 bg-black z-[1002] flex items-center px-[var(--container-padding)] md:relative md:inset-auto md:bg-transparent md:px-0 md:z-auto w-full md:w-auto' 
+                : 'hidden md:flex'
+            } items-center`}
+          >
             <AnimatePresence mode="wait">
               {searchOpen ? (
                 <motion.div
                   key="search-open"
-                  initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: 280, opacity: 1 }}
-                  exit={{ width: 0, opacity: 0 }}
-                  transition={{ duration: 0.25, ease: 'easeInOut' }}
-                  className="relative overflow-visible"
+                  initial={{ opacity: 0, scale: 0.97 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.97 }}
+                  transition={{ duration: 0.2 }}
+                  className="relative overflow-visible w-full md:w-[280px]"
                 >
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 z-10" />
+                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 z-10" />
                   <input
                     ref={inputRef}
                     type="text"
@@ -223,15 +230,15 @@ const Navbar: React.FC = () => {
                     onChange={e => setSearchQuery(e.target.value)}
                     onKeyDown={handleSearchKeyDown}
                     placeholder="Cari film, serial..."
-                    className="w-full bg-white/10 border border-white/20 rounded-full py-2 pl-9 pr-8 text-sm text-white placeholder-white/40 outline-none focus:border-netflix-red/60 transition-colors"
+                    className="w-full bg-[#181818] md:bg-white/10 border border-white/10 md:border-white/20 rounded-full py-2.5 pl-11 pr-10 text-sm text-white placeholder-white/40 outline-none focus:border-netflix-red/60 transition-colors"
                   />
-                  <button onClick={closeSearch} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
-                    <X size={14} />
+                  <button onClick={closeSearch} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                    <X size={16} />
                   </button>
 
                   {/* Suggestions */}
                   {suggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#111] border border-zinc-800 rounded-2xl overflow-hidden z-[2000] shadow-[0_20px_50px_rgba(0,0,0,0.9)]">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#111111] border border-zinc-800 rounded-2xl overflow-hidden z-[2000] shadow-[0_20px_50px_rgba(0,0,0,0.9)] max-h-[60vh] overflow-y-auto premium-scroll">
                       {suggestions.map((movie, idx) => (
                         <div
                           key={movie.id}
@@ -350,35 +357,53 @@ const Navbar: React.FC = () => {
 
           {/* Removed old select menu for a better experience in the mobile overlay */}
 
-          {/* Mobile Burger */}
-          <button
-            className="md:hidden text-white cursor-pointer z-[1001] flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 hover:bg-netflix-red transition-all duration-300 shadow-lg"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <motion.div animate={isOpen ? "open" : "closed"} className="relative w-5 h-5 flex flex-col justify-center items-center">
-              <motion.span
-                variants={{
-                  closed: { rotate: 0, y: -5 },
-                  open: { rotate: 45, y: 0 }
+          {/* Mobile Search & Burger */}
+          <div className="flex items-center gap-3 md:hidden">
+            {!searchOpen && (
+              <button
+                onClick={() => {
+                  setSearchOpen(true);
+                  setIsOpen(false);
+                  setTimeout(() => inputRef.current?.focus(), 150);
                 }}
-                className="absolute w-full h-0.5 bg-current rounded-full"
-              />
-              <motion.span
-                variants={{
-                  closed: { opacity: 1, scale: 1 },
-                  open: { opacity: 0, scale: 0 }
-                }}
-                className="absolute w-full h-0.5 bg-current rounded-full"
-              />
-              <motion.span
-                variants={{
-                  closed: { rotate: 0, y: 5 },
-                  open: { rotate: -45, y: 0 }
-                }}
-                className="absolute w-full h-0.5 bg-current rounded-full"
-              />
-            </motion.div>
-          </button>
+                className="text-white cursor-pointer flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 hover:bg-netflix-red transition-all duration-300 shadow-lg"
+              >
+                <Search size={20} />
+              </button>
+            )}
+
+            <button
+              className="text-white cursor-pointer z-[1001] flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 hover:bg-netflix-red transition-all duration-300 shadow-lg"
+              onClick={() => {
+                setIsOpen(!isOpen);
+                setSearchOpen(false);
+              }}
+            >
+              <motion.div animate={isOpen ? "open" : "closed"} className="relative w-5 h-5 flex flex-col justify-center items-center">
+                <motion.span
+                  variants={{
+                    closed: { rotate: 0, y: -5 },
+                    open: { rotate: 45, y: 0 }
+                  }}
+                  className="absolute w-full h-0.5 bg-current rounded-full"
+                />
+                <motion.span
+                  variants={{
+                    closed: { opacity: 1, scale: 1 },
+                    open: { opacity: 0, scale: 0 }
+                  }}
+                  className="absolute w-full h-0.5 bg-current rounded-full"
+                />
+                <motion.span
+                  variants={{
+                    closed: { rotate: 0, y: 5 },
+                    open: { rotate: -45, y: 0 }
+                  }}
+                  className="absolute w-full h-0.5 bg-current rounded-full"
+                />
+              </motion.div>
+            </button>
+          </div>
         </div>
 
       </motion.nav>

@@ -8,15 +8,29 @@ const MovieCard: React.FC<{ movie: UnifiedMovie; inRow?: boolean }> = ({ movie, 
   const { t } = useTranslation();
   
   const handleClick = () => {
-    window.location.href = `/watch.html?id=${movie.id}`;
+    window.location.href = `/watch.html?id=${movie.id}&type=${movie.type}`;
+  };
+
+  const parseLocalDate = (dateStr: string): Date | null => {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        return new Date(year, month, day);
+      }
+    }
+    const fallback = new Date(dateStr);
+    return isNaN(fallback.getTime()) ? null : fallback;
   };
 
   const isComingSoon = (releaseDate?: string) => {
     if (!releaseDate) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const release = new Date(releaseDate);
-    if (isNaN(release.getTime())) return false;
+    const release = parseLocalDate(releaseDate);
+    if (!release) return false;
     return release > today;
   };
 

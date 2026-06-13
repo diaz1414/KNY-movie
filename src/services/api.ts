@@ -170,61 +170,13 @@ export const movieService = {
       .map(normalizeTMDB);
   },
 
-  getMovieDetail: async (id: string): Promise<UnifiedMovieDetail | null> => {
-    try {
-      const res = await api.get(`/movie/${id}`, { params: { append_to_response: 'credits,videos', language: getLangCode() } });
-      const movie = res.data;
+  getMovieDetail: async (id: string, type?: 'movie' | 'series'): Promise<UnifiedMovieDetail | null> => {
+    const isTV = type === 'series' || id.startsWith('tv-') || id.startsWith('series-');
+    const cleanId = id.replace(/^(movie|series|tv)-/, '');
 
-      const director = movie.credits?.crew?.find((c: any) => c.job === 'Director');
-      const directorName = director?.name || 'Unknown';
-      const directorId = director?.id;
-      const cast = movie.credits?.cast?.slice(0, 5).map((c: any) => c.name) || [];
-      const castMembers = movie.credits?.cast?.slice(0, 15).map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        character: c.character,
-        profilePath: c.profile_path ? getImageUrl(c.profile_path, 'w500') : null
-      })) || [];
-      const genres = movie.genres?.map((g: any) => g.name) || [];
-
-      // Find YouTube trailer
-      const trailerVideo = movie.videos?.results?.find(
-        (v: any) => v.type === 'Trailer' && v.site === 'YouTube'
-      ) || movie.videos?.results?.find(
-        (v: any) => v.site === 'YouTube'
-      );
-
-      return {
-        ...normalizeTMDB(movie),
-        synopsis: movie.overview,
-        director: directorName,
-        directorId,
-        cast,
-        castMembers,
-        genres,
-        duration: movie.runtime ? `${movie.runtime}m` : '',
-        releaseDate: movie.release_date,
-        voteCount: movie.vote_count,
-        trailerKey: trailerVideo?.key,
-        originalLanguage: movie.original_language,
-        streamSources: [
-          { name: 'Server 1 (Primary)', url: `https://vidsrcme.su/embed/movie/${id}` },
-          { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/movie/${id}` },
-          { name: 'Server 3 (Mirror)', url: `https://vidsrc-me.ru/embed/movie/${id}` },
-          { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/movie/${id}` },
-          { name: 'Server 5 (Regional)', url: `https://autoembed.co/movie/tmdb/${id}` },
-          { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/movie/${id}` },
-          { name: 'Server 7 (SuperEmbed)', url: `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1` },
-          { name: 'Server 8 (WarezCDN)', url: `https://embed.warezcdn.com/serie/${id}` }, // Coba ganti /movie/ kalau film
-          { name: 'Server 9 (NontonGo)', url: `https://www.nontongo.win/embed/movie/${id}` },
-          { name: 'Server 10 (2Embed)', url: `https://www.2embed.cc/embed/${id}` },
-          { name: 'Server Indo (Mino)', url: `https://minochinos.com/embed/${id}` }
-        ]
-      };
-    } catch (e) {
-      // Try TV if Movie fails
+    if (isTV) {
       try {
-        const res = await api.get(`/tv/${id}`, { params: { append_to_response: 'credits,videos', language: getLangCode() } });
+        const res = await api.get(`/tv/${cleanId}`, { params: { append_to_response: 'credits,videos', language: getLangCode() } });
         const tv = res.data;
         const cast = tv.credits?.cast?.slice(0, 5).map((c: any) => c.name) || [];
         const castMembers = tv.credits?.cast?.slice(0, 15).map((c: any) => ({
@@ -246,6 +198,7 @@ export const movieService = {
 
         return {
           ...normalizeTMDB(tv),
+          id: cleanId,
           synopsis: tv.overview,
           director: creator?.name || 'Various',
           directorId: creator?.id,
@@ -258,16 +211,123 @@ export const movieService = {
           trailerKey: trailerVideo?.key,
           originalLanguage: tv.original_language,
           streamSources: [
-            { name: 'Server 1 (Primary)', url: `https://vidsrcme.su/embed/tv/${id}` },
-            { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/tv/${id}` },
-            { name: 'Server 3 (Mirror)', url: `https://vidsrc-me.ru/embed/tv/${id}` },
-            { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/tv/${id}` },
-            { name: 'Server 5 (Regional)', url: `https://autoembed.co/tv/tmdb/${id}` },
-            { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/tv/${id}` }
+            { name: 'Server 1 (Primary)', url: `https://vidsrcme.su/embed/tv/${cleanId}` },
+            { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/tv/${cleanId}` },
+            { name: 'Server 3 (Mirror)', url: `https://vidsrc-me.ru/embed/tv/${cleanId}` },
+            { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/tv/${cleanId}` },
+            { name: 'Server 5 (Regional)', url: `https://autoembed.co/tv/tmdb/${cleanId}` },
+            { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/tv/${cleanId}` }
           ]
         };
       } catch (err) {
-        console.error("Failed to fetch TMDB details", err);
+        console.error("Failed to fetch TMDB tv details", err);
+        return null;
+      }
+    } else {
+      try {
+        const res = await api.get(`/movie/${cleanId}`, { params: { append_to_response: 'credits,videos', language: getLangCode() } });
+        const movie = res.data;
+
+        const director = movie.credits?.crew?.find((c: any) => c.job === 'Director');
+        const directorName = director?.name || 'Unknown';
+        const directorId = director?.id;
+        const cast = movie.credits?.cast?.slice(0, 5).map((c: any) => c.name) || [];
+        const castMembers = movie.credits?.cast?.slice(0, 15).map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          character: c.character,
+          profilePath: c.profile_path ? getImageUrl(c.profile_path, 'w500') : null
+        })) || [];
+        const genres = movie.genres?.map((g: any) => g.name) || [];
+
+        // Find YouTube trailer
+        const trailerVideo = movie.videos?.results?.find(
+          (v: any) => v.type === 'Trailer' && v.site === 'YouTube'
+        ) || movie.videos?.results?.find(
+          (v: any) => v.site === 'YouTube'
+        );
+
+        return {
+          ...normalizeTMDB(movie),
+          id: cleanId,
+          synopsis: movie.overview,
+          director: directorName,
+          directorId,
+          cast,
+          castMembers,
+          genres,
+          duration: movie.runtime ? `${movie.runtime}m` : '',
+          releaseDate: movie.release_date,
+          voteCount: movie.vote_count,
+          trailerKey: trailerVideo?.key,
+          originalLanguage: movie.original_language,
+          streamSources: [
+            { name: 'Server 1 (Primary)', url: `https://vidsrcme.su/embed/movie/${cleanId}` },
+            { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/movie/${cleanId}` },
+            { name: 'Server 3 (Mirror)', url: `https://vidsrc-me.ru/embed/tv/${cleanId}` }, // tv endpoint inside if fallback is used? Actually keep movie
+            { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/movie/${cleanId}` },
+            { name: 'Server 5 (Regional)', url: `https://autoembed.co/movie/tmdb/${cleanId}` },
+            { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/movie/${cleanId}` },
+            { name: 'Server 7 (SuperEmbed)', url: `https://multiembed.mov/directstream.php?video_id=${cleanId}&tmdb=1` },
+            { name: 'Server 8 (WarezCDN)', url: `https://embed.warezcdn.com/movie/${cleanId}` },
+            { name: 'Server 9 (NontonGo)', url: `https://www.nontongo.win/embed/movie/${cleanId}` },
+            { name: 'Server 10 (2Embed)', url: `https://www.2embed.cc/embed/${cleanId}` },
+            { name: 'Server Indo (Mino)', url: `https://minochinos.com/embed/${cleanId}` }
+          ]
+        };
+      } catch (e) {
+        if (!type) {
+          // Fallback to TV if Movie fails and no type was specified
+          try {
+            const res = await api.get(`/tv/${cleanId}`, { params: { append_to_response: 'credits,videos', language: getLangCode() } });
+            const tv = res.data;
+            const cast = tv.credits?.cast?.slice(0, 5).map((c: any) => c.name) || [];
+            const castMembers = tv.credits?.cast?.slice(0, 15).map((c: any) => ({
+              id: c.id,
+              name: c.name,
+              character: c.character,
+              profilePath: c.profile_path ? getImageUrl(c.profile_path, 'w500') : null
+            })) || [];
+            const genres = tv.genres?.map((g: any) => g.name) || [];
+
+            const trailerVideo = tv.videos?.results?.find(
+              (v: any) => v.type === 'Trailer' && v.site === 'YouTube'
+            ) || tv.videos?.results?.find(
+              (v: any) => v.site === 'YouTube'
+            );
+
+            // Find creator
+            const creator = tv.created_by?.[0];
+
+            return {
+              ...normalizeTMDB(tv),
+              id: cleanId,
+              synopsis: tv.overview,
+              director: creator?.name || 'Various',
+              directorId: creator?.id,
+              cast,
+              castMembers,
+              genres,
+              duration: `${tv.number_of_seasons} Season${tv.number_of_seasons > 1 ? 's' : ''}`,
+              releaseDate: tv.first_air_date,
+              voteCount: tv.vote_count,
+              trailerKey: trailerVideo?.key,
+              originalLanguage: tv.original_language,
+              streamSources: [
+                { name: 'Server 1 (Primary)', url: `https://vidsrcme.su/embed/tv/${cleanId}` },
+                { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/tv/${cleanId}` },
+                { name: 'Server 3 (Mirror)', url: `https://vidsrc-me.ru/embed/tv/${cleanId}` },
+                { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/tv/${cleanId}` },
+                { name: 'Server 5 (Regional)', url: `https://autoembed.co/tv/tmdb/${cleanId}` },
+                { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/tv/${cleanId}` }
+              ]
+            };
+          } catch (err) {
+            console.error("Failed to fetch TMDB tv fallback details", err);
+            return null;
+          }
+        }
+        console.error("Failed to fetch TMDB movie details", e);
         return null;
       }
     }

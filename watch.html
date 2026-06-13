@@ -733,7 +733,14 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltZGFhY3lkcHN6bnpib2JwcHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzcwNzcsImV4cCI6MjA5MTMxMzA3N30.DAvImMrafbZiPp-GDDMwvxyL8qKXRzrpMHaCG58Q-ic';
         const TMDB_API_KEY = 'f76f5f908dd164d45ec92431b0517a3a';
         const urlParams = new URLSearchParams(window.location.search);
-        const movieId = urlParams.get('id');
+        let rawId = urlParams.get('id');
+        let contentType = urlParams.get('type') || 'movie';
+        if (rawId && (rawId.startsWith('tv-') || rawId.startsWith('series-') || rawId.startsWith('movie-'))) {
+            const parts = rawId.split('-');
+            contentType = parts[0] === 'series' || parts[0] === 'tv' ? 'tv' : 'movie';
+            rawId = parts.slice(1).join('-');
+        }
+        const movieId = rawId;
         let currentContentTitle = "";
         let isComingSoon = false;
 
@@ -806,15 +813,17 @@
 
                 // Force English language for titles and overview (TMDB Data)
                 const lang = 'en-US';
-                let movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}&language=${lang}&append_to_response=credits,videos`);
+                const endpoint = contentType === 'tv' || contentType === 'series' ? 'tv' : 'movie';
+                let movieResponse = await fetch(`https://api.themoviedb.org/3/${endpoint}/${movieId}?api_key=${TMDB_API_KEY}&language=${lang}&append_to_response=credits,videos`);
                 let movie = await movieResponse.json();
 
-                // If not found in movies, check TV shows
-                if (!movieResponse.ok || (!movie.title && !movie.name)) {
-                    const tvResponse = await fetch(`https://api.themoviedb.org/3/tv/${movieId}?api_key=${TMDB_API_KEY}&language=${lang}&append_to_response=credits,videos`);
-                    if (tvResponse.ok) {
-                        movie = await tvResponse.json();
-                    } else if (!movieResponse.ok) {
+                if (!movieResponse.ok) {
+                    // Fallback to check other type if not found
+                    const fallbackEndpoint = endpoint === 'tv' ? 'movie' : 'tv';
+                    const fallbackResponse = await fetch(`https://api.themoviedb.org/3/${fallbackEndpoint}/${movieId}?api_key=${TMDB_API_KEY}&language=${lang}&append_to_response=credits,videos`);
+                    if (fallbackResponse.ok) {
+                        movie = await fallbackResponse.json();
+                    } else {
                         throw new Error(`TMDB Error: ${movie.status_message || 'Item not found'}`);
                     }
                 }
@@ -829,12 +838,28 @@
 
                 document.title = `Watch ${movieTitle} - YKN`;
 
+                // Helper to parse date in local timezone
+                function parseLocalDate(dateStr) {
+                    if (!dateStr) return null;
+                    const parts = dateStr.split('-');
+                    if (parts.length === 3) {
+                        const year = parseInt(parts[0], 10);
+                        const month = parseInt(parts[1], 10) - 1;
+                        const day = parseInt(parts[2], 10);
+                        if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                            return new Date(year, month, day);
+                        }
+                    }
+                    const fallback = new Date(dateStr);
+                    return isNaN(fallback.getTime()) ? null : fallback;
+                }
+
                 // Check if unreleased (Coming Soon)
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 const releaseDateStr = movie.release_date || movie.first_air_date;
-                const release = releaseDateStr ? new Date(releaseDateStr) : null;
-                isComingSoon = release && !isNaN(release.getTime()) && release > today;
+                const release = parseLocalDate(releaseDateStr);
+                isComingSoon = release && release > today;
 
                 if (isComingSoon) {
                     // Hide server parent section

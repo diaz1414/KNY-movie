@@ -13,6 +13,16 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
 
   const updates = [
     {
+      date: 'June 13, 2026',
+      title: 'Mobile Navigation & Timezone Patches',
+      items: [
+        'Added a search button next to the burger menu on mobile layout for better accessibility.',
+        'Refactored the mobile search overlay with a solid black background, preventing overlay collisions with logo and burger button.',
+        'Fixed overlapping TMDB ID routing where TV series and movies sharing the same ID would load incorrect content.',
+        'Patched a timezone offset bug that incorrectly labeled recently released titles as "Coming Soon" due to UTC midnight mismatch.'
+      ]
+    },
+    {
       date: 'June 12, 2026',
       title: 'Upcoming Releases & Coming Soon System',
       items: [
