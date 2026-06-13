@@ -132,9 +132,11 @@ export const movieService = {
   getPopularMovies: async (page: number = 1) => {
     try {
       // 1. Fetch top viewed items from Supabase
+      // Minimum 5 views to be considered "trending" — needs real engagement, not just 1-2 accidental views
       const { data: supabaseData, error } = await supabase
         .from('movie_views')
         .select('*')
+        .gte('view_count', 5)
         .order('view_count', { ascending: false })
         .range((page - 1) * 20, page * 20 - 1);
 
