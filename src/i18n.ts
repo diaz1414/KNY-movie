@@ -84,7 +84,23 @@ const resources = {
       "genre_fantasy": "Fantasy",
       "genre_animation": "Animation",
       "genre_crime": "Crime",
-      "genre_adventure": "Adventure"
+      "genre_adventure": "Adventure",
+      "report_title": "Report Issue",
+      "report_subtitle": "Help us improve by reporting streaming issues or site bugs.",
+      "report_category": "Category",
+      "report_cat_broken": "Broken Video / Server Error",
+      "report_cat_sub": "Subtitle Issue",
+      "report_cat_info": "Wrong Movie Info",
+      "report_cat_other": "Other Bug / Feedback",
+      "report_movie_title": "Movie/Series Title (Optional)",
+      "report_placeholder_movie": "e.g. Toy Story 5",
+      "report_desc": "Detailed Description",
+      "report_placeholder_desc": "Please describe the problem in detail (e.g. Server 1 keeps buffering, no sound)...",
+      "report_submit": "Send Report",
+      "report_submitting": "Sending...",
+      "report_success": "Report submitted successfully! Thank you.",
+      "report_success_desc": "Our team will look into it shortly.",
+      "report_error": "Failed to send report. Please try again."
     }
   },
   id: {
@@ -169,7 +185,23 @@ const resources = {
       "genre_fantasy": "Fantasi",
       "genre_animation": "Animasi",
       "genre_crime": "Kriminal",
-      "genre_adventure": "Petualangan"
+      "genre_adventure": "Petualangan",
+      "report_title": "Laporkan Masalah",
+      "report_subtitle": "Bantu kami meningkatkan kualitas dengan melaporkan masalah streaming atau bug website.",
+      "report_category": "Kategori",
+      "report_cat_broken": "Video Rusak / Error Server",
+      "report_cat_sub": "Masalah Subtitle",
+      "report_cat_info": "Informasi Film Salah",
+      "report_cat_other": "Bug Lain / Masukan",
+      "report_movie_title": "Judul Film/Series (Opsional)",
+      "report_placeholder_movie": "contoh: Toy Story 5",
+      "report_desc": "Deskripsi Masalah",
+      "report_placeholder_desc": "Jelaskan masalah secara detail (contoh: Server 1 macet, suara tidak keluar)...",
+      "report_submit": "Kirim Laporan",
+      "report_submitting": "Mengirim...",
+      "report_success": "Laporan berhasil dikirim! Terima kasih.",
+      "report_success_desc": "Tim kami akan segera memeriksa masalah ini.",
+      "report_error": "Gagal mengirim laporan. Silakan coba lagi."
     }
   },
   ja: {

@@ -8,11 +8,12 @@ import MovieRow from '../components/MovieRow';
 import Footer from '../components/Footer';
 import YKNInstallBanner from '../components/YKNInstallBanner';
 import { movieService, type UnifiedMovie } from '../services/api';
-import { Search, ChevronLeft, ChevronRight, Sparkles, Trophy, Play, Shuffle } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Sparkles, Trophy, Play, Shuffle, AlertTriangle } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import MovieModal from '../components/MovieModal';
 import AdBanner from '../components/AdBanner';
 import RandomPickModal from '../components/RandomPickModal';
+import ReportModal from '../components/ReportModal';
 
 const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -28,6 +29,7 @@ const Home: React.FC = () => {
   const [explorePage, setExplorePage] = useState(1);
   const [exploreLoading, setExploreLoading] = useState(false);
   const [showRandomModal, setShowRandomModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [searchParams] = useSearchParams();
 
   // Restore state on mount
@@ -482,10 +484,24 @@ const Home: React.FC = () => {
       <YKNInstallBanner />
       <Footer />
 
+      {/* Floating Report Button */}
+      <button
+        onClick={() => setShowReportModal(true)}
+        className="fixed bottom-[5.5rem] right-6 z-[990] flex items-center justify-start w-12 hover:w-48 h-12 bg-zinc-950/90 hover:bg-netflix-red border border-white/10 hover:border-netflix-red/50 text-zinc-300 hover:text-white rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 ease-out group cursor-pointer overflow-hidden"
+        title={t('report_title', 'Laporkan Masalah')}
+      >
+        <div className="flex items-center gap-2.5 px-3.5 whitespace-nowrap">
+          <AlertTriangle size={18} className="shrink-0 group-hover:rotate-12 transition-transform duration-300" />
+          <span className="text-[11px] font-black uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            {t('report_title', 'Laporkan Masalah')}
+          </span>
+        </div>
+      </button>
+
       {/* Floating Random Pick Button */}
       <button
         onClick={() => setShowRandomModal(true)}
-        className="fixed bottom-6 right-6 z-[990] flex items-center gap-2.5 px-5 py-3.5 bg-netflix-red hover:bg-red-600 text-white font-black rounded-full shadow-[0_8px_30px_rgba(229,9,20,0.5)] hover:shadow-[0_12px_40px_rgba(229,9,20,0.7)] transition-all duration-300 hover:scale-105 active:scale-95 group"
+        className="fixed bottom-6 right-6 z-[990] flex items-center gap-2.5 px-5 py-3.5 bg-netflix-red hover:bg-red-600 text-white font-black rounded-full shadow-[0_8px_30px_rgba(229,9,20,0.5)] hover:shadow-[0_12px_40px_rgba(229,9,20,0.7)] transition-all duration-300 hover:scale-105 active:scale-95 group cursor-pointer"
         title={t('random_pick_title', 'Pilihkan Aku!')}
       >
         <Shuffle size={18} className="group-hover:rotate-180 transition-transform duration-500" />
@@ -500,6 +516,12 @@ const Home: React.FC = () => {
           setShowRandomModal(false);
           setSelectedMovieId(type ? `${type}-${id}` : id);
         }}
+      />
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
       />
     </div>
   );
