@@ -295,10 +295,10 @@ const cleanDescription = (desc?: string): string => {
 const ChannelCard: React.FC<{
   item: PlayableStream;
   activeTab: string;
-  setActiveStream: (stream: PlayableStream) => void;
+  selectStream: (stream: PlayableStream, tab?: any) => void;
   setSidebarTab: (tab: any) => void;
   t: any;
-}> = ({ item, activeTab, setActiveStream, setSidebarTab, t }) => {
+}> = ({ item, activeTab, selectStream, t }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (e: React.MouseEvent) => {
@@ -317,8 +317,7 @@ const ChannelCard: React.FC<{
       whileTap={{ scale: 0.96 }}
       transition={{ type: 'spring', damping: 18, stiffness: 220 }}
       onClick={() => {
-        setActiveStream(item);
-        setSidebarTab(activeTab);
+        selectStream(item, activeTab);
       }}
       className="relative group cursor-pointer rounded-2xl overflow-hidden shadow-2xl bg-[#141414] border border-white/5 transition-all duration-300 w-full aspect-[2/3]"
     >
@@ -406,11 +405,11 @@ const ChannelCard: React.FC<{
 
 const MatchCard: React.FC<{
   item: PlayableStream;
-  setActiveStream: (stream: PlayableStream) => void;
+  selectStream: (stream: PlayableStream, tab?: any) => void;
   setSidebarTab: (tab: any) => void;
   t: any;
   i18n: any;
-}> = ({ item, setActiveStream, setSidebarTab, t, i18n }) => {
+}> = ({ item, selectStream, t, i18n }) => {
   const { isPlayable, buttonText, status } = getPlayableStatus(item, t);
   const [copied, setCopied] = useState(false);
 
@@ -430,8 +429,7 @@ const MatchCard: React.FC<{
       whileTap={{ scale: 0.96 }}
       transition={{ type: 'spring', damping: 18, stiffness: 220 }}
       onClick={() => {
-        setActiveStream(item);
-        setSidebarTab('events');
+        selectStream(item, 'events');
       }}
       className="relative group rounded-2xl overflow-hidden shadow-2xl bg-[#141414] border border-white/5 transition-all duration-300 w-full aspect-[2/3] cursor-pointer"
     >
@@ -847,6 +845,23 @@ const LiveSports: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [activeStream]);
 
+  // Helper: select a stream and push slug to URL
+  const selectStream = (stream: PlayableStream, tab?: 'events' | 'sports-tv' | 'live-tv') => {
+    setActiveStream(stream);
+    setActiveServerIdx(0);
+    if (tab) setSidebarTab(tab);
+    const slug = getSlug(stream.name);
+    const param = stream.isChannel ? `channel=${slug}` : `match=${slug}`;
+    window.history.pushState({}, '', `${window.location.pathname}?${param}`);
+  };
+
+  // Helper: go back to menu and clear URL params
+  const clearStream = () => {
+    setActiveStream(null);
+    setActiveServerIdx(0);
+    window.history.pushState({}, '', window.location.pathname);
+  };
+
   const currentChannels = activeTab === 'sports-tv' ? sportsTv : liveTv;
 
   return <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
@@ -866,8 +881,7 @@ const LiveSports: React.FC = () => {
             <div className="lg:col-span-8 space-y-6">
               <button
                 onClick={() => {
-                  setActiveStream(null);
-                  setActiveServerIdx(0);
+                  clearStream();
                 }}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all font-bold text-sm tracking-wide cursor-pointer"
               >
@@ -1093,8 +1107,7 @@ const LiveSports: React.FC = () => {
                         <div
                           key={item.id}
                           onClick={() => {
-                            setActiveStream(item);
-                            setActiveServerIdx(0);
+                            selectStream(item);
                           }}
                           className={`flex flex-col gap-2.5 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${isCurrent
                             ? 'bg-netflix-red/10 border-netflix-red'
@@ -1151,8 +1164,7 @@ const LiveSports: React.FC = () => {
                         <div
                           key={item.id}
                           onClick={() => {
-                            setActiveStream(item);
-                            setActiveServerIdx(0);
+                            selectStream(item);
                           }}
                           className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all duration-300 cursor-pointer ${isCurrent
                             ? 'bg-netflix-red/10 border-netflix-red'
@@ -1253,8 +1265,7 @@ const LiveSports: React.FC = () => {
                         onClick={() => {
                           const firstPlayable = matches.find(m => getPlayableStatus(m, t).isPlayable);
                           if (firstPlayable) {
-                            setActiveStream(firstPlayable);
-                            setSidebarTab('events');
+                            selectStream(firstPlayable, 'events');
                           } else {
                             const section = document.getElementById('sports-content');
                             if (section) {
@@ -1366,7 +1377,7 @@ const LiveSports: React.FC = () => {
                       <MatchCard
                         key={item.id}
                         item={item}
-                        setActiveStream={setActiveStream}
+                        selectStream={selectStream}
                         setSidebarTab={setSidebarTab}
                         t={t}
                         i18n={i18n}
@@ -1393,7 +1404,7 @@ const LiveSports: React.FC = () => {
                         key={item.id}
                         item={item}
                         activeTab={activeTab}
-                        setActiveStream={setActiveStream}
+                        selectStream={selectStream}
                         setSidebarTab={setSidebarTab}
                         t={t}
                       />
