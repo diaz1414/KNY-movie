@@ -14,14 +14,18 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
   const updates = [
     {
       date: 'June 14, 2026',
-      title: 'Live Sports Hub & FIFA World Cup 2026 Cinematic Experience',
+      title: 'Live Sports Hub & Player Enhancements',
       items: [
-        'Launched the dedicated Live Sports Streaming Hub featuring real-time tournament matches and premium sports television channels.',
-        'Designed an immersive cinematic backdrop powered by custom high-definition football stadium visualizations and official tournament branding elements.',
-        'Implemented a smart-focus viewport hook that automatically centers and scrolls the video player to the top of the screen upon channel selection.',
-        'Integrated a high-efficiency stream decoder for low-latency live HLS sports broadcasts.',
-        'Designed premium glassmorphic dark widgets for real-time match scheduling, dates, and live-channel categories.',
-        'Optimized responsive layout scaling and component grids across desktop, tablet, and mobile device viewports.'
+        'Launched the new Live Sports section for watching live matches and sports TV channels.',
+        'Designed a premium stadium backdrop with World Cup graphics.',
+        'Added a countdown screen for upcoming matches—streams will automatically unlock and play when the match starts.',
+        'Added share buttons so you can easily copy and share direct links to matches and channels.',
+        'Added a live delay indicator that shows if you fall behind the stream, with a sync button to catch up instantly.',
+        'Added a buffering spinner in the middle of the player when the network slows down.',
+        'Simplified the World Cup standings filter to a clean dropdown menu instead of a long row of buttons.',
+        'Cursor now hides automatically when watching a video and the player controls fade out.',
+        'Added automatic page scrolling to the top when a channel or match is selected.',
+        'Improved layouts so they adjust perfectly on mobile, tablet, and desktop screens.'
       ]
     },
     {
