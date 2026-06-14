@@ -31,6 +31,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
   const [currentTrack, setCurrentTrack] = useState<any | null>(null);
   const [abrEnabled, setAbrEnabled] = useState(true);
   const [showQualityMenu, setShowQualityMenu] = useState(false);
+  const [buffering, setBuffering] = useState(false);
 
   // Auto-hide controls timer reference
   const controlsTimeoutRef = useRef<any>(null);
@@ -57,6 +58,11 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       setError(shakaErr.message || `Error playing video stream (Code ${shakaErr.code}).`);
     };
     player.addEventListener('error', onError);
+
+    const onBuffering = (event: any) => {
+      setBuffering(event.buffering);
+    };
+    player.addEventListener('buffering', onBuffering);
 
     // Track detection and quality resolution listeners
     const updateTracks = () => {
@@ -96,6 +102,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
 
     return () => {
       if (playerRef.current) {
+        playerRef.current.removeEventListener('buffering', onBuffering);
         playerRef.current.destroy().catch(() => { });
         playerRef.current = null;
       }
@@ -120,6 +127,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
     setTracks([]);
     setCurrentTrack(null);
     setShowQualityMenu(false);
+    setBuffering(false);
 
     const initAndLoad = async () => {
       try {
@@ -128,7 +136,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
           video.src = url;
           setLoading(false);
           setIsPlaying(true);
-          video.play().catch(() => {});
+          video.play().catch(() => { });
           return;
         }
 
@@ -188,7 +196,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
           video.src = url;
           setLoading(false);
           setIsPlaying(true);
-          video.play().catch(() => {});
+          video.play().catch(() => { });
         } else {
           setError('Failed to load stream: ' + (err.message || err.code));
           setLoading(false);
@@ -240,11 +248,21 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       }
     };
 
+    const onWaiting = () => setBuffering(true);
+    const onPlaying = () => {
+      setIsPlaying(true);
+      setBuffering(false);
+    };
+    const onCanPlay = () => setBuffering(false);
+
     video.addEventListener('play', onPlay);
     video.addEventListener('pause', onPause);
     video.addEventListener('volumechange', onVolumeChange);
     video.addEventListener('timeupdate', onTimeUpdate);
     video.addEventListener('error', onVideoError);
+    video.addEventListener('waiting', onWaiting);
+    video.addEventListener('playing', onPlaying);
+    video.addEventListener('canplay', onCanPlay);
 
     return () => {
       isCancelled = true;
@@ -255,6 +273,9 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
         video.removeEventListener('volumechange', onVolumeChange);
         video.removeEventListener('timeupdate', onTimeUpdate);
         video.removeEventListener('error', onVideoError);
+        video.removeEventListener('waiting', onWaiting);
+        video.removeEventListener('playing', onPlaying);
+        video.removeEventListener('canplay', onCanPlay);
       }
     };
   }, [url, type, keyId, keyVal]);
@@ -469,7 +490,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       )}
 
       {/* Central Play/Pause overlay button */}
-      {!loading && !error && (
+      {!loading && !error && !buffering && (
         <div
           className={`absolute inset-0 flex items-center justify-center z-15 transition-opacity duration-300 pointer-events-none ${showControls ? 'opacity-100' : 'opacity-0'
             }`}
@@ -485,6 +506,20 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
               <Play size={28} fill="currentColor" className="ml-1" />
             )}
           </button>
+        </div>
+      )}
+
+      {/* Buffering Overlay */}
+      {buffering && !loading && !error && (
+        <div className="absolute inset-0 flex items-center justify-center z-15 bg-black/10 pointer-events-none">
+          <div className="relative w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
+            {/* The Outer Ring */}
+            <div className="absolute inset-0 border-4 border-zinc-800 rounded-full"></div>
+            {/* The Spinning Segment */}
+            <div className="absolute inset-0 border-4 border-transparent border-t-netflix-red rounded-full animate-spin"></div>
+            {/* Inner Glow */}
+            <div className="absolute inset-2 border-2 border-netflix-red/20 rounded-full blur-sm"></div>
+          </div>
         </div>
       )}
 
@@ -554,8 +589,8 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
                     <span className={`text-[10px] md:text-xs font-black tracking-widest uppercase transition-colors duration-300 ${isLive ? 'text-white' : 'text-amber-500'
                       }`}>
                       {isLive ? 'LIVE' : `LIVE -${displayDelay < 60
-                          ? `${displayDelay}s`
-                          : `${Math.floor(displayDelay / 60)}:${(displayDelay % 60).toString().padStart(2, '0')}`
+                        ? `${displayDelay}s`
+                        : `${Math.floor(displayDelay / 60)}:${(displayDelay % 60).toString().padStart(2, '0')}`
                         }`}
                     </span>
 
@@ -569,7 +604,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
 
             {/* Right Controls: Quality, PiP and Fullscreen buttons */}
             <div className="flex items-center gap-3">
-              
+
               {/* Quality Selector (DASH/HLS via Shaka) */}
               {tracks.length > 1 && (
                 <div className="relative flex items-center justify-center">
@@ -578,9 +613,8 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
                       e.stopPropagation();
                       setShowQualityMenu(!showQualityMenu);
                     }}
-                    className={`text-white hover:text-netflix-red transition-all cursor-pointer flex items-center gap-1.5 text-[10px] md:text-xs font-black uppercase tracking-wider select-none ${
-                      showQualityMenu ? 'text-netflix-red' : ''
-                    }`}
+                    className={`text-white hover:text-netflix-red transition-all cursor-pointer flex items-center gap-1.5 text-[10px] md:text-xs font-black uppercase tracking-wider select-none ${showQualityMenu ? 'text-netflix-red' : ''
+                      }`}
                     title="Change Resolution"
                   >
                     <Settings size={20} className={showQualityMenu ? 'animate-spin-slow' : ''} />
@@ -607,9 +641,8 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
                           }
                           setShowQualityMenu(false);
                         }}
-                        className={`text-left px-2.5 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
-                          abrEnabled ? 'bg-netflix-red text-white' : 'text-zinc-400 hover:bg-white/5 hover:text-white'
-                        }`}
+                        className={`text-left px-2.5 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${abrEnabled ? 'bg-netflix-red text-white' : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                          }`}
                       >
                         <span>Auto</span>
                         {abrEnabled && <span className="text-[8px] font-black bg-white/20 px-1 rounded-sm">ACT</span>}
@@ -631,9 +664,8 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
                               }
                               setShowQualityMenu(false);
                             }}
-                            className={`text-left px-2.5 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
-                              isCurrent ? 'bg-netflix-red text-white' : 'text-zinc-400 hover:bg-white/5 hover:text-white'
-                            }`}
+                            className={`text-left px-2.5 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${isCurrent ? 'bg-netflix-red text-white' : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                              }`}
                           >
                             <span>{track.height}p</span>
                             {isCurrent && <span className="text-[8px] font-black bg-white/20 px-1 rounded-sm">ACT</span>}
