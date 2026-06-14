@@ -354,7 +354,7 @@ const ChannelCard: React.FC<{
       </button>
 
       {/* Brand Logo Hero Element */}
-      <div className="relative z-10 w-full h-full flex items-center justify-center p-8 select-none">
+      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-6 text-center select-none">
         {item.isBase64Logo && item.logo ? (
           <img
             src={item.logo}
@@ -363,7 +363,12 @@ const ChannelCard: React.FC<{
             loading="lazy"
           />
         ) : (
-          <Tv size={64} className="text-zinc-400 transition-colors group-hover:text-netflix-red" />
+          <div className="flex flex-col items-center gap-3">
+            <Tv size={56} className="text-zinc-400 transition-colors group-hover:text-netflix-red" />
+            <span className="text-xs md:text-sm font-black text-zinc-300 uppercase tracking-wider max-w-[150px] break-words">
+              {item.name}
+            </span>
+          </div>
         )}
       </div>
 
@@ -670,7 +675,7 @@ const LiveSports: React.FC = () => {
   const slides = [
     {
       id: 0,
-      image: '/world_cup_2026_logo.png',
+      image: '/world_cup_2026_hero.png',
       badge: 'Live',
       subtitle: 'FIFA World Cup 2026 Special',
       title: t('live_sports_tv'),
@@ -693,8 +698,27 @@ const LiveSports: React.FC = () => {
   const [matches, setMatches] = useState<PlayableStream[]>([]);
   const [sportsTv, setSportsTv] = useState<PlayableStream[]>([]);
   const [liveTv, setLiveTv] = useState<PlayableStream[]>([]);
-  const [activeTab, setActiveTab] = useState<'events' | 'sports-tv' | 'live-tv'>('events');
-  const [sidebarTab, setSidebarTab] = useState<'events' | 'sports-tv' | 'live-tv'>('events');
+  const [testTv] = useState<PlayableStream[]>([
+    {
+      id: '4228',
+      name: 'WorldCup TV (Test)',
+      subName: 'Online Test Stream (ClearKey)',
+      logo: '/world_cup_2026_logo.png',
+      isBase64Logo: true,
+      servers: [
+        {
+          name: 'Server 1',
+          url: 'https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/ch299/default/index.mpd',
+          type: 'dash-clearkey',
+          keyId: '549ab7cd35a64bb6bb479ecead04d69d',
+          key: '829799ed534d11fcadeb4b192467e050'
+        }
+      ],
+      isChannel: true
+    }
+  ]);
+  const [activeTab, setActiveTab] = useState<'events' | 'sports-tv' | 'live-tv' | 'test'>('events');
+  const [sidebarTab, setSidebarTab] = useState<'events' | 'sports-tv' | 'live-tv' | 'test'>('events');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -736,10 +760,17 @@ const LiveSports: React.FC = () => {
           setActiveStream(foundLive);
           setSidebarTab('live-tv');
           setActiveTab('live-tv');
+        } else {
+          const foundTest = testTv.find(c => getSlug(c.name) === channelSlug);
+          if (foundTest) {
+            setActiveStream(foundTest);
+            setSidebarTab('test');
+            setActiveTab('test');
+          }
         }
       }
     }
-  }, [loading, matches, sportsTv, liveTv]);
+  }, [loading, matches, sportsTv, liveTv, testTv]);
 
   // Selected stream server info
   const [activeStream, setActiveStream] = useState<PlayableStream | null>(null);
@@ -760,15 +791,35 @@ const LiveSports: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch events, sports channels, and entertainment channels in parallel
-        const [eventsRes, sportsRes, liveRes] = await Promise.all([
-          axios.get<MatchEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-events.dat'),
-          axios.get<ChannelEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-sports.dat'),
-          axios.get<ChannelEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-hiburan.dat')
-        ]);
+        let eventsData: MatchEvent[] = [];
+        let sportsData: ChannelEvent[] = [];
+        let liveData: ChannelEvent[] = [];
+
+        try {
+          // Try fetching from the external Github raw URLs
+          const [eventsRes, sportsRes, liveRes] = await Promise.all([
+            axios.get<MatchEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-events.dat'),
+            axios.get<ChannelEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-sports.dat'),
+            axios.get<ChannelEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-hiburan.dat')
+          ]);
+          eventsData = eventsRes.data;
+          sportsData = sportsRes.data;
+          liveData = liveRes.data;
+        } catch (githubErr) {
+          console.warn('Failed to fetch from Github source, falling back to local JSON data...', githubErr);
+          // Fallback to local JSON files served from the public/data folder
+          const [eventsRes, sportsRes, liveRes] = await Promise.all([
+            axios.get<MatchEvent[]>('/data/tv-events.json'),
+            axios.get<ChannelEvent[]>('/data/tv-sports.json'),
+            axios.get<ChannelEvent[]>('/data/tv-hiburan.json')
+          ]);
+          eventsData = eventsRes.data;
+          sportsData = sportsRes.data;
+          liveData = liveRes.data;
+        }
 
         // 1. Process Events (Match Schedule)
-        const mappedEvents: PlayableStream[] = eventsRes.data.map(item => ({
+        const mappedEvents: PlayableStream[] = eventsData.map(item => ({
           id: item.id_event,
           name: `${item.player_1} vs ${item.player_2}`,
           subName: item.nama_event,
@@ -785,7 +836,7 @@ const LiveSports: React.FC = () => {
         }));
 
         // 2. Process Sports TV Channels
-        const mappedSports: PlayableStream[] = sportsRes.data.map(item => ({
+        const mappedSports: PlayableStream[] = sportsData.map(item => ({
           id: item.id_iptv,
           name: item.nama_channel,
           subName: item.tagline || 'Saluran Sports Premium',
@@ -796,7 +847,7 @@ const LiveSports: React.FC = () => {
         }));
 
         // 3. Process Live TV Channels
-        const mappedLive: PlayableStream[] = liveRes.data.map(item => ({
+        const mappedLive: PlayableStream[] = liveData.map(item => ({
           id: item.id_iptv,
           name: item.nama_channel,
           subName: item.tagline || 'Saluran Hiburan & Lokal',
@@ -846,7 +897,7 @@ const LiveSports: React.FC = () => {
   }, [activeStream]);
 
   // Helper: select a stream and push slug to URL
-  const selectStream = (stream: PlayableStream, tab?: 'events' | 'sports-tv' | 'live-tv') => {
+  const selectStream = (stream: PlayableStream, tab?: 'events' | 'sports-tv' | 'live-tv' | 'test') => {
     setActiveStream(stream);
     setActiveServerIdx(0);
     if (tab) setSidebarTab(tab);
@@ -862,7 +913,7 @@ const LiveSports: React.FC = () => {
     window.history.pushState({}, '', window.location.pathname);
   };
 
-  const currentChannels = activeTab === 'sports-tv' ? sportsTv : liveTv;
+  const currentChannels = activeTab === 'sports-tv' ? sportsTv : activeTab === 'live-tv' ? liveTv : testTv;
 
   return <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
     <Navbar />
@@ -939,70 +990,64 @@ const LiveSports: React.FC = () => {
                       </div>
                     ) : !activeStream.isChannel && status === 'ended' ? (
                       /* ── MATCH ENDED OVERLAY ── */
-                      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center p-4 md:p-8 text-center select-none">
+                      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center p-3 md:p-8 text-center select-none">
                         <img
                           src="/stadium_pitch_bg.png"
                           alt=""
                           className="absolute inset-0 w-full h-full object-cover opacity-10"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/90" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
 
-                        {/* Menggunakan flex-col-reverse di mobile agar tombol naik ke atas, dan flex-col di desktop */}
-                        <div className="relative z-10 flex flex-col-reverse md:flex-col items-center gap-5 md:gap-6 w-full max-w-sm md:max-w-md">
+                        {/* Standard elegant layout: Flags -> Trophy (Desktop) -> Info Text -> CTA Button */}
+                        <div className="relative z-10 flex flex-col items-center gap-2 md:gap-4 w-full max-w-xs md:max-w-md">
 
-                          {/* GROUP 1: Konten Teks & Trofi (Akan berada di bawah tombol saat di mobile) */}
-                          <div className="flex flex-col items-center gap-3 md:gap-4 w-full">
-                            {/* Trophy — disembunyikan di mobile agar menghemat vertical space layar player, tetap ada di desktop */}
-                            <Trophy size={42} className="text-zinc-500 animate-bounce duration-1000 hidden md:block" />
-
-                            <div className="flex flex-col items-center gap-1">
-                              <h3 className="text-sm md:text-2xl font-black font-outfit text-white uppercase tracking-wider">
-                                {t('match_ended')}
-                              </h3>
-                              <p className="text-zinc-400 text-[10px] md:text-sm leading-relaxed px-4 md:px-0">
-                                {i18n.language.startsWith('id')
-                                  ? 'Pertandingan ini telah selesai. Tonton tayangan olahraga lainnya di World Cup TV.'
-                                  : 'This match has ended. Watch other sports broadcasts on World Cup TV.'}
-                              </p>
-                            </div>
+                          {/* 1. Flags (Match Identity) */}
+                          <div className="flex items-center gap-3 md:gap-6">
+                            <FlagImage countryName={activeStream.player1 || ''} className="w-8 h-5.5 md:w-14 md:h-10 shadow-lg border border-white/10 opacity-60" />
+                            <span className="text-[10px] md:text-sm font-black text-zinc-500 font-outfit uppercase tracking-widest">VS</span>
+                            <FlagImage countryName={activeStream.player2 || ''} className="w-8 h-5.5 md:w-14 md:h-10 shadow-lg border border-white/10 opacity-60" />
                           </div>
 
-                          {/* GROUP 2: Tombol Aksi Utama (Naik ke atas tepat di bawah bendera jika di mobile) */}
-                          <div className="flex flex-col items-center gap-4 md:gap-5 w-full">
-                            {/* ── TOMBOL KE CHANNEL WORLD CUP TV ── */}
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => {
-                                const worldCupChannel = sportsTv.find(
-                                  (c) =>
-                                    c.name.toLowerCase().includes('world cup') ||
-                                    getSlug(c.name) === 'worldcup-tv'
-                                );
+                          {/* 2. Trophy (Hidden on mobile to save vertical space) */}
+                          <Trophy size={36} className="text-zinc-500 animate-bounce duration-1000 hidden md:block" />
 
-                                if (worldCupChannel) {
-                                  selectStream(worldCupChannel, 'sports-tv');
-                                } else if (sportsTv.length > 0) {
-                                  selectStream(sportsTv[0], 'sports-tv');
-                                } else {
-                                  clearStream();
-                                  setActiveTab('sports-tv');
-                                }
-                              }}
-                              // Lebar penuh (w-full) di mobile agar gampang di-tap jari, otomatis menyesuaikan di desktop
-                              className="w-full md:w-auto px-6 py-3 md:px-7 md:py-3 rounded-xl bg-netflix-red text-white font-black text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-lg shadow-red-950/50 hover:bg-red-700 transition-all cursor-pointer"
-                            >
-                              <Tv size={16} fill="currentColor" />
-                              <span>Watch World Cup TV</span>
-                            </motion.button>
-
-                            {/* Flags — Selalu konstan bertindak sebagai jangkar visual atas */}
-                            <div className="flex items-center gap-3 md:gap-6">
-                              <FlagImage countryName={activeStream.player1 || ''} className="w-9 h-6 md:w-14 md:h-10 shadow-lg border border-white/10 opacity-60" />
-                              <span className="text-[10px] md:text-sm font-black text-zinc-500 font-outfit uppercase tracking-widest">VS</span>
-                              <FlagImage countryName={activeStream.player2 || ''} className="w-9 h-6 md:w-14 md:h-10 shadow-lg border border-white/10 opacity-60" />
-                            </div>
+                          {/* 3. Text content */}
+                          <div className="flex flex-col items-center gap-0.5">
+                            <h3 className="text-xs md:text-xl font-black font-outfit text-white uppercase tracking-wider">
+                              {t('match_ended')}
+                            </h3>
+                            <p className="text-zinc-400 text-[9px] md:text-sm leading-relaxed px-4 md:px-0 max-w-[200px] md:max-w-sm">
+                              {i18n.language.startsWith('id')
+                                ? 'Pertandingan ini telah selesai. Tonton siaran olahraga lainnya di World Cup TV.'
+                                : 'This match has ended. Watch other sports broadcasts on World Cup TV.'}
+                            </p>
                           </div>
+
+                          {/* 4. CTA Button (Full width on mobile for better touch targets) */}
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => {
+                              const worldCupChannel = sportsTv.find(
+                                (c) =>
+                                  c.name.toLowerCase().includes('world cup') ||
+                                  getSlug(c.name) === 'worldcup-tv'
+                              );
+
+                              if (worldCupChannel) {
+                                selectStream(worldCupChannel, 'sports-tv');
+                              } else if (sportsTv.length > 0) {
+                                selectStream(sportsTv[0], 'sports-tv');
+                              } else {
+                                clearStream();
+                                setActiveTab('sports-tv');
+                              }
+                            }}
+                            className="w-full md:w-auto mt-1 px-4 py-2 md:px-6 md:py-2.5 rounded-lg md:rounded-xl bg-netflix-red text-white font-black text-[10px] md:text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-red-950/50 hover:bg-red-700 transition-all cursor-pointer"
+                          >
+                            <Tv size={14} fill="currentColor" />
+                            <span>Watch World Cup TV</span>
+                          </motion.button>
 
                         </div>
                       </div>
@@ -1141,6 +1186,13 @@ const LiveSports: React.FC = () => {
                 >
                   Live TV
                 </button>
+                <button
+                  onClick={() => setSidebarTab('test')}
+                  className={`flex-1 py-2 px-3 rounded-lg font-black text-[10px] uppercase tracking-wider transition-all duration-300 cursor-pointer ${sidebarTab === 'test' ? 'bg-netflix-red text-white shadow' : 'text-zinc-500 hover:text-white'
+                    }`}
+                >
+                  Test
+                </button>
               </div>
 
               {/* Sidebar Channels List */}
@@ -1204,10 +1256,10 @@ const LiveSports: React.FC = () => {
                     })
                   )
                 ) : (
-                  (sidebarTab === 'sports-tv' ? sportsTv : liveTv).length === 0 ? (
+                  (sidebarTab === 'sports-tv' ? sportsTv : sidebarTab === 'live-tv' ? liveTv : testTv).length === 0 ? (
                     <div className="py-10 text-center text-zinc-500 text-xs font-bold">{t('no_channels')}</div>
                   ) : (
-                    (sidebarTab === 'sports-tv' ? sportsTv : liveTv).map((item) => {
+                    (sidebarTab === 'sports-tv' ? sportsTv : sidebarTab === 'live-tv' ? liveTv : testTv).map((item) => {
                       const isCurrent = activeStream?.id === item.id;
                       return (
                         <div
@@ -1360,7 +1412,7 @@ const LiveSports: React.FC = () => {
                     {t('live_sports')}
                   </h2>
                   <p className="text-xs font-black text-zinc-500 uppercase tracking-widest mt-1">
-                    {activeTab === 'events' ? t('match_schedule') : activeTab === 'sports-tv' ? 'Sports TV' : 'Live TV'}
+                    {activeTab === 'events' ? t('match_schedule') : activeTab === 'sports-tv' ? 'Sports TV' : activeTab === 'live-tv' ? 'Live TV' : 'Test'}
                   </p>
                 </header>
 
@@ -1395,6 +1447,16 @@ const LiveSports: React.FC = () => {
                   >
                     <Radio className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
                     Live TV
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('test')}
+                    className={`shrink-0 py-2 px-4 md:py-3.5 md:px-7 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-wider transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center gap-2 md:gap-3 justify-center ${activeTab === 'test'
+                      ? 'bg-netflix-red text-white shadow-lg shadow-red-950/30'
+                      : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                      }`}
+                  >
+                    <Tv className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
+                    Test
                   </button>
                 </div>
               </div>
