@@ -268,13 +268,13 @@ const getPlayableStatus = (stream: PlayableStream, t: any): { isPlayable: boolea
       }
       const stopTime = new Date(safeStopStr).getTime();
       if (!isNaN(stopTime) && now > stopTime) {
-        return { isPlayable: false, buttonText: t('match_ended'), status: 'ended' };
+        return { isPlayable: true, buttonText: t('match_ended'), status: 'ended' };
       }
     } else {
       // Fallback: 3 hours default duration
       const threeHoursMs = 3 * 60 * 60 * 1000;
       if (now > startTime + threeHoursMs) {
-        return { isPlayable: false, buttonText: t('match_ended'), status: 'ended' };
+        return { isPlayable: true, buttonText: t('match_ended'), status: 'ended' };
       }
     }
 
@@ -938,26 +938,41 @@ const LiveSports: React.FC = () => {
                         </div>
                       </div>
                     ) : !activeStream.isChannel && status === 'ended' ? (
-                      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center p-6 text-center select-none">
+                      /* ── MATCH ENDED OVERLAY ── */
+                      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center p-4 md:p-8 text-center select-none">
                         <img
                           src="/stadium_pitch_bg.png"
                           alt=""
                           className="absolute inset-0 w-full h-full object-cover opacity-10"
                         />
-                        <div className="absolute inset-0 bg-black/80" />
-                        <div className="relative z-10 flex flex-col items-center gap-4">
-                          <Trophy size={48} className="text-zinc-500" />
-                          <h3 className="text-lg md:text-xl font-black font-outfit text-white uppercase tracking-wider">
-                            {t('match_ended')}
-                          </h3>
-                          <p className="text-zinc-500 text-xs md:text-sm max-w-xs">
-                            {i18n.language.startsWith('id') 
-                              ? 'Pertandingan ini telah selesai. Pantau terus jadwal berikutnya!' 
-                              : 'This match has ended. Stay tuned for the next broadcasts!'}
-                          </p>
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/90" />
+
+                        <div className="relative z-10 flex flex-col items-center gap-3 md:gap-5">
+                          {/* Flags */}
+                          <div className="flex items-center gap-3 md:gap-6">
+                            <FlagImage countryName={activeStream.player1 || ''} className="w-10 h-7 md:w-14 md:h-10 shadow-lg border border-white/10 opacity-60" />
+                            <span className="text-[10px] md:text-sm font-black text-zinc-500 font-outfit uppercase tracking-widest">VS</span>
+                            <FlagImage countryName={activeStream.player2 || ''} className="w-10 h-7 md:w-14 md:h-10 shadow-lg border border-white/10 opacity-60" />
+                          </div>
+
+                          {/* Trophy + Title */}
+                          <Trophy size={32} className="text-zinc-600 md:hidden" />
+                          <Trophy size={52} className="text-zinc-500 hidden md:block" />
+
+                          <div className="flex flex-col items-center gap-1">
+                            <h3 className="text-base md:text-2xl font-black font-outfit text-white uppercase tracking-wider">
+                              {t('match_ended')}
+                            </h3>
+                            <p className="text-zinc-500 text-[10px] md:text-sm max-w-[220px] md:max-w-xs leading-relaxed">
+                              {i18n.language.startsWith('id')
+                                ? 'Pertandingan ini telah selesai.'
+                                : 'This match has ended.'}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ) : playerUrl ? (
+
                       <iframe
                         id="shaka_player_iframe"
                         src={playerUrl}
