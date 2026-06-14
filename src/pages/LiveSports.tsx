@@ -713,11 +713,11 @@ const LiveSports: React.FC = () => {
   // Check for share parameters on mount or when streams load
   useEffect(() => {
     if (loading || matches.length === 0) return;
-    
+
     const params = new URLSearchParams(window.location.search);
     const matchSlug = params.get('match');
     const channelSlug = params.get('channel');
-    
+
     if (matchSlug) {
       const found = matches.find(m => getSlug(m.name) === matchSlug);
       if (found) {
@@ -903,13 +903,13 @@ const LiveSports: React.FC = () => {
                           className="absolute inset-0 w-full h-full object-cover opacity-15"
                         />
                         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/85" />
-                        
+
                         {/* Content */}
                         <div className="relative z-10 flex flex-col items-center text-center gap-2 md:gap-6 w-full">
                           <span className="text-[9px] md:text-xs font-black bg-amber-500/20 border border-amber-500/30 text-amber-500 px-2.5 py-1 md:px-3.5 md:py-1.5 rounded-full uppercase tracking-[2px] animate-pulse">
                             {t('upcoming')}
                           </span>
-                          
+
                           {/* VS Flags and Names */}
                           <div className="flex items-center gap-3 md:gap-8 justify-center w-full max-w-lg">
                             <div className="flex flex-col items-center gap-1 md:gap-2.5">
@@ -931,8 +931,8 @@ const LiveSports: React.FC = () => {
                           )}
 
                           <p className="hidden md:block text-[9px] md:text-xs text-zinc-400 font-bold uppercase tracking-[2px] max-w-md">
-                            {i18n.language.startsWith('id') 
-                              ? 'Siaran langsung akan dimulai 20 menit sebelum waktu pertandingan.' 
+                            {i18n.language.startsWith('id')
+                              ? 'Siaran langsung akan dimulai 20 menit sebelum waktu pertandingan.'
                               : 'Live stream will unlock exactly 20 minutes before kickoff.'}
                           </p>
                         </div>
@@ -947,7 +947,7 @@ const LiveSports: React.FC = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/90" />
 
-                        <div className="relative z-10 flex flex-col items-center gap-3 md:gap-5">
+                        <div className="relative z-10 flex flex-col items-center gap-4 md:gap-6">
                           {/* Flags */}
                           <div className="flex items-center gap-3 md:gap-6">
                             <FlagImage countryName={activeStream.player1 || ''} className="w-10 h-7 md:w-14 md:h-10 shadow-lg border border-white/10 opacity-60" />
@@ -956,23 +956,50 @@ const LiveSports: React.FC = () => {
                           </div>
 
                           {/* Trophy + Title */}
-                          <Trophy size={32} className="text-zinc-600 md:hidden" />
-                          <Trophy size={52} className="text-zinc-500 hidden md:block" />
+                          <Trophy size={42} className="text-zinc-500 animate-bounce duration-1000" />
 
                           <div className="flex flex-col items-center gap-1">
                             <h3 className="text-base md:text-2xl font-black font-outfit text-white uppercase tracking-wider">
                               {t('match_ended')}
                             </h3>
-                            <p className="text-zinc-500 text-[10px] md:text-sm max-w-[220px] md:max-w-xs leading-relaxed">
+                            <p className="text-zinc-400 text-[10px] md:text-sm max-w-[240px] md:max-w-sm leading-relaxed mb-2">
                               {i18n.language.startsWith('id')
-                                ? 'Pertandingan ini telah selesai.'
-                                : 'This match has ended.'}
+                                ? 'Pertandingan ini telah selesai. Tonton tayangan olahraga lainnya di World Cup TV.'
+                                : 'This match has ended. Watch other sports broadcasts on World Cup TV.'}
                             </p>
                           </div>
+
+                          {/* ── TOMBOL KE CHANNEL WORLD CUP TV ── */}
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => {
+                              // Cari channel World Cup TV berdasarkan nama / keyword di list sportsTv
+                              const worldCupChannel = sportsTv.find(
+                                (c) =>
+                                  c.name.toLowerCase().includes('world cup') ||
+                                  getSlug(c.name) === 'worldcup-tv'
+                              );
+
+                              if (worldCupChannel) {
+                                selectStream(worldCupChannel, 'sports-tv');
+                              } else if (sportsTv.length > 0) {
+                                // Fallback jika nama tidak akurat, alihkan ke channel sport pertama yang tersedia
+                                selectStream(sportsTv[0], 'sports-tv');
+                              } else {
+                                // Jika tidak ada data channel sama sekali, balik ke menu utama sport
+                                clearStream();
+                                setActiveTab('sports-tv');
+                              }
+                            }}
+                            className="px-5 py-2.5 md:px-7 md:py-3 rounded-xl bg-netflix-red text-white font-black text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-950/50 hover:bg-red-700 transition-all cursor-pointer"
+                          >
+                            <Tv size={16} fill="currentColor" />
+                            <span>Watch World Cup TV</span>
+                          </motion.button>
                         </div>
                       </div>
                     ) : playerUrl ? (
-
                       <iframe
                         id="shaka_player_iframe"
                         src={playerUrl}
