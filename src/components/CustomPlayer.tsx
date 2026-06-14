@@ -19,6 +19,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
   const playerRef = useRef<shaka.Player | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const [hasPlayed, setHasPlayed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Custom Controls State
@@ -133,6 +134,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
     }
     setError(null);
     setIsPlaying(false);
+    setHasPlayed(false);
     setTracks([]);
     setCurrentTrack(null);
     setShowQualityMenu(false);
@@ -285,10 +287,12 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
     const onPlaying = () => {
       setIsPlaying(true);
       setBuffering(false);
+      setHasPlayed(true);
       setError(null); // Clear any transient errors on successful playback
     };
     const onCanPlay = () => {
       setBuffering(false);
+      setHasPlayed(true);
       setError(null); // Clear any transient errors on successful playback
     };
 
@@ -502,7 +506,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
         }`}
     >
       {/* Stadium Pitch Background behind video during transitions/buffering */}
-      {(loading || buffering || error) && (
+      {(!hasPlayed || error) && (
         <div className="absolute inset-0 z-0 pointer-events-none select-none opacity-20">
           <img
             src="/stadium_pitch_bg.png"
