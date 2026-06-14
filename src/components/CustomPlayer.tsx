@@ -498,17 +498,19 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       ref={containerRef}
       onMouseMove={resetControlsTimeout}
       onMouseLeave={() => isPlaying && setShowControls(false)}
-      className={`relative w-full h-full bg-[#050505] flex items-center justify-center group overflow-hidden select-none ${!showControls && isPlaying ? 'cursor-none' : ''
+      className={`relative w-full h-full bg-black flex items-center justify-center group overflow-hidden select-none ${!showControls && isPlaying ? 'cursor-none' : ''
         }`}
     >
       {/* Stadium Pitch Background behind video during transitions/buffering */}
-      <div className="absolute inset-0 z-0 pointer-events-none select-none opacity-20">
-        <img
-          src="/stadium_pitch_bg.png"
-          alt=""
-          className="w-full h-full object-cover"
-        />
-      </div>
+      {(loading || buffering || error) && (
+        <div className="absolute inset-0 z-0 pointer-events-none select-none opacity-20">
+          <img
+            src="/stadium_pitch_bg.png"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
 
       {/* HTML5 Video Element (without native controls to allow customized overlays) */}
       <video
