@@ -14,10 +14,10 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const playerRef = useRef<shaka.Player | null>(null);
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Custom Controls State
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -31,7 +31,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
   // Auto-hide controls timer reference
   const controlsTimeoutRef = useRef<any>(null);
 
-  // Initialize Shaka Player
+  // 1. Initialize and attach Shaka Player instance once on mount
   useEffect(() => {
     shaka.polyfill.installAll();
 
@@ -40,8 +40,6 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
 
     if (!shaka.Player.isBrowserSupported()) {
       console.warn('Shaka Player is not supported by this browser. Falling back to native video playback.');
-      video.src = url;
-      setLoading(false);
       return;
     }
 
@@ -50,53 +48,93 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
 
     const onError = (event: any) => {
       const shakaErr = event.detail;
-      // Filter out non-fatal or expected errors like LOAD_INTERRUPTED (7002)
-      if (shakaErr && shakaErr.code === 7002) {
-        console.log('Ignore non-fatal Shaka error 7002 (LOAD_INTERRUPTED)');
-        return;
-      }
+      if (shakaErr && shakaErr.code === 7002) return;
       console.error('Shaka Player error:', shakaErr);
       setError(shakaErr.message || `Error playing video stream (Code ${shakaErr.code}).`);
     };
     player.addEventListener('error', onError);
 
-    // Target a tight 3s delay from live edge to stay in sync
-    player.configure({
-      streaming: {
-        liveSync: {
-          enabled: true,
-          targetLatency: 3,
-        }
-      }
+    player.attach(video).catch((err) => {
+      console.error('Failed to attach video to Shaka Player:', err);
     });
 
-    if (type === 'dash-clearkey' && keyId && keyVal) {
-      player.configure({
-        drm: {
-          clearKeys: {
-            [keyId.trim()]: keyVal.trim()
-          }
-        }
-      });
-    }
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.destroy().catch(() => { });
+        playerRef.current = null;
+      }
+      if (video) {
+        video.src = '';
+        video.load();
+      }
+    };
+  }, []);
+
+  // 2. Load and play stream whenever url, type, keyId, or keyVal changes
+  useEffect(() => {
+    const video = videoRef.current;
+    const player = playerRef.current;
+    if (!video) return;
 
     let isCancelled = false;
 
     setLoading(true);
     setError(null);
+    setIsPlaying(false);
 
     const initAndLoad = async () => {
       try {
-        await player.attach(video);
-        if (isCancelled) return;
+        if (!player) {
+          // Fallback to native HTML5 video player direct src assignment if Shaka is unavailable
+          video.src = url;
+          setLoading(false);
+          setIsPlaying(true);
+          video.play().catch(() => {});
+          return;
+        }
 
+        // Reset any previous ClearKey config to clean state
+        player.configure({
+          drm: {
+            clearKeys: {}
+          }
+        });
+
+        // Configure general streaming parameters
+        player.configure({
+          streaming: {
+            bufferingGoal: 8,      // Keep a healthy 8 seconds of buffer ahead of the playhead
+            rebufferingGoal: 2,    // Start playing as soon as we have 2 seconds of buffer to speed up load time
+            liveSync: {
+              enabled: true,
+              targetLatency: 6.5,  // 6.5s delay is stable for CDN/network delivery and stays within the 10s green "LIVE" badge threshold
+            },
+            retryParameters: {
+              maxAttempts: 3,      // Automatically retry fetching media segments up to 3 times on network glitches
+              baseDelay: 1000,
+              backoffFactor: 1.5
+            }
+          }
+        });
+
+        if (type === 'dash-clearkey' && keyId && keyVal) {
+          player.configure({
+            drm: {
+              clearKeys: {
+                [keyId.trim()]: keyVal.trim()
+              }
+            }
+          });
+        }
+
+        // Load new stream URL (Shaka automatically unloads the previous source cleanly)
         await player.load(url);
         if (isCancelled) return;
 
         setLoading(false);
         setIsPlaying(true);
-        video.play().catch(() => {
-          console.log('Autoplay blocked. User interaction required.');
+        video.play().catch((err) => {
+          console.log('Autoplay blocked. User interaction required.', err);
           setIsPlaying(false);
         });
       } catch (err: any) {
@@ -111,6 +149,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
           video.src = url;
           setLoading(false);
           setIsPlaying(true);
+          video.play().catch(() => {});
         } else {
           setError('Failed to load stream: ' + (err.message || err.code));
           setLoading(false);
@@ -125,11 +164,14 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       if (video) {
         let liveEdge = 0;
         if (video.seekable && video.seekable.length > 0) {
-          liveEdge = video.seekable.end(video.seekable.length - 1);
+          const end = video.seekable.end(video.seekable.length - 1);
+          liveEdge = isFinite(end) ? end : 0;
         } else {
-          liveEdge = video.duration || 0;
+          liveEdge = isFinite(video.duration) ? video.duration : 0;
         }
-        const currentDelay = Math.max(0, Math.round(liveEdge - video.currentTime));
+        const curTime = isFinite(video.currentTime) ? video.currentTime : 0;
+        const diff = liveEdge - curTime;
+        const currentDelay = isFinite(diff) && diff >= 0 ? Math.round(diff) : 0;
         setLiveDelay(currentDelay);
       }
     };
@@ -151,25 +193,29 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       updateDelay();
     };
 
+    const onVideoError = () => {
+      if (video && video.error) {
+        console.error('Native video error:', video.error);
+        setError(`Native playback error (Code ${video.error.code}): ${video.error.message || 'Failed to load or locate media stream.'}`);
+        setLoading(false);
+      }
+    };
+
     video.addEventListener('play', onPlay);
     video.addEventListener('pause', onPause);
     video.addEventListener('volumechange', onVolumeChange);
     video.addEventListener('timeupdate', onTimeUpdate);
+    video.addEventListener('error', onVideoError);
 
     return () => {
       isCancelled = true;
       clearInterval(delayInterval);
-      if (playerRef.current) {
-        playerRef.current.destroy().catch(() => {});
-        playerRef.current = null;
-      }
       if (video) {
         video.removeEventListener('play', onPlay);
         video.removeEventListener('pause', onPause);
         video.removeEventListener('volumechange', onVolumeChange);
         video.removeEventListener('timeupdate', onTimeUpdate);
-        video.src = '';
-        video.load();
+        video.removeEventListener('error', onVideoError);
       }
     };
   }, [url, type, keyId, keyVal]);
@@ -238,7 +284,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
     if (isPlaying) {
       video.pause();
     } else {
-      video.play().catch(() => {});
+      video.play().catch(() => { });
     }
   };
 
@@ -298,11 +344,18 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
     const video = videoRef.current;
     if (!video) return;
 
-    // Check seekable range ends
+    let targetTime = 0;
     if (video.seekable && video.seekable.length > 0) {
-      video.currentTime = video.seekable.end(video.seekable.length - 1) - 0.5;
-    } else {
-      video.currentTime = video.duration;
+      const end = video.seekable.end(video.seekable.length - 1);
+      if (isFinite(end)) {
+        targetTime = end - 0.5;
+      }
+    } else if (isFinite(video.duration)) {
+      targetTime = video.duration;
+    }
+
+    if (isFinite(targetTime) && targetTime > 0) {
+      video.currentTime = targetTime;
     }
 
     // Automatically resume playback if paused
@@ -324,9 +377,8 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       {/* HTML5 Video Element (without native controls to allow customized overlays) */}
       <video
         ref={videoRef}
-        onClick={() => togglePlay()}
         onDoubleClick={() => toggleFullscreen()}
-        className="w-full h-full object-contain cursor-pointer"
+        className="w-full h-full object-contain"
         playsInline
         autoPlay
       />
@@ -369,17 +421,36 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
         </div>
       )}
 
+      {/* Central Play/Pause overlay button */}
+      {!loading && !error && (
+        <div
+          className={`absolute inset-0 flex items-center justify-center z-15 transition-opacity duration-300 pointer-events-none ${showControls ? 'opacity-100' : 'opacity-0'
+            }`}
+        >
+          <button
+            onClick={togglePlay}
+            className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-black/30 hover:bg-netflix-red/80 hover:border-netflix-red/80 border border-white/10 flex items-center justify-center text-white backdrop-blur-sm transition-all duration-300 hover:scale-110 active:scale-95 shadow-[0_10px_30px_rgba(0,0,0,0.4)] cursor-pointer pointer-events-auto"
+            title={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? (
+              <Pause size={28} fill="currentColor" />
+            ) : (
+              <Play size={28} fill="currentColor" className="ml-1" />
+            )}
+          </button>
+        </div>
+      )}
+
       {/* CUSTOM PREMIUM CONTROLS BAR (Overlay) */}
       {!loading && !error && (
         <div
-          className={`absolute inset-x-0 bottom-0 z-10 p-4 bg-gradient-to-t from-black/95 via-black/80 to-transparent flex flex-col gap-3 transition-opacity duration-300 ${
-            showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
+          className={`absolute inset-x-0 bottom-0 z-20 p-4 bg-gradient-to-t from-black/95 via-black/80 to-transparent flex flex-col gap-3 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Bottom control row */}
           <div className="flex items-center justify-between w-full">
-            
+
             {/* Left Controls: Play/Pause and Volume */}
             <div className="flex items-center gap-4">
               <button
@@ -432,17 +503,15 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500 animate-pulse"></span>
                       )}
                     </span>
-                    
-                    <span className={`text-[10px] md:text-xs font-black tracking-widest uppercase transition-colors duration-300 ${
-                      isLive ? 'text-white' : 'text-amber-500'
-                    }`}>
-                      {isLive ? 'LIVE' : `LIVE -${
-                        displayDelay < 60
+
+                    <span className={`text-[10px] md:text-xs font-black tracking-widest uppercase transition-colors duration-300 ${isLive ? 'text-white' : 'text-amber-500'
+                      }`}>
+                      {isLive ? 'LIVE' : `LIVE -${displayDelay < 60
                           ? `${displayDelay}s`
                           : `${Math.floor(displayDelay / 60)}:${(displayDelay % 60).toString().padStart(2, '0')}`
-                      }`}
+                        }`}
                     </span>
-                    
+
                     {!isLive && (
                       <RotateCcw size={10} className="text-amber-500 animate-spin" />
                     )}

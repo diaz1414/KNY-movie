@@ -789,46 +789,65 @@ const LiveSports: React.FC = () => {
           liveData = liveRes.data;
         }
 
-        // 1. Process Events (Match Schedule)
-        const mappedEvents: PlayableStream[] = eventsData.map(item => ({
-          id: item.id_event,
-          name: `${item.player_1} vs ${item.player_2}`,
-          subName: item.nama_event,
-          logo: item.logo_1,
-          isBase64Logo: false,
-          servers: buildServers(item.url_iptv, item.url_license, item.jenis),
-          isChannel: false,
-          player1: item.player_1,
-          player2: item.player_2,
-          jadwal_event: item.jadwal_event,
-          jadwal_stop: item.jadwal_stop,
-          deskripsi: cleanDescription(item.deskripsi),
-          deskripsi_en: cleanDescription(item.deskripsi_en)
-        }));
+        // 1. Process Events (Match Schedule) - Deduplicated
+        const seenEvents = new Set<string>();
+        const mappedEvents: PlayableStream[] = [];
+        for (const item of eventsData) {
+          const key = item.id_event || `${item.player_1} vs ${item.player_2}`;
+          if (seenEvents.has(key)) continue;
+          seenEvents.add(key);
+          mappedEvents.push({
+            id: item.id_event,
+            name: `${item.player_1} vs ${item.player_2}`,
+            subName: item.nama_event,
+            logo: item.logo_1,
+            isBase64Logo: false,
+            servers: buildServers(item.url_iptv, item.url_license, item.jenis),
+            isChannel: false,
+            player1: item.player_1,
+            player2: item.player_2,
+            jadwal_event: item.jadwal_event,
+            jadwal_stop: item.jadwal_stop,
+            deskripsi: cleanDescription(item.deskripsi),
+            deskripsi_en: cleanDescription(item.deskripsi_en)
+          });
+        }
 
-        // 2. Process Sports TV Channels
-        const mappedSports: PlayableStream[] = sportsData.map(item => ({
-          id: item.id_iptv,
-          name: item.nama_channel,
-          subName: item.tagline || 'Saluran Sports Premium',
-          logo: item.gbr_base64,
-          isBase64Logo: !!item.gbr_base64,
-          servers: buildServers(item.url_iptv, item.url_license, item.jenis),
-          isChannel: true
-        }));
+        // 2. Process Sports TV Channels - Deduplicated
+        const seenSports = new Set<string>();
+        const mappedSports: PlayableStream[] = [];
+        for (const item of sportsData) {
+          const key = item.id_iptv || item.nama_channel;
+          if (seenSports.has(key)) continue;
+          seenSports.add(key);
+          mappedSports.push({
+            id: item.id_iptv,
+            name: item.nama_channel,
+            subName: item.tagline || 'Saluran Sports Premium',
+            logo: item.gbr_base64,
+            isBase64Logo: !!item.gbr_base64,
+            servers: buildServers(item.url_iptv, item.url_license, item.jenis),
+            isChannel: true
+          });
+        }
 
-
-
-        // 3. Process Live TV Channels
-        const mappedLive: PlayableStream[] = liveData.map(item => ({
-          id: item.id_iptv,
-          name: item.nama_channel,
-          subName: item.tagline || 'Saluran Hiburan & Lokal',
-          logo: item.gbr_base64,
-          isBase64Logo: !!item.gbr_base64,
-          servers: buildServers(item.url_iptv, item.url_license, item.jenis),
-          isChannel: true
-        }));
+        // 3. Process Live TV Channels - Deduplicated
+        const seenLive = new Set<string>();
+        const mappedLive: PlayableStream[] = [];
+        for (const item of liveData) {
+          const key = item.id_iptv || item.nama_channel;
+          if (seenLive.has(key)) continue;
+          seenLive.add(key);
+          mappedLive.push({
+            id: item.id_iptv,
+            name: item.nama_channel,
+            subName: item.tagline || 'Saluran Hiburan & Lokal',
+            logo: item.gbr_base64,
+            isBase64Logo: !!item.gbr_base64,
+            servers: buildServers(item.url_iptv, item.url_license, item.jenis),
+            isChannel: true
+          });
+        }
 
         setMatches(mappedEvents);
         setSportsTv(mappedSports);
