@@ -127,7 +127,10 @@ const resources = {
       "report_submitting": "Sending...",
       "report_success": "Report submitted successfully! Thank you.",
       "report_success_desc": "Our team will look into it shortly.",
-      "report_error": "Failed to send report. Please try again."
+      "report_error": "Failed to send report. Please try again.",
+      "playback_error": "Playback Error",
+      "retry_button": "Retry",
+      "refresh_player": "Refresh Player"
     }
   },
   id: {
@@ -255,7 +258,10 @@ const resources = {
       "report_submitting": "Mengirim...",
       "report_success": "Laporan berhasil dikirim! Terima kasih.",
       "report_success_desc": "Tim kami akan segera memeriksa masalah ini.",
-      "report_error": "Gagal mengirim laporan. Silakan coba lagi."
+      "report_error": "Gagal mengirim laporan. Silakan coba lagi.",
+      "playback_error": "Kesalahan Pemutaran",
+      "retry_button": "Coba Lagi",
+      "refresh_player": "Muat Ulang Player"
     }
   },
   ja: {

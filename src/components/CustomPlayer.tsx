@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import shaka from 'shaka-player';
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, RotateCcw, Film, Settings } from 'lucide-react';
 import NetflixLoader from './NetflixLoader';
+import { useTranslation } from 'react-i18next';
 
 interface CustomPlayerProps {
   url: string;
@@ -11,6 +12,8 @@ interface CustomPlayerProps {
 }
 
 export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, keyVal }) => {
+  const { t } = useTranslation();
+  const [refreshKey, setRefreshKey] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const playerRef = useRef<shaka.Player | null>(null);
@@ -111,7 +114,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
         video.load();
       }
     };
-  }, []);
+  }, [refreshKey]);
 
   // 2. Load and play stream whenever url, type, keyId, or keyVal changes
   useEffect(() => {
@@ -147,20 +150,33 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
           }
         });
 
-        // Configure general streaming parameters
+        // Configure general streaming parameters optimized for resilience on slow connections
         player.configure({
           streaming: {
-            bufferingGoal: 8,      // Keep a healthy 8 seconds of buffer ahead of the playhead
-            rebufferingGoal: 2,    // Start playing as soon as we have 2 seconds of buffer to speed up load time
+            bufferingGoal: 15,      // Keep a robust 15 seconds of buffer ahead of the playhead (previously 8)
+            rebufferingGoal: 4,    // Start playing as soon as we have 4 seconds of buffer (previously 2) to prevent rapid start/stop stuttering
             liveSync: {
               enabled: true,
-              targetLatency: 6.5,  // 6.5s delay is stable for CDN/network delivery and stays within the 10s green "LIVE" badge threshold
+              targetLatency: 10,   // Stable 10s latency provides a larger buffer for network variance
             },
             retryParameters: {
-              maxAttempts: 3,      // Automatically retry fetching media segments up to 3 times on network glitches
+              maxAttempts: 6,      // Retry media segment fetches up to 6 times (previously 3)
               baseDelay: 1000,
-              backoffFactor: 1.5
+              backoffFactor: 1.5,
+              timeout: 15000       // Give requests up to 15s timeout before declaring error
             }
+          },
+          manifest: {
+            retryParameters: {
+              maxAttempts: 6,      // Retry manifest updates up to 6 times
+              baseDelay: 1000,
+              backoffFactor: 1.5,
+              timeout: 15000       // Give manifest fetches up to 15s timeout before declaring error
+            }
+          },
+          abr: {
+            enabled: true,
+            defaultBandwidthEstimate: 500000 // Start with a safe 500kbps estimate to play low quality quickly on slow connections
           }
         });
 
@@ -278,7 +294,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
         video.removeEventListener('canplay', onCanPlay);
       }
     };
-  }, [url, type, keyId, keyVal]);
+  }, [url, type, keyId, keyVal, refreshKey]);
 
   // Synchronize controls visibility auto-hide on mouse movement
   const resetControlsTimeout = () => {
@@ -506,9 +522,29 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
 
       {/* Error Overlay */}
       {error && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center bg-zinc-950/95 text-white gap-3">
-          <span className="text-netflix-red font-bold uppercase tracking-wider text-xs md:text-sm">Playback Error</span>
-          <p className="text-zinc-400 text-[10px] md:text-xs max-w-md">{error}</p>
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center bg-[#070707]/95 text-white gap-4 backdrop-blur-sm">
+          {/* Subtle Stadium Pitch Background (Full Cover) */}
+          <div className="absolute inset-0 z-0 pointer-events-none select-none opacity-10">
+            <img
+              src="/stadium_pitch_bg.png"
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center gap-3">
+            <span className="text-netflix-red font-extrabold uppercase tracking-widest text-xs md:text-sm">
+              {t('playback_error')}
+            </span>
+            <p className="text-zinc-400 text-[10px] md:text-xs max-w-md font-medium px-4">{error}</p>
+            <button
+              onClick={() => setRefreshKey(prev => prev + 1)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-netflix-red hover:bg-red-700 text-white font-bold text-xs md:text-sm transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_4px_15px_rgba(229,9,20,0.4)] cursor-pointer"
+            >
+              <RotateCcw size={16} />
+              <span>{t('retry_button')}</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -556,14 +592,22 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
           {/* Bottom control row */}
           <div className="flex items-center justify-between w-full">
 
-            {/* Left Controls: Play/Pause and Volume */}
+            {/* Left Controls: Play/Pause, Refresh and Volume */}
             <div className="flex items-center gap-4">
               <button
                 onClick={togglePlay}
-                className="text-white hover:text-netflix-red transition-colors cursor-pointer"
+                className="text-white hover:text-netflix-red transition-colors cursor-pointer flex items-center justify-center"
                 title={isPlaying ? 'Pause' : 'Play'}
               >
                 {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+              </button>
+
+              <button
+                onClick={() => setRefreshKey(prev => prev + 1)}
+                className="text-white hover:text-netflix-red transition-all duration-500 hover:rotate-180 active:scale-90 cursor-pointer flex items-center justify-center"
+                title={t('refresh_player')}
+              >
+                <RotateCcw size={18} />
               </button>
 
               {/* Volume block */}
