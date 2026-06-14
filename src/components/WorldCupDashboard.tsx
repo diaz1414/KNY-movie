@@ -185,6 +185,21 @@ const getTimelineFromScorers = (homeTeam: string, awayTeam: string, homeScorers:
   return timeline;
 };
 
+const parseMatchDate = (dateStr: string): number => {
+  if (!dateStr) return 0;
+  const parsed = Date.parse(dateStr);
+  if (!isNaN(parsed)) return parsed;
+
+  try {
+    const [datePart, timePart] = dateStr.split(' ');
+    const [m, d, y] = datePart.split('/').map(Number);
+    const [h, min] = timePart.split(':').map(Number);
+    return new Date(y, m - 1, d, h, min).getTime();
+  } catch (e) {
+    return 0;
+  }
+};
+
 export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n }) => {
   const { i18n: localI18n } = useTranslation();
   const i18nObj = propsI18n || localI18n;
@@ -276,6 +291,13 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
             homeTeamId: g.home_team_id,
             awayTeamId: g.away_team_id
           };
+        });
+
+        // Sort matches chronologically (earliest first, latest last)
+        mappedMatches.sort((a, b) => {
+          const timeA = parseMatchDate(a.date);
+          const timeB = parseMatchDate(b.date);
+          return timeA - timeB;
         });
 
         // Detect real goals between API updates
