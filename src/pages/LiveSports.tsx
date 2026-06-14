@@ -817,24 +817,7 @@ const LiveSports: React.FC = () => {
           isChannel: true
         }));
 
-        // Append WorldCup TV (Test) so it is playable inside the Sports TV channel list
-        mappedSports.push({
-          id: '4228',
-          name: 'WorldCup TV (Test)',
-          subName: 'Online Test Channel (ClearKey)',
-          logo: '/world_cup_2026_logo.png',
-          isBase64Logo: false,
-          servers: [
-            {
-              name: 'Server 1',
-              url: 'https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/ch299/default/index.mpd',
-              type: 'dash-clearkey',
-              keyId: '549ab7cd35a64bb6bb479ecead04d69d',
-              key: '829799ed534d11fcadeb4b192467e050'
-            }
-          ],
-          isChannel: true
-        });
+
 
         // 3. Process Live TV Channels
         const mappedLive: PlayableStream[] = liveData.map(item => ({
