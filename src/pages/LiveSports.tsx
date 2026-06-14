@@ -234,10 +234,10 @@ const getPlayableStatus = (stream: PlayableStream, t: any): { isPlayable: boolea
     if (isNaN(startTime)) return { isPlayable: true, buttonText: t('play_now'), status: 'live' };
 
     const now = Date.now();
-    const leadTimeMs = 20 * 60 * 1000; // 20 minutes in milliseconds
+    const leadTimeMs = 30 * 60 * 1000; // 30 minutes in milliseconds
     const startsIn = startTime - now;
 
-    // 1. Check if the match is in the future and starting in > 20 minutes
+    // 1. Check if the match is in the future and starting in > 30 minutes
     if (startsIn > leadTimeMs) {
       const minsLeft = Math.ceil(startsIn / (60 * 1000));
       if (minsLeft < 60) {
