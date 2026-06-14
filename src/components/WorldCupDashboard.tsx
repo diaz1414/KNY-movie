@@ -24,6 +24,7 @@ export interface MatchScore {
   group: string;
   status: string; // 'FT', 'LIVE', 'UPCOMING'
   time?: string;
+  rawTimeElapsed: string;
   date: string;
   homeScorers: string[];
   awayScorers: string[];
@@ -143,22 +144,67 @@ const parseScorers = (scorersStr: string | null): string[] => {
   }
 };
 
-const getTimelineFromScorers = (homeTeam: string, awayTeam: string, homeScorers: string[], awayScorers: string[]): string[] => {
+const getTimelineFromScorers = (
+  homeTeam: string,
+  awayTeam: string,
+  homeScorers: string[],
+  awayScorers: string[],
+  status: string,
+  currentMinuteStr: string
+): string[] => {
   const events: { min: number; text: string }[] = [];
   
+  // Parse current minute numeric value
+  let currentMinuteNum = 90;
+  if (status === 'LIVE') {
+    currentMinuteNum = parseInt(currentMinuteStr.replace(/[^0-9]/g, '')) || 45;
+  }
+
   homeScorers.forEach(s => {
-    const match = s.match(/(.+)\s+(\d+)'/);
+    const match = s.match(/(.+?)\s+(\d+)(.*)/);
     if (match) {
-      events.push({ min: parseInt(match[2]), text: `${match[2]}' ⚽ GOAL! ${homeTeam} scored by ${match[1]}` });
+      const name = match[1].trim();
+      const minBase = parseInt(match[2]);
+      const suffix = match[3] || '';
+      
+      const extraMatch = suffix.match(/\+(\d+)/);
+      const extraTime = extraMatch ? `+${extraMatch[1]}` : '';
+      const displayMin = `${minBase}'${extraTime ? `${extraTime}'` : ''}`;
+      
+      const isOG = suffix.toUpperCase().includes('(OG)');
+      const displayName = `${name}${isOG ? ' (OG)' : ''}`;
+
+      if (status !== 'LIVE' || minBase <= currentMinuteNum) {
+        events.push({ 
+          min: minBase, 
+          text: `${displayMin} ⚽ GOAL! ${homeTeam} scored by ${displayName}` 
+        });
+      }
     } else {
       events.push({ min: 35, text: `⚽ GOAL! ${homeTeam} scored by ${s}` });
     }
   });
 
   awayScorers.forEach(s => {
-    const match = s.match(/(.+)\s+(\d+)'/);
+    const match = s.match(/(.+?)\s+(\d+)(.*)/);
     if (match) {
-      events.push({ min: parseInt(match[2]), text: `${match[2]}' ⚽ GOAL! ${awayTeam} scored by ${match[1]}` });
+      const name = match[1].trim();
+      const minBase = parseInt(match[2]);
+      const suffix = match[3] || '';
+      
+      const extraMatch = suffix.match(/\+(\d+)/);
+      const extraTime = extraMatch ? `+${extraMatch[1]}` : '';
+      const displayMin = `${minBase}'${extraTime ? `${extraTime}'` : ''}`;
+      
+      const isOG = suffix.toUpperCase().includes('(OG)');
+      const displayName = `${name}${isOG ? ' (OG)' : ''}`;
+
+      if (status !== 'LIVE' || minBase <= currentMinuteNum) {
+        events.push({ 
+          min: minBase, 
+          text: `${displayMin} ⚽ GOAL! ${awayTeam} scored by ${displayName}` 
+        });
+      }
     } else {
       events.push({ min: 38, text: `⚽ GOAL! ${awayTeam} scored by ${s}` });
     }
@@ -171,17 +217,24 @@ const getTimelineFromScorers = (homeTeam: string, awayTeam: string, homeScorers:
 
   events.forEach(e => {
     if (e.min > 45 && !addedHalfTime) {
-      timeline.push("45' ⏱️ Half Time.");
-      addedHalfTime = true;
+      if (status !== 'LIVE' || currentMinuteNum >= 45) {
+        timeline.push("45' ⏱️ Half Time.");
+        addedHalfTime = true;
+      }
     }
     timeline.push(e.text);
   });
 
-  if (!addedHalfTime) {
+  if (!addedHalfTime && (status !== 'LIVE' || currentMinuteNum >= 45)) {
     timeline.push("45' ⏱️ Half Time.");
   }
   
-  timeline.push("90' 🏁 Full Time! The referee blows the final whistle.");
+  if (status === 'FT') {
+    timeline.push("90' 🏁 Full Time! The referee blows the final whistle.");
+  } else if (status === 'LIVE') {
+    timeline.push(`${currentMinuteNum}' ⏱️ Match is currently live and intense!`);
+  }
+  
   return timeline;
 };
 
@@ -200,6 +253,42 @@ const parseMatchDate = (dateStr: string): number => {
   }
 };
 
+const calculateLiveMatchMinute = (apiTimeElapsed: string, kickoffDateStr: string, fetchTimeMs: number): string => {
+  if (apiTimeElapsed === 'finished') return 'FT';
+  if (apiTimeElapsed === 'notstarted') return '';
+
+  const baseMin = parseInt(apiTimeElapsed);
+  if (!isNaN(baseMin)) {
+    const elapsedMins = Math.floor((Date.now() - fetchTimeMs) / 60000);
+    const currentMin = baseMin + elapsedMins;
+    if (currentMin > 90) {
+      return `90'+${currentMin - 90}`;
+    }
+    return `${currentMin}'`;
+  }
+
+  const kickoffMs = parseMatchDate(kickoffDateStr);
+  if (kickoffMs > 0) {
+    const elapsedSinceKickoff = Math.floor((Date.now() - kickoffMs) / 60000);
+    if (elapsedSinceKickoff >= 0 && elapsedSinceKickoff <= 130) {
+      if (elapsedSinceKickoff <= 45) {
+        return `${elapsedSinceKickoff}'`;
+      }
+      if (elapsedSinceKickoff <= 60) {
+        return 'HT';
+      }
+      if (elapsedSinceKickoff <= 105) {
+        const gameMin = elapsedSinceKickoff - 15;
+        return `${gameMin}'`;
+      }
+      const extra = elapsedSinceKickoff - 105;
+      return `90'+${extra}`;
+    }
+  }
+
+  return 'LIVE';
+};
+
 export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n }) => {
   const { i18n: localI18n } = useTranslation();
   const i18nObj = propsI18n || localI18n;
@@ -211,12 +300,22 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
   const [stadiumsMap, setStadiumsMap] = useState<Record<string, APIStadium>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchTimestamp, setFetchTimestamp] = useState<number>(Date.now());
 
   const [goalAlert, setGoalAlert] = useState<{ title: string; body: string } | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<MatchScore | null>(null);
   const [modalTab, setModalTab] = useState<'timeline' | 'stats'>('timeline');
   const [selectedGroup, setSelectedGroup] = useState<string>('Group A');
   const [showGroupDropdown, setShowGroupDropdown] = useState<boolean>(false);
+
+  // Trigger re-render every 10 seconds to keep live match minutes ticking in real-time
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick(prev => prev + 1);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Close group dropdown on outside click
   useEffect(() => {
@@ -284,6 +383,7 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
             group: `Group ${g.group}`,
             status: g.time_elapsed === 'finished' ? 'FT' : (g.time_elapsed === 'notstarted' ? 'UPCOMING' : 'LIVE'),
             time: g.time_elapsed === 'finished' ? 'FT' : (g.time_elapsed === 'notstarted' ? '' : `${g.time_elapsed}'`),
+            rawTimeElapsed: g.time_elapsed,
             date: g.local_date,
             homeScorers,
             awayScorers,
@@ -325,6 +425,7 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
           return mappedMatches;
         });
 
+        setFetchTimestamp(Date.now());
         setGroups(groupsRes.groups);
 
       } catch (err: any) {
@@ -406,7 +507,8 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
   const currentStandings = getGroupStandings(selectedGroup);
 
   const getMatchEventsList = (match: MatchScore): string[] => {
-    return getTimelineFromScorers(match.homeTeam, match.awayTeam, match.homeScorers, match.awayScorers);
+    const liveTime = calculateLiveMatchMinute(match.rawTimeElapsed, match.date, fetchTimestamp);
+    return getTimelineFromScorers(match.homeTeam, match.awayTeam, match.homeScorers, match.awayScorers, match.status, liveTime);
   };
 
   const selectedMatchEvents = selectedMatch ? getMatchEventsList(selectedMatch) : [];
@@ -621,9 +723,16 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
                     <span>{match.group}</span>
                     <span className="flex items-center gap-1">
                       {isLive ? (
-                        <span className="flex items-center gap-1.5 text-amber-400 font-black">
+                        <span className="flex items-center gap-1.5 text-amber-400 font-black animate-pulse">
                           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-                          <span>LIVE {match.time}</span>
+                          <span>
+                            {(() => {
+                              const liveTime = calculateLiveMatchMinute(match.rawTimeElapsed, match.date, fetchTimestamp);
+                              return liveTime.toUpperCase().includes('LIVE') || liveTime === 'HT'
+                                ? liveTime
+                                : `LIVE ${liveTime}`;
+                            })()}
+                          </span>
                         </span>
                       ) : match.status === 'UPCOMING' ? (
                         <span className="text-netflix-red font-black flex items-center gap-1">
@@ -730,7 +839,14 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
                       {selectedMatch.status === 'LIVE' ? (
                         <span className="mt-2.5 px-3 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[9px] font-black rounded-full uppercase tracking-wider animate-pulse select-none flex items-center gap-1.5">
                           <span className="w-1 h-1 rounded-full bg-amber-400 animate-ping" />
-                          LIVE {selectedMatch.time}
+                          <span>
+                            {(() => {
+                              const liveTime = calculateLiveMatchMinute(selectedMatch.rawTimeElapsed, selectedMatch.date, fetchTimestamp);
+                              return liveTime.toUpperCase().includes('LIVE') || liveTime === 'HT'
+                                ? liveTime
+                                : `LIVE ${liveTime}`;
+                            })()}
+                          </span>
                         </span>
                       ) : selectedMatch.status === 'FT' ? (
                         <span className="mt-2.5 px-3 py-1 bg-zinc-800/50 border border-zinc-700/20 text-zinc-400 text-[9px] font-black rounded-full uppercase tracking-wider select-none">
