@@ -13,6 +13,18 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
 
   const updates = [
     {
+      date: 'June 14, 2026',
+      title: 'Live Sports Hub & FIFA World Cup 2026 Cinematic Experience',
+      items: [
+        'Launched the dedicated Live Sports Streaming Hub featuring real-time tournament matches and premium sports television channels.',
+        'Designed an immersive cinematic backdrop powered by custom high-definition football stadium visualizations and official tournament branding elements.',
+        'Implemented a smart-focus viewport hook that automatically centers and scrolls the video player to the top of the screen upon channel selection.',
+        'Integrated a high-efficiency stream decoder for low-latency live HLS sports broadcasts.',
+        'Designed premium glassmorphic dark widgets for real-time match scheduling, dates, and live-channel categories.',
+        'Optimized responsive layout scaling and component grids across desktop, tablet, and mobile device viewports.'
+      ]
+    },
+    {
       date: 'June 13, 2026',
       title: 'User Reporting, Mobile Navigation & Timezone Patches',
       items: [
