@@ -658,7 +658,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
 
               <button
                 onClick={() => setRefreshKey(prev => prev + 1)}
-                className="text-white hover:text-netflix-red transition-all duration-500 hover:rotate-180 active:scale-90 cursor-pointer flex items-center justify-center"
+                className="text-white hover:text-netflix-red transition-all duration-500 hover:rotate-180 active:scale-90 cursor-pointer hidden md:flex items-center justify-center"
                 title={t('refresh_player')}
               >
                 <RotateCcw size={18} />
