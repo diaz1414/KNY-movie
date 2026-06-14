@@ -891,23 +891,23 @@ const LiveSports: React.FC = () => {
                         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/85" />
                         
                         {/* Content */}
-                        <div className="relative z-10 flex flex-col items-center text-center gap-4 md:gap-6 w-full">
-                          <span className="text-[10px] md:text-xs font-black bg-amber-500/20 border border-amber-500/30 text-amber-500 px-3.5 py-1.5 rounded-full uppercase tracking-[2px] animate-pulse">
+                        <div className="relative z-10 flex flex-col items-center text-center gap-2 md:gap-6 w-full">
+                          <span className="text-[9px] md:text-xs font-black bg-amber-500/20 border border-amber-500/30 text-amber-500 px-2.5 py-1 md:px-3.5 md:py-1.5 rounded-full uppercase tracking-[2px] animate-pulse">
                             {t('upcoming')}
                           </span>
                           
                           {/* VS Flags and Names */}
-                          <div className="flex items-center gap-4 md:gap-8 justify-center w-full max-w-lg">
-                            <div className="flex flex-col items-center gap-1.5 md:gap-2.5">
-                              <FlagImage countryName={activeStream.player1 || ''} className="w-12 h-8 md:w-16 md:h-11 shadow-lg border border-white/10" />
-                              <span className="text-xs md:text-sm font-black text-zinc-300 max-w-[100px] truncate">{activeStream.player1}</span>
+                          <div className="flex items-center gap-3 md:gap-8 justify-center w-full max-w-lg">
+                            <div className="flex flex-col items-center gap-1 md:gap-2.5">
+                              <FlagImage countryName={activeStream.player1 || ''} className="w-10 h-7 md:w-16 md:h-11 shadow-lg border border-white/10" />
+                              <span className="text-[10px] md:text-sm font-black text-zinc-300 max-w-[80px] md:max-w-[100px] truncate">{activeStream.player1}</span>
                             </div>
-                            <span className="text-xs md:text-sm font-black text-netflix-red font-outfit uppercase tracking-widest">
+                            <span className="text-[10px] md:text-sm font-black text-netflix-red font-outfit uppercase tracking-widest">
                               VS
                             </span>
-                            <div className="flex flex-col items-center gap-1.5 md:gap-2.5">
-                              <FlagImage countryName={activeStream.player2 || ''} className="w-12 h-8 md:w-16 md:h-11 shadow-lg border border-white/10" />
-                              <span className="text-xs md:text-sm font-black text-zinc-300 max-w-[100px] truncate">{activeStream.player2}</span>
+                            <div className="flex flex-col items-center gap-1 md:gap-2.5">
+                              <FlagImage countryName={activeStream.player2 || ''} className="w-10 h-7 md:w-16 md:h-11 shadow-lg border border-white/10" />
+                              <span className="text-[10px] md:text-sm font-black text-zinc-300 max-w-[80px] md:max-w-[100px] truncate">{activeStream.player2}</span>
                             </div>
                           </div>
 
@@ -916,7 +916,7 @@ const LiveSports: React.FC = () => {
                             <MatchCountdown targetTime={activeStream.jadwal_event} />
                           )}
 
-                          <p className="text-[9px] md:text-xs text-zinc-400 font-bold uppercase tracking-[2px] max-w-md">
+                          <p className="hidden md:block text-[9px] md:text-xs text-zinc-400 font-bold uppercase tracking-[2px] max-w-md">
                             {i18n.language.startsWith('id') 
                               ? 'Siaran langsung akan dimulai 20 menit sebelum waktu pertandingan.' 
                               : 'Live stream will unlock exactly 20 minutes before kickoff.'}
@@ -966,36 +966,46 @@ const LiveSports: React.FC = () => {
               {(() => {
                 const { status } = getPlayableStatus(activeStream, t);
                 return (
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6 bg-white/[0.02] border border-white/5 p-4 md:p-8 rounded-2xl md:rounded-3xl backdrop-blur-3xl shadow-xl">
-                    <div>
-                      <span className="text-netflix-red text-xs font-black uppercase tracking-[3px] animate-pulse flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-netflix-red animate-ping shrink-0" />
-                        {activeStream.isChannel ? t('live_now') : (status === 'live' ? t('live_now') : (status === 'upcoming' ? t('upcoming') : t('match_ended')))}
-                      </span>
-
-                      <div className="flex items-center gap-4 flex-wrap mt-1">
-                        {activeStream.isChannel ? (
-                          <h1 className="text-lg md:text-3xl font-black font-outfit text-white flex items-center gap-2 md:gap-3">
-                            {activeStream.isBase64Logo && activeStream.logo && (
-                              <img src={activeStream.logo} alt={activeStream.name} className="h-6 md:h-8 max-w-[90px] md:max-w-[120px] object-contain rounded bg-white/5 p-1 border border-white/10" />
-                            )}
-                            <span>{activeStream.name}</span>
-                          </h1>
-                        ) : (
-                          <h1 className="text-base md:text-3xl font-black font-outfit text-white flex items-center gap-2 md:gap-3.5 flex-wrap">
-                            <FlagImage countryName={activeStream.player1 || ''} className="w-7 h-5 md:w-10 md:h-7 inline-block" />
-                            <span>{activeStream.player1} vs {activeStream.player2}</span>
-                            <FlagImage countryName={activeStream.player2 || ''} className="w-7 h-5 md:w-10 md:h-7 inline-block" />
-                          </h1>
-                        )}
-
-                        {/* Share Button in Player View */}
-                        <PlayerShareButton stream={activeStream} t={t} />
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-6 bg-white/[0.02] border border-white/5 p-3 md:p-8 rounded-xl md:rounded-3xl backdrop-blur-3xl shadow-xl">
+                    <div className="flex-1 min-w-0">
+                      {/* Status badge + share button on same row on mobile */}
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-netflix-red text-[9px] md:text-xs font-black uppercase tracking-[3px] animate-pulse flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-netflix-red animate-ping shrink-0" />
+                          {activeStream.isChannel ? t('live_now') : (status === 'live' ? t('live_now') : (status === 'upcoming' ? t('upcoming') : t('match_ended')))}
+                        </span>
+                        {/* Share button inline on mobile */}
+                        <div className="md:hidden shrink-0">
+                          <PlayerShareButton stream={activeStream} t={t} />
+                        </div>
                       </div>
 
-                      <p className="text-zinc-500 text-xs font-bold uppercase tracking-wider mt-2">
+                      {/* Title */}
+                      <div className="mt-0.5 md:mt-1">
+                        {activeStream.isChannel ? (
+                          <h1 className="text-sm md:text-3xl font-black font-outfit text-white flex items-center gap-2 md:gap-3 truncate">
+                            {activeStream.isBase64Logo && activeStream.logo && (
+                              <img src={activeStream.logo} alt={activeStream.name} className="h-5 md:h-8 max-w-[70px] md:max-w-[120px] object-contain rounded bg-white/5 p-0.5 md:p-1 border border-white/10 shrink-0" />
+                            )}
+                            <span className="truncate">{activeStream.name}</span>
+                          </h1>
+                        ) : (
+                          <h1 className="text-sm md:text-3xl font-black font-outfit text-white flex items-center gap-1.5 md:gap-3.5 flex-wrap">
+                            <FlagImage countryName={activeStream.player1 || ''} className="w-5 h-3.5 md:w-10 md:h-7 inline-block shrink-0" />
+                            <span className="leading-tight">{activeStream.player1} vs {activeStream.player2}</span>
+                            <FlagImage countryName={activeStream.player2 || ''} className="w-5 h-3.5 md:w-10 md:h-7 inline-block shrink-0" />
+                          </h1>
+                        )}
+                      </div>
+
+                      <p className="text-zinc-500 text-[9px] md:text-xs font-bold uppercase tracking-wider mt-1">
                         {activeStream.subName}
                       </p>
+                    </div>
+
+                    {/* Share Button — desktop only (inline above on mobile) */}
+                    <div className="hidden md:flex items-center gap-4 shrink-0">
+                      <PlayerShareButton stream={activeStream} t={t} />
                     </div>
 
                     {/* Server selector */}
