@@ -17,6 +17,7 @@ import NetflixIntro from './components/NetflixIntro';
 import NotFound from './pages/NotFound';
 import News from './pages/News';
 import PersonDetail from './pages/PersonDetail';
+import LiveSports from './pages/LiveSports';
 import OfflineOverlay from './components/OfflineOverlay';
 import { isAndroid } from './utils/platform';
 import { Network } from '@capacitor/network';
@@ -52,7 +53,7 @@ const App: React.FC = () => {
       const handleTouchEnd = (e: TouchEvent) => {
         const touchEndX = e.changedTouches[0].clientX;
         const touchEndY = e.changedTouches[0].clientY;
-        
+
         const deltaX = touchEndX - touchStartX;
         const deltaY = Math.abs(touchEndY - touchStartY);
 
@@ -112,6 +113,7 @@ const App: React.FC = () => {
           <Route path="/popular" element={<Popular />} />
           <Route path="/news" element={<News />} />
           <Route path="/person/:id" element={<PersonDetail />} />
+          <Route path="/live-sports" element={<LiveSports />} />
           {/* Catch-all route for Not Found (404) */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -102,6 +102,7 @@ const Navbar: React.FC = () => {
     { name: t('movies'), path: '/movies' },
     { name: t('series'), path: '/series' },
     { name: t('popular'), path: '/popular' },
+    { name: t('live_sports'), path: '/live-sports' },
   ];
 
   const languages = [
