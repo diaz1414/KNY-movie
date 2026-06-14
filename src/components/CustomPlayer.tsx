@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import shaka from 'shaka-player';
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, RotateCcw, Film } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, RotateCcw, Film, Settings } from 'lucide-react';
 import NetflixLoader from './NetflixLoader';
 
 interface CustomPlayerProps {
@@ -27,6 +27,10 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
   const [isPip, setIsPip] = useState(false);
   const [isPipSupported, setIsPipSupported] = useState(false);
   const [liveDelay, setLiveDelay] = useState(0);
+  const [tracks, setTracks] = useState<any[]>([]);
+  const [currentTrack, setCurrentTrack] = useState<any | null>(null);
+  const [abrEnabled, setAbrEnabled] = useState(true);
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
 
   // Auto-hide controls timer reference
   const controlsTimeoutRef = useRef<any>(null);
@@ -53,6 +57,38 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       setError(shakaErr.message || `Error playing video stream (Code ${shakaErr.code}).`);
     };
     player.addEventListener('error', onError);
+
+    // Track detection and quality resolution listeners
+    const updateTracks = () => {
+      if (playerRef.current) {
+        const variantTracks = playerRef.current.getVariantTracks();
+        const uniqueTracks: any[] = [];
+        const seenHeights = new Set<number>();
+        // Sort quality heights descending (e.g., 1080p, 720p, etc.)
+        const sorted = [...variantTracks].sort((a, b) => (b.height || 0) - (a.height || 0));
+        for (const track of sorted) {
+          if (track.height && !seenHeights.has(track.height)) {
+            seenHeights.add(track.height);
+            uniqueTracks.push(track);
+          }
+        }
+        setTracks(uniqueTracks);
+
+        const activeTrack = variantTracks.find(t => t.active);
+        setCurrentTrack(activeTrack || null);
+
+        const config = playerRef.current.getConfiguration();
+        setAbrEnabled(config.abr.enabled);
+      }
+    };
+
+    player.addEventListener('trackschanged', updateTracks);
+    player.addEventListener('adaptation', () => {
+      if (playerRef.current) {
+        const activeTrack = playerRef.current.getVariantTracks().find(t => t.active);
+        setCurrentTrack(activeTrack || null);
+      }
+    });
 
     player.attach(video).catch((err) => {
       console.error('Failed to attach video to Shaka Player:', err);
@@ -81,6 +117,9 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
     setLoading(true);
     setError(null);
     setIsPlaying(false);
+    setTracks([]);
+    setCurrentTrack(null);
+    setShowQualityMenu(false);
 
     const initAndLoad = async () => {
       try {
@@ -241,6 +280,14 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       }
     };
   }, [isPlaying]);
+
+  // Close quality menu if user clicks outside of it
+  useEffect(() => {
+    if (!showQualityMenu) return;
+    const closeMenu = () => setShowQualityMenu(false);
+    window.addEventListener('click', closeMenu);
+    return () => window.removeEventListener('click', closeMenu);
+  }, [showQualityMenu]);
 
   // Sync fullscreen change state
   useEffect(() => {
@@ -520,8 +567,84 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
               );
             })()}
 
-            {/* Right Controls: PiP and Fullscreen buttons */}
+            {/* Right Controls: Quality, PiP and Fullscreen buttons */}
             <div className="flex items-center gap-3">
+              
+              {/* Quality Selector (DASH/HLS via Shaka) */}
+              {tracks.length > 1 && (
+                <div className="relative flex items-center justify-center">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowQualityMenu(!showQualityMenu);
+                    }}
+                    className={`text-white hover:text-netflix-red transition-all cursor-pointer flex items-center gap-1.5 text-[10px] md:text-xs font-black uppercase tracking-wider select-none ${
+                      showQualityMenu ? 'text-netflix-red' : ''
+                    }`}
+                    title="Change Resolution"
+                  >
+                    <Settings size={20} className={showQualityMenu ? 'animate-spin-slow' : ''} />
+                    <span className="hidden sm:inline">
+                      {abrEnabled ? `Auto (${currentTrack?.height ? `${currentTrack.height}p` : ''})` : (currentTrack?.height ? `${currentTrack.height}p` : 'Quality')}
+                    </span>
+                  </button>
+
+                  {/* Quality Dropdown Popup */}
+                  {showQualityMenu && (
+                    <div className="absolute bottom-10 right-0 z-30 w-32 bg-black/95 border border-white/10 rounded-xl p-2 flex flex-col gap-1 backdrop-blur-md shadow-2xl animate-fade-in pointer-events-auto">
+                      <span className="text-[8px] font-black text-white/40 uppercase tracking-[2px] px-2.5 py-1.5 select-none">
+                        Resolution
+                      </span>
+                      {/* Auto Option */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (playerRef.current) {
+                            playerRef.current.configure({ abr: { enabled: true } });
+                            setAbrEnabled(true);
+                            const active = playerRef.current.getVariantTracks().find(t => t.active);
+                            setCurrentTrack(active || null);
+                          }
+                          setShowQualityMenu(false);
+                        }}
+                        className={`text-left px-2.5 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
+                          abrEnabled ? 'bg-netflix-red text-white' : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <span>Auto</span>
+                        {abrEnabled && <span className="text-[8px] font-black bg-white/20 px-1 rounded-sm">ACT</span>}
+                      </button>
+
+                      {/* Track Options */}
+                      {tracks.map((track) => {
+                        const isCurrent = !abrEnabled && currentTrack?.id === track.id;
+                        return (
+                          <button
+                            key={track.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (playerRef.current) {
+                                playerRef.current.configure({ abr: { enabled: false } });
+                                playerRef.current.selectVariantTrack(track, true);
+                                setAbrEnabled(false);
+                                setCurrentTrack(track);
+                              }
+                              setShowQualityMenu(false);
+                            }}
+                            className={`text-left px-2.5 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
+                              isCurrent ? 'bg-netflix-red text-white' : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                          >
+                            <span>{track.height}p</span>
+                            {isCurrent && <span className="text-[8px] font-black bg-white/20 px-1 rounded-sm">ACT</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {isPipSupported && (
                 <button
                   onClick={togglePip}
