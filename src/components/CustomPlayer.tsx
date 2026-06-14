@@ -490,6 +490,35 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
         autoPlay
       />
 
+      {/* Top-Right Watermark Logo */}
+      {!loading && !error && (
+        <div
+          className={`absolute z-10 flex items-center bg-black/75 backdrop-blur-md border border-white/10 text-white select-none pointer-events-none transition-all duration-300 ${
+            isFullscreen
+              ? 'top-6 right-6 md:top-8 md:right-8 gap-2 md:gap-2.5 px-3 py-2 md:px-4 md:py-2.5 rounded-2xl'
+              : 'top-4 right-4 gap-1.5 px-2.5 py-1.5 rounded-xl'
+          } ${showControls ? 'opacity-100' : 'opacity-0'}`}
+        >
+          <Film
+            className={`text-netflix-red transition-all duration-300 ${
+              isFullscreen ? 'w-4 h-4 md:w-5 md:h-5' : 'w-3.5 h-3.5'
+            }`}
+          />
+          <span
+            className={`font-black tracking-widest uppercase font-outfit transition-all duration-300 ${
+              isFullscreen ? 'text-xs md:text-sm' : 'text-[10px]'
+            }`}
+          >
+            YKN TV
+          </span>
+          <span
+            className={`rounded-full bg-netflix-red animate-pulse transition-all duration-300 ${
+              isFullscreen ? 'w-2 h-2' : 'w-1.5 h-1.5'
+            }`}
+          />
+        </div>
+      )}
+
       {/* Loading Overlay */}
       {loading && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#070707] overflow-hidden">
