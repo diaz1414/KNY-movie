@@ -261,6 +261,11 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
 
     const onVideoError = () => {
       if (video && video.error) {
+        // Ignore expected empty source errors triggered when unloading/switching channels
+        if (video.error.code === 4 && (!video.src || video.src === '' || video.src === window.location.href)) {
+          console.log('Ignored empty native src error during source switch.');
+          return;
+        }
         console.error('Native video error:', video.error);
         setError(`Native playback error (Code ${video.error.code}): ${video.error.message || 'Failed to load or locate media stream.'}`);
         setLoading(false);
