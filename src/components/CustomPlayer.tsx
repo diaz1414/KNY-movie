@@ -115,7 +115,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
         video.load();
       }
     };
-  }, [refreshKey]);
+  }, []);
 
   // 2. Load and play stream whenever url, type, keyId, or keyVal changes
   useEffect(() => {
