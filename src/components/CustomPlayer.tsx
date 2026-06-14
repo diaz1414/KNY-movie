@@ -265,9 +265,14 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
 
     const onVideoError = () => {
       if (video && video.error) {
-        // Ignore expected empty source errors triggered when unloading/switching channels
-        if (video.error.code === 4 && (!video.src || video.src === '' || video.src === window.location.href)) {
-          console.log('Ignored empty native src error during source switch.');
+        const errMsg = video.error.message || '';
+        const errCode = video.error.code;
+        // Ignore expected empty source errors or blob URL revocation errors triggered when unloading/switching channels
+        if (
+          (errCode === 4 && (errMsg.includes('Empty src') || errMsg.includes('empty src'))) ||
+          (errCode === 4 && (!video.src || video.src === '' || video.src.startsWith('blob:') || video.src === window.location.href))
+        ) {
+          console.log('Ignored empty/blob native src error during channel transition.');
           return;
         }
         console.error('Native video error:', video.error);
@@ -280,8 +285,12 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
     const onPlaying = () => {
       setIsPlaying(true);
       setBuffering(false);
+      setError(null); // Clear any transient errors on successful playback
     };
-    const onCanPlay = () => setBuffering(false);
+    const onCanPlay = () => {
+      setBuffering(false);
+      setError(null); // Clear any transient errors on successful playback
+    };
 
     video.addEventListener('play', onPlay);
     video.addEventListener('pause', onPause);
@@ -489,9 +498,8 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       ref={containerRef}
       onMouseMove={resetControlsTimeout}
       onMouseLeave={() => isPlaying && setShowControls(false)}
-      className={`relative w-full h-full bg-[#050505] flex items-center justify-center group overflow-hidden select-none ${
-        !showControls && isPlaying ? 'cursor-none' : ''
-      }`}
+      className={`relative w-full h-full bg-[#050505] flex items-center justify-center group overflow-hidden select-none ${!showControls && isPlaying ? 'cursor-none' : ''
+        }`}
     >
       {/* Stadium Pitch Background behind video during transitions/buffering */}
       <div className="absolute inset-0 z-0 pointer-events-none select-none opacity-20">
@@ -514,28 +522,24 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       {/* Top-Right Watermark Logo */}
       {!loading && !error && (
         <div
-          className={`absolute z-10 flex items-center bg-black/75 backdrop-blur-md border border-white/10 text-white select-none pointer-events-none transition-all duration-300 ${
-            isFullscreen
+          className={`absolute z-10 flex items-center bg-black/75 backdrop-blur-md border border-white/10 text-white select-none pointer-events-none transition-all duration-300 ${isFullscreen
               ? 'top-6 right-6 md:top-8 md:right-8 gap-2 md:gap-2.5 px-3 py-2 md:px-4 md:py-2.5 rounded-2xl'
               : 'top-4 right-4 gap-1.5 px-2.5 py-1.5 rounded-xl'
-          } ${showControls ? 'opacity-100' : 'opacity-0'}`}
+            } ${showControls ? 'opacity-100' : 'opacity-0'}`}
         >
           <Film
-            className={`text-netflix-red transition-all duration-300 ${
-              isFullscreen ? 'w-4 h-4 md:w-5 md:h-5' : 'w-3.5 h-3.5'
-            }`}
+            className={`text-netflix-red transition-all duration-300 ${isFullscreen ? 'w-4 h-4 md:w-5 md:h-5' : 'w-3.5 h-3.5'
+              }`}
           />
           <span
-            className={`font-black tracking-widest uppercase font-outfit transition-all duration-300 ${
-              isFullscreen ? 'text-xs md:text-sm' : 'text-[10px]'
-            }`}
+            className={`font-black tracking-widest uppercase font-outfit transition-all duration-300 ${isFullscreen ? 'text-xs md:text-sm' : 'text-[10px]'
+              }`}
           >
             YKN TV
           </span>
           <span
-            className={`rounded-full bg-netflix-red animate-pulse transition-all duration-300 ${
-              isFullscreen ? 'w-2 h-2' : 'w-1.5 h-1.5'
-            }`}
+            className={`rounded-full bg-netflix-red animate-pulse transition-all duration-300 ${isFullscreen ? 'w-2 h-2' : 'w-1.5 h-1.5'
+              }`}
           />
         </div>
       )}
