@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import axios from 'axios';
-import { Trophy, Play, AlertCircle, ArrowLeft, Tv, ShieldAlert, Radio, Calendar, Clock, Film, Share2, Check } from 'lucide-react';
+import { Trophy, Play, AlertCircle, ArrowLeft, Tv, ShieldAlert, Radio, Calendar, Clock, Film, Share2, Check, Award } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
+import { CustomPlayer } from '../components/CustomPlayer';
+import { WorldCupDashboard } from '../components/WorldCupDashboard';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 
 interface StreamServer {
@@ -85,11 +87,7 @@ const decryptLicense = (ciphertext: string): string => {
   }
 };
 
-// Obfuscate the DASH URL/DRM Keys for the blogspot player
-const encodeV = (url: string, keyId: string, key: string): string => {
-  const inner = btoa(url) + ":" + btoa(keyId) + ":" + btoa(key);
-  return btoa(btoa(inner));
-};
+
 
 const buildServers = (urlIptv: string, urlLicense: string | undefined, jenis: string): StreamServer[] => {
   const decryptedLicense = urlLicense ? decryptLicense(urlLicense) : '';
@@ -698,27 +696,8 @@ const LiveSports: React.FC = () => {
   const [matches, setMatches] = useState<PlayableStream[]>([]);
   const [sportsTv, setSportsTv] = useState<PlayableStream[]>([]);
   const [liveTv, setLiveTv] = useState<PlayableStream[]>([]);
-  const [testTv] = useState<PlayableStream[]>([
-    {
-      id: '4228',
-      name: 'WorldCup TV (Test)',
-      subName: 'Online Test Stream (ClearKey)',
-      logo: '/world_cup_2026_logo.png',
-      isBase64Logo: true,
-      servers: [
-        {
-          name: 'Server 1',
-          url: 'https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/ch299/default/index.mpd',
-          type: 'dash-clearkey',
-          keyId: '549ab7cd35a64bb6bb479ecead04d69d',
-          key: '829799ed534d11fcadeb4b192467e050'
-        }
-      ],
-      isChannel: true
-    }
-  ]);
-  const [activeTab, setActiveTab] = useState<'events' | 'sports-tv' | 'live-tv' | 'test'>('events');
-  const [sidebarTab, setSidebarTab] = useState<'events' | 'sports-tv' | 'live-tv' | 'test'>('events');
+  const [activeTab, setActiveTab] = useState<'events' | 'sports-tv' | 'live-tv' | 'stats'>('events');
+  const [sidebarTab, setSidebarTab] = useState<'events' | 'sports-tv' | 'live-tv'>('events');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -760,22 +739,14 @@ const LiveSports: React.FC = () => {
           setActiveStream(foundLive);
           setSidebarTab('live-tv');
           setActiveTab('live-tv');
-        } else {
-          const foundTest = testTv.find(c => getSlug(c.name) === channelSlug);
-          if (foundTest) {
-            setActiveStream(foundTest);
-            setSidebarTab('test');
-            setActiveTab('test');
-          }
         }
       }
     }
-  }, [loading, matches, sportsTv, liveTv, testTv]);
+  }, [loading, matches, sportsTv, liveTv]);
 
   // Selected stream server info
   const [activeStream, setActiveStream] = useState<PlayableStream | null>(null);
   const [activeServerIdx, setActiveServerIdx] = useState<number>(0);
-  const [playerUrl, setPlayerUrl] = useState<string>('');
 
   useEffect(() => {
     if (activeStream) return;
@@ -796,7 +767,7 @@ const LiveSports: React.FC = () => {
         let liveData: ChannelEvent[] = [];
 
         try {
-          // Try fetching from the external Github raw URLs
+          // Try fetching from the external GitHub raw URLs first (Primary Source)
           const [eventsRes, sportsRes, liveRes] = await Promise.all([
             axios.get<MatchEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-events.dat'),
             axios.get<ChannelEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-sports.dat'),
@@ -846,6 +817,25 @@ const LiveSports: React.FC = () => {
           isChannel: true
         }));
 
+        // Append WorldCup TV (Test) so it is playable inside the Sports TV channel list
+        mappedSports.push({
+          id: '4228',
+          name: 'WorldCup TV (Test)',
+          subName: 'Online Test Channel (ClearKey)',
+          logo: '/world_cup_2026_logo.png',
+          isBase64Logo: false,
+          servers: [
+            {
+              name: 'Server 1',
+              url: 'https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/ch299/default/index.mpd',
+              type: 'dash-clearkey',
+              keyId: '549ab7cd35a64bb6bb479ecead04d69d',
+              key: '829799ed534d11fcadeb4b192467e050'
+            }
+          ],
+          isChannel: true
+        });
+
         // 3. Process Live TV Channels
         const mappedLive: PlayableStream[] = liveData.map(item => ({
           id: item.id_iptv,
@@ -871,33 +861,13 @@ const LiveSports: React.FC = () => {
     fetchAllData();
   }, []);
 
-  // Set the player URL when a stream or server changes
-  useEffect(() => {
-    if (!activeStream) {
-      setPlayerUrl('');
-      return;
-    }
-
-    const server = activeStream.servers[activeServerIdx];
-    if (!server) return;
-
-    if (server.type === 'dash-clearkey' && server.keyId && server.key) {
-      const v = encodeV(server.url, server.keyId, server.key);
-      setPlayerUrl(`https://wc-2026-player.blogspot.com/?type=dash-clearkey&v=${v}`);
-    } else {
-      // Default fallback (e.g. HLS)
-      const v = btoa(btoa(btoa(server.url)));
-      setPlayerUrl(`https://wc-2026-player.blogspot.com/?type=hls&v=${v}`);
-    }
-  }, [activeStream, activeServerIdx]);
-
   // Scroll to top when activeStream changes (opening player or going back to menu)
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [activeStream]);
 
   // Helper: select a stream and push slug to URL
-  const selectStream = (stream: PlayableStream, tab?: 'events' | 'sports-tv' | 'live-tv' | 'test') => {
+  const selectStream = (stream: PlayableStream, tab?: 'events' | 'sports-tv' | 'live-tv') => {
     setActiveStream(stream);
     setActiveServerIdx(0);
     if (tab) setSidebarTab(tab);
@@ -913,7 +883,7 @@ const LiveSports: React.FC = () => {
     window.history.pushState({}, '', window.location.pathname);
   };
 
-  const currentChannels = activeTab === 'sports-tv' ? sportsTv : activeTab === 'live-tv' ? liveTv : testTv;
+  const currentChannels = activeTab === 'sports-tv' ? sportsTv : liveTv;
 
   return <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
     <Navbar />
@@ -1051,16 +1021,13 @@ const LiveSports: React.FC = () => {
 
                         </div>
                       </div>
-                    ) : playerUrl ? (
-                      <iframe
-                        id="shaka_player_iframe"
-                        src={playerUrl}
-                        title={t('match_schedule')}
-                        className="w-full h-full border-none"
-                        allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *"
-                        allowFullScreen
-                        sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
-                      ></iframe>
+                    ) : activeStream.servers[activeServerIdx] ? (
+                      <CustomPlayer
+                        url={activeStream.servers[activeServerIdx].url}
+                        type={activeStream.servers[activeServerIdx].type}
+                        keyId={activeStream.servers[activeServerIdx].keyId}
+                        keyVal={activeStream.servers[activeServerIdx].key}
+                      />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <NetflixLoader />
@@ -1186,13 +1153,6 @@ const LiveSports: React.FC = () => {
                 >
                   Live TV
                 </button>
-                <button
-                  onClick={() => setSidebarTab('test')}
-                  className={`flex-1 py-2 px-3 rounded-lg font-black text-[10px] uppercase tracking-wider transition-all duration-300 cursor-pointer ${sidebarTab === 'test' ? 'bg-netflix-red text-white shadow' : 'text-zinc-500 hover:text-white'
-                    }`}
-                >
-                  Test
-                </button>
               </div>
 
               {/* Sidebar Channels List */}
@@ -1256,10 +1216,10 @@ const LiveSports: React.FC = () => {
                     })
                   )
                 ) : (
-                  (sidebarTab === 'sports-tv' ? sportsTv : sidebarTab === 'live-tv' ? liveTv : testTv).length === 0 ? (
+                  (sidebarTab === 'sports-tv' ? sportsTv : liveTv).length === 0 ? (
                     <div className="py-10 text-center text-zinc-500 text-xs font-bold">{t('no_channels')}</div>
                   ) : (
-                    (sidebarTab === 'sports-tv' ? sportsTv : sidebarTab === 'live-tv' ? liveTv : testTv).map((item) => {
+                    (sidebarTab === 'sports-tv' ? sportsTv : liveTv).map((item) => {
                       const isCurrent = activeStream?.id === item.id;
                       return (
                         <div
@@ -1412,7 +1372,7 @@ const LiveSports: React.FC = () => {
                     {t('live_sports')}
                   </h2>
                   <p className="text-xs font-black text-zinc-500 uppercase tracking-widest mt-1">
-                    {activeTab === 'events' ? t('match_schedule') : activeTab === 'sports-tv' ? 'Sports TV' : activeTab === 'live-tv' ? 'Live TV' : 'Test'}
+                    {activeTab === 'events' ? t('match_schedule') : activeTab === 'sports-tv' ? 'Sports TV' : activeTab === 'live-tv' ? 'Live TV' : t('stats_standings')}
                   </p>
                 </header>
 
@@ -1449,14 +1409,14 @@ const LiveSports: React.FC = () => {
                     Live TV
                   </button>
                   <button
-                    onClick={() => setActiveTab('test')}
-                    className={`shrink-0 py-2 px-4 md:py-3.5 md:px-7 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-wider transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center gap-2 md:gap-3 justify-center ${activeTab === 'test'
+                    onClick={() => setActiveTab('stats')}
+                    className={`shrink-0 py-2 px-4 md:py-3.5 md:px-7 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-wider transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center gap-2 md:gap-3 justify-center ${activeTab === 'stats'
                       ? 'bg-netflix-red text-white shadow-lg shadow-red-950/30'
                       : 'text-zinc-500 hover:text-white hover:bg-white/5'
                       }`}
                   >
-                    <Tv className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
-                    Test
+                    <Award className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
+                    {t('stats_standings')}
                   </button>
                 </div>
               </div>
@@ -1496,6 +1456,9 @@ const LiveSports: React.FC = () => {
                     ))}
                   </div>
                 )
+              ) : activeTab === 'stats' ? (
+                // WORLD CUP STANDINGS & SCORES DASHBOARD
+                <WorldCupDashboard i18n={i18n} />
               ) : (
                 // CHANNEL CARDS GRID (Netflix-aligned column specs)
                 currentChannels.length === 0 ? (
