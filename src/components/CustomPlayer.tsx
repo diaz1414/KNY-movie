@@ -143,6 +143,9 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
           return;
         }
 
+        // Unload previous stream instantly to abort pending HTTP segment downloads
+        await player.unload();
+
         // Reset any previous ClearKey config to clean state
         player.configure({
           drm: {
@@ -150,33 +153,33 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
           }
         });
 
-        // Configure general streaming parameters optimized for resilience on slow connections
+        // Configure general streaming parameters optimized for fast channel switching
         player.configure({
           streaming: {
-            bufferingGoal: 15,      // Keep a robust 15 seconds of buffer ahead of the playhead (previously 8)
-            rebufferingGoal: 4,    // Start playing as soon as we have 4 seconds of buffer (previously 2) to prevent rapid start/stop stuttering
+            bufferingGoal: 10,      // Standard buffer target for faster load
+            rebufferingGoal: 1.5,   // Start playing as soon as we have 1.5s of buffer (extremely fast startup)
             liveSync: {
               enabled: true,
-              targetLatency: 10,   // Stable 10s latency provides a larger buffer for network variance
+              targetLatency: 6,     // Closer sync to live edge
             },
             retryParameters: {
-              maxAttempts: 6,      // Retry media segment fetches up to 6 times (previously 3)
-              baseDelay: 1000,
+              maxAttempts: 4,      // Retry media segment fetches up to 4 times
+              baseDelay: 500,
               backoffFactor: 1.5,
-              timeout: 15000       // Give requests up to 15s timeout before declaring error
+              timeout: 8000        // Abort hanging segment downloads in 8s instead of 15s
             }
           },
           manifest: {
             retryParameters: {
-              maxAttempts: 6,      // Retry manifest updates up to 6 times
-              baseDelay: 1000,
+              maxAttempts: 4,      // Retry manifest updates up to 4 times
+              baseDelay: 500,
               backoffFactor: 1.5,
-              timeout: 15000       // Give manifest fetches up to 15s timeout before declaring error
+              timeout: 8000        // Abort hanging manifest fetches in 8s
             }
           },
           abr: {
             enabled: true,
-            defaultBandwidthEstimate: 500000 // Start with a safe 500kbps estimate to play low quality quickly on slow connections
+            defaultBandwidthEstimate: 500000 // Start with a safe 500kbps estimate to play low quality quickly
           }
         });
 
