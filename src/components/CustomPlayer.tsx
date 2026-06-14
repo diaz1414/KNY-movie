@@ -313,7 +313,28 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
   // Sync fullscreen change state
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const isCurrentlyFullscreen = !!document.fullscreenElement;
+      setIsFullscreen(isCurrentlyFullscreen);
+
+      if (isCurrentlyFullscreen) {
+        // Lock screen orientation to landscape on mobile devices when entering fullscreen
+        const orientation = screen.orientation as any;
+        if (orientation && typeof orientation.lock === 'function') {
+          orientation.lock('landscape').catch((err: any) => {
+            console.log('Screen orientation lock is not supported or was rejected:', err);
+          });
+        }
+      } else {
+        // Unlock orientation on exiting fullscreen
+        const orientation = screen.orientation as any;
+        if (orientation && typeof orientation.unlock === 'function') {
+          try {
+            orientation.unlock();
+          } catch (err) {
+            console.log('Screen orientation unlock failed:', err);
+          }
+        }
+      }
     };
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => {

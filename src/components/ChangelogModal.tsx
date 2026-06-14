@@ -25,7 +25,8 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
         'Simplified the World Cup standings filter to a clean dropdown menu instead of a long row of buttons.',
         'Cursor now hides automatically when watching a video and the player controls fade out.',
         'Added automatic page scrolling to the top when a channel or match is selected.',
-        'Improved layouts so they adjust perfectly on mobile, tablet, and desktop screens.'
+        'Improved layouts so they adjust perfectly on mobile, tablet, and desktop screens.',
+        'Video automatically rotates to landscape (miring) when entering fullscreen on mobile devices.'
       ]
     },
     {
