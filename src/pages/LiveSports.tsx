@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import axios from 'axios';
-import { Trophy, Play, AlertCircle, ArrowLeft, Tv, ShieldAlert, Radio, Calendar, Clock, Film } from 'lucide-react';
+import { Trophy, Play, AlertCircle, ArrowLeft, Tv, ShieldAlert, Radio, Calendar, Clock, Film, Share2, Check } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 
@@ -60,6 +60,15 @@ interface ChannelEvent {
 }
 
 const XOR_KEY = '90_NiwmsdfhgjQw';
+
+// Helper to format slug from name
+const getSlug = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+};
 
 // XOR decryption logic reconstructed from the site's library
 const decryptLicense = (ciphertext: string): string => {
@@ -290,6 +299,18 @@ const ChannelCard: React.FC<{
   setSidebarTab: (tab: any) => void;
   t: any;
 }> = ({ item, activeTab, setActiveStream, setSidebarTab, t }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const slug = getSlug(item.name);
+    const url = `${window.location.origin}${window.location.pathname}?channel=${slug}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.06, y: -6 }}
@@ -323,6 +344,15 @@ const ChannelCard: React.FC<{
         <span className="w-1.5 h-1.5 rounded-full bg-netflix-red animate-pulse" />
         LIVE
       </div>
+
+      {/* Share / Copy Link Button */}
+      <button
+        onClick={handleCopy}
+        className="absolute top-4 right-4 z-30 w-9 h-9 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-netflix-red hover:border-netflix-red hover:scale-105 active:scale-95 transition-all shadow-lg cursor-pointer flex items-center justify-center"
+        title={copied ? t('copied') : t('copy_link')}
+      >
+        {copied ? <Check size={14} className="text-green-500" /> : <Share2 size={14} />}
+      </button>
 
       {/* Brand Logo Hero Element */}
       <div className="relative z-10 w-full h-full flex items-center justify-center p-8 select-none">
@@ -382,6 +412,17 @@ const MatchCard: React.FC<{
   i18n: any;
 }> = ({ item, setActiveStream, setSidebarTab, t, i18n }) => {
   const { isPlayable, buttonText, status } = getPlayableStatus(item, t);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const slug = getSlug(item.name);
+    const url = `${window.location.origin}${window.location.pathname}?match=${slug}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   return (
     <motion.div
@@ -389,13 +430,10 @@ const MatchCard: React.FC<{
       whileTap={{ scale: 0.96 }}
       transition={{ type: 'spring', damping: 18, stiffness: 220 }}
       onClick={() => {
-        if (isPlayable) {
-          setActiveStream(item);
-          setSidebarTab('events');
-        }
+        setActiveStream(item);
+        setSidebarTab('events');
       }}
-      className={`relative group rounded-2xl overflow-hidden shadow-2xl bg-[#141414] border transition-all duration-300 w-full aspect-[2/3] ${isPlayable ? 'cursor-pointer border-white/5' : 'cursor-not-allowed border-white/5 opacity-70'
-        }`}
+      className="relative group rounded-2xl overflow-hidden shadow-2xl bg-[#141414] border border-white/5 transition-all duration-300 w-full aspect-[2/3] cursor-pointer"
     >
       {/* Absolute Background Image */}
       <div className="absolute inset-0 z-0">
@@ -435,6 +473,15 @@ const MatchCard: React.FC<{
           </>
         )}
       </div>
+
+      {/* Share / Copy Link Button */}
+      <button
+        onClick={handleCopy}
+        className="absolute top-4 right-4 z-30 w-9 h-9 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-netflix-red hover:border-netflix-red hover:scale-105 active:scale-95 transition-all shadow-lg cursor-pointer flex items-center justify-center"
+        title={copied ? t('copied') : t('copy_link')}
+      >
+        {copied ? <Check size={14} className="text-green-500" /> : <Share2 size={14} />}
+      </button>
 
       {/* Flag / Matchup Hero graphic */}
       <div className="relative z-10 w-full h-full flex flex-col justify-center items-center p-6 select-none gap-8 pb-20">
@@ -504,6 +551,106 @@ const MatchCard: React.FC<{
   );
 };
 
+
+// Countdown component for upcoming matches
+const MatchCountdown: React.FC<{ targetTime: string; onComplete?: () => void }> = ({ targetTime, onComplete }) => {
+  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number } | null>(null);
+
+  useEffect(() => {
+    let safeStartStr = targetTime.trim();
+    if (safeStartStr.includes(' ')) {
+      safeStartStr = safeStartStr.replace(' ', 'T');
+    }
+    const startMatch = safeStartStr.match(/([+-])(\d{2})$/);
+    if (startMatch) {
+      safeStartStr = safeStartStr + ':00';
+    }
+    const kickoffTime = new Date(safeStartStr).getTime();
+
+    const updateCountdown = () => {
+      const now = Date.now();
+      const diff = kickoffTime - now;
+
+      if (diff <= 0) {
+        if (onComplete) onComplete();
+        return;
+      }
+
+      const hrs = Math.floor(diff / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeLeft({ hours: hrs, minutes: mins, seconds: secs });
+    };
+
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+    return () => clearInterval(timer);
+  }, [targetTime]);
+
+  if (!timeLeft) return null;
+
+  const pad = (num: number) => String(num).padStart(2, '0');
+
+  return (
+    <div className="flex gap-2.5 md:gap-6 justify-center items-center font-outfit select-none my-1 md:my-2">
+      <div className="flex flex-col items-center">
+        <div className="w-10 h-10 text-sm sm:w-12 sm:h-12 sm:text-lg md:w-16 md:h-16 md:text-3xl bg-white/5 rounded-xl md:rounded-2xl border border-white/10 flex items-center justify-center font-black text-white shadow-lg backdrop-blur-md">
+          {pad(timeLeft.hours)}
+        </div>
+        <span className="text-[7px] md:text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Hours</span>
+      </div>
+      <span className="text-base md:text-2xl font-black text-netflix-red animate-pulse">:</span>
+      <div className="flex flex-col items-center">
+        <div className="w-10 h-10 text-sm sm:w-12 sm:h-12 sm:text-lg md:w-16 md:h-16 md:text-3xl bg-white/5 rounded-xl md:rounded-2xl border border-white/10 flex items-center justify-center font-black text-white shadow-lg backdrop-blur-md">
+          {pad(timeLeft.minutes)}
+        </div>
+        <span className="text-[7px] md:text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Minutes</span>
+      </div>
+      <span className="text-base md:text-2xl font-black text-netflix-red animate-pulse">:</span>
+      <div className="flex flex-col items-center">
+        <div className="w-10 h-10 text-sm sm:w-12 sm:h-12 sm:text-lg md:w-16 md:h-16 md:text-3xl bg-white/5 rounded-xl md:rounded-2xl border border-white/10 flex items-center justify-center font-black text-white shadow-lg backdrop-blur-md">
+          {pad(timeLeft.seconds)}
+        </div>
+        <span className="text-[7px] md:text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Seconds</span>
+      </div>
+    </div>
+  );
+};
+
+// Share button component for the Player View
+const PlayerShareButton: React.FC<{ stream: PlayableStream; t: any }> = ({ stream, t }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    const slug = getSlug(stream.name);
+    const param = stream.isChannel ? `channel=${slug}` : `match=${slug}`;
+    const url = `${window.location.origin}${window.location.pathname}?${param}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all font-bold text-xs uppercase tracking-wider cursor-pointer text-white shrink-0"
+    >
+      {copied ? (
+        <>
+          <Check size={14} className="text-green-500" />
+          <span>{t('copied')}</span>
+        </>
+      ) : (
+        <>
+          <Share2 size={14} />
+          <span>{t('share')}</span>
+        </>
+      )}
+    </button>
+  );
+};
+
 const LiveSports: React.FC = () => {
   const { t, i18n } = useTranslation();
 
@@ -552,6 +699,49 @@ const LiveSports: React.FC = () => {
   const [sidebarTab, setSidebarTab] = useState<'events' | 'sports-tv' | 'live-tv'>('events');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Real-time ticking state to trigger countdown updates
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick(t => t + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Reference tick to trigger re-evaluations and satisfy unused variable lint rules
+  void tick;
+
+  // Check for share parameters on mount or when streams load
+  useEffect(() => {
+    if (loading || matches.length === 0) return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const matchSlug = params.get('match');
+    const channelSlug = params.get('channel');
+    
+    if (matchSlug) {
+      const found = matches.find(m => getSlug(m.name) === matchSlug);
+      if (found) {
+        setActiveStream(found);
+        setSidebarTab('events');
+      }
+    } else if (channelSlug) {
+      const foundSport = sportsTv.find(c => getSlug(c.name) === channelSlug);
+      if (foundSport) {
+        setActiveStream(foundSport);
+        setSidebarTab('sports-tv');
+        setActiveTab('sports-tv');
+      } else {
+        const foundLive = liveTv.find(c => getSlug(c.name) === channelSlug);
+        if (foundLive) {
+          setActiveStream(foundLive);
+          setSidebarTab('live-tv');
+          setActiveTab('live-tv');
+        }
+      }
+    }
+  }, [loading, matches, sportsTv, liveTv]);
 
   // Selected stream server info
   const [activeStream, setActiveStream] = useState<PlayableStream | null>(null);
@@ -686,75 +876,155 @@ const LiveSports: React.FC = () => {
               </button>
 
               {/* Video Player Frame */}
-              <div className="relative aspect-video w-full rounded-3xl overflow-hidden border border-white/10 bg-black shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]">
-                {playerUrl ? (
-                  <iframe
-                    id="shaka_player_iframe"
-                    src={playerUrl}
-                    title={t('match_schedule')}
-                    className="w-full h-full border-none"
-                    allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *"
-                    allowFullScreen
-                    sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
-                  ></iframe>
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <NetflixLoader />
+              {(() => {
+                const { status } = getPlayableStatus(activeStream, t);
+                return (
+                  <div className="relative aspect-video w-full rounded-3xl overflow-hidden border border-white/10 bg-[#070707] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]">
+                    {!activeStream.isChannel && status === 'upcoming' ? (
+                      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center p-6 md:p-10 select-none">
+                        {/* Background Image inside Player */}
+                        <img
+                          src="/stadium_pitch_bg.png"
+                          alt=""
+                          className="absolute inset-0 w-full h-full object-cover opacity-15"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/85" />
+                        
+                        {/* Content */}
+                        <div className="relative z-10 flex flex-col items-center text-center gap-4 md:gap-6 w-full">
+                          <span className="text-[10px] md:text-xs font-black bg-amber-500/20 border border-amber-500/30 text-amber-500 px-3.5 py-1.5 rounded-full uppercase tracking-[2px] animate-pulse">
+                            {t('upcoming')}
+                          </span>
+                          
+                          {/* VS Flags and Names */}
+                          <div className="flex items-center gap-4 md:gap-8 justify-center w-full max-w-lg">
+                            <div className="flex flex-col items-center gap-1.5 md:gap-2.5">
+                              <FlagImage countryName={activeStream.player1 || ''} className="w-12 h-8 md:w-16 md:h-11 shadow-lg border border-white/10" />
+                              <span className="text-xs md:text-sm font-black text-zinc-300 max-w-[100px] truncate">{activeStream.player1}</span>
+                            </div>
+                            <span className="text-xs md:text-sm font-black text-netflix-red font-outfit uppercase tracking-widest">
+                              VS
+                            </span>
+                            <div className="flex flex-col items-center gap-1.5 md:gap-2.5">
+                              <FlagImage countryName={activeStream.player2 || ''} className="w-12 h-8 md:w-16 md:h-11 shadow-lg border border-white/10" />
+                              <span className="text-xs md:text-sm font-black text-zinc-300 max-w-[100px] truncate">{activeStream.player2}</span>
+                            </div>
+                          </div>
+
+                          {/* Countdown */}
+                          {activeStream.jadwal_event && (
+                            <MatchCountdown targetTime={activeStream.jadwal_event} />
+                          )}
+
+                          <p className="text-[9px] md:text-xs text-zinc-400 font-bold uppercase tracking-[2px] max-w-md">
+                            {i18n.language.startsWith('id') 
+                              ? 'Siaran langsung akan dimulai 20 menit sebelum waktu pertandingan.' 
+                              : 'Live stream will unlock exactly 20 minutes before kickoff.'}
+                          </p>
+                        </div>
+                      </div>
+                    ) : !activeStream.isChannel && status === 'ended' ? (
+                      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center p-6 text-center select-none">
+                        <img
+                          src="/stadium_pitch_bg.png"
+                          alt=""
+                          className="absolute inset-0 w-full h-full object-cover opacity-10"
+                        />
+                        <div className="absolute inset-0 bg-black/80" />
+                        <div className="relative z-10 flex flex-col items-center gap-4">
+                          <Trophy size={48} className="text-zinc-500" />
+                          <h3 className="text-lg md:text-xl font-black font-outfit text-white uppercase tracking-wider">
+                            {t('match_ended')}
+                          </h3>
+                          <p className="text-zinc-500 text-xs md:text-sm max-w-xs">
+                            {i18n.language.startsWith('id') 
+                              ? 'Pertandingan ini telah selesai. Pantau terus jadwal berikutnya!' 
+                              : 'This match has ended. Stay tuned for the next broadcasts!'}
+                          </p>
+                        </div>
+                      </div>
+                    ) : playerUrl ? (
+                      <iframe
+                        id="shaka_player_iframe"
+                        src={playerUrl}
+                        title={t('match_schedule')}
+                        className="w-full h-full border-none"
+                        allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *"
+                        allowFullScreen
+                        sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+                      ></iframe>
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <NetflixLoader />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
 
               {/* Stream Info & Server Toggle */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/[0.02] border border-white/5 p-8 rounded-3xl backdrop-blur-3xl shadow-xl">
-                <div>
-                  <span className="text-netflix-red text-xs font-black uppercase tracking-[3px] animate-pulse flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-netflix-red animate-ping shrink-0" />
-                    {t('live_now')}
-                  </span>
+              {(() => {
+                const { status } = getPlayableStatus(activeStream, t);
+                return (
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6 bg-white/[0.02] border border-white/5 p-4 md:p-8 rounded-2xl md:rounded-3xl backdrop-blur-3xl shadow-xl">
+                    <div>
+                      <span className="text-netflix-red text-xs font-black uppercase tracking-[3px] animate-pulse flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-netflix-red animate-ping shrink-0" />
+                        {activeStream.isChannel ? t('live_now') : (status === 'live' ? t('live_now') : (status === 'upcoming' ? t('upcoming') : t('match_ended')))}
+                      </span>
 
-                  {activeStream.isChannel ? (
-                    <h1 className="text-2xl md:text-3xl font-black font-outfit mt-1 text-white flex items-center gap-3">
-                      {activeStream.isBase64Logo && activeStream.logo && (
-                        <img src={activeStream.logo} alt={activeStream.name} className="h-8 max-w-[120px] object-contain rounded bg-white/5 p-1 border border-white/10" />
-                      )}
-                      <span>{activeStream.name}</span>
-                    </h1>
-                  ) : (
-                    <h1 className="text-2xl md:text-3xl font-black font-outfit mt-1 text-white flex items-center gap-3.5 flex-wrap">
-                      <FlagImage countryName={activeStream.player1 || ''} className="w-10 h-7 inline-block" />
-                      <span>{activeStream.player1} vs {activeStream.player2}</span>
-                      <FlagImage countryName={activeStream.player2 || ''} className="w-10 h-7 inline-block" />
-                    </h1>
-                  )}
+                      <div className="flex items-center gap-4 flex-wrap mt-1">
+                        {activeStream.isChannel ? (
+                          <h1 className="text-lg md:text-3xl font-black font-outfit text-white flex items-center gap-2 md:gap-3">
+                            {activeStream.isBase64Logo && activeStream.logo && (
+                              <img src={activeStream.logo} alt={activeStream.name} className="h-6 md:h-8 max-w-[90px] md:max-w-[120px] object-contain rounded bg-white/5 p-1 border border-white/10" />
+                            )}
+                            <span>{activeStream.name}</span>
+                          </h1>
+                        ) : (
+                          <h1 className="text-base md:text-3xl font-black font-outfit text-white flex items-center gap-2 md:gap-3.5 flex-wrap">
+                            <FlagImage countryName={activeStream.player1 || ''} className="w-7 h-5 md:w-10 md:h-7 inline-block" />
+                            <span>{activeStream.player1} vs {activeStream.player2}</span>
+                            <FlagImage countryName={activeStream.player2 || ''} className="w-7 h-5 md:w-10 md:h-7 inline-block" />
+                          </h1>
+                        )}
 
-                  <p className="text-zinc-500 text-xs font-bold uppercase tracking-wider mt-2">
-                    {activeStream.subName}
-                  </p>
-                </div>
+                        {/* Share Button in Player View */}
+                        <PlayerShareButton stream={activeStream} t={t} />
+                      </div>
 
-                {/* Server selector */}
-                {activeStream.servers.length > 1 && (
-                  <div className="flex flex-col gap-2 shrink-0">
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[2px]">
-                      {t('server_selector')}
-                    </span>
-                    <div className="flex gap-2">
-                      {activeStream.servers.map((srv, idx) => (
-                        <button
-                          key={srv.name}
-                          onClick={() => setActiveServerIdx(idx)}
-                          className={`px-5 py-2.5 rounded-full font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${activeServerIdx === idx
-                            ? 'bg-netflix-red text-white shadow-lg shadow-red-950/40'
-                            : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white/70'
-                            }`}
-                        >
-                          {srv.name}
-                        </button>
-                      ))}
+                      <p className="text-zinc-500 text-xs font-bold uppercase tracking-wider mt-2">
+                        {activeStream.subName}
+                      </p>
                     </div>
+
+                    {/* Server selector */}
+                    {activeStream.servers.length > 1 && (
+                      <div className="flex flex-col gap-2 shrink-0">
+                        <span className="text-[10px] font-black text-white/40 uppercase tracking-[2px]">
+                          {t('server_selector')}
+                        </span>
+                        <div className="flex gap-2">
+                          {activeStream.servers.map((srv, idx) => (
+                            <button
+                              key={srv.name}
+                              onClick={() => setActiveServerIdx(idx)}
+                              className={`px-5 py-2.5 rounded-full font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${activeServerIdx === idx
+                                ? 'bg-netflix-red text-white shadow-lg shadow-red-950/40'
+                                : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white/70'
+                                }`}
+                            >
+                              {srv.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
+
+
 
               {/* Safety Tips Banner */}
               <div className="flex gap-4 p-6 bg-amber-950/20 border-l-4 border-amber-500/80 rounded-r-2xl text-zinc-400 text-sm">
@@ -813,16 +1083,12 @@ const LiveSports: React.FC = () => {
                         <div
                           key={item.id}
                           onClick={() => {
-                            if (isPlayable) {
-                              setActiveStream(item);
-                              setActiveServerIdx(0);
-                            }
+                            setActiveStream(item);
+                            setActiveServerIdx(0);
                           }}
-                          className={`flex flex-col gap-2.5 p-4 rounded-2xl border transition-all duration-300 ${isCurrent
+                          className={`flex flex-col gap-2.5 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${isCurrent
                             ? 'bg-netflix-red/10 border-netflix-red'
-                            : isPlayable
-                              ? 'bg-white/[0.01] border-white/5 hover:bg-white/5 hover:border-white/10 cursor-pointer'
-                              : 'bg-white/[0.005] border-white/5 opacity-55 cursor-not-allowed'
+                            : 'bg-white/[0.01] border-white/5 hover:bg-white/5 hover:border-white/10'
                             }`}
                         >
                           <div className="flex items-center justify-between text-[9px] font-black tracking-wider uppercase">
