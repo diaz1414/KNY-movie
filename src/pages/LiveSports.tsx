@@ -932,8 +932,8 @@ const LiveSports: React.FC = () => {
 
                           <p className="hidden md:block text-[9px] md:text-xs text-zinc-400 font-bold uppercase tracking-[2px] max-w-md">
                             {i18n.language.startsWith('id')
-                              ? 'Siaran langsung akan dimulai 20 menit sebelum waktu pertandingan.'
-                              : 'Live stream will unlock exactly 20 minutes before kickoff.'}
+                              ? 'Siaran langsung akan dimulai 30 menit sebelum waktu pertandingan.'
+                              : 'Live stream will unlock exactly 30 minutes before kickoff.'}
                           </p>
                         </div>
                       </div>
