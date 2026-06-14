@@ -35,6 +35,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
   const [abrEnabled, setAbrEnabled] = useState(true);
   const [showQualityMenu, setShowQualityMenu] = useState(false);
   const [buffering, setBuffering] = useState(false);
+  const isFirstLoadRef = useRef(true);
 
   // Auto-hide controls timer reference
   const controlsTimeoutRef = useRef<any>(null);
@@ -124,13 +125,17 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
 
     let isCancelled = false;
 
-    setLoading(true);
+    if (isFirstLoadRef.current) {
+      setLoading(true);
+      isFirstLoadRef.current = false;
+    } else {
+      setBuffering(true);
+    }
     setError(null);
     setIsPlaying(false);
     setTracks([]);
     setCurrentTrack(null);
     setShowQualityMenu(false);
-    setBuffering(false);
 
     const initAndLoad = async () => {
       try {
@@ -143,8 +148,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
           return;
         }
 
-        // Unload previous stream instantly to abort pending HTTP segment downloads
-        await player.unload();
+        // Just load directly for instant switching without full player unload black flash
 
         // Reset any previous ClearKey config to clean state
         player.configure({
@@ -489,11 +493,20 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
         !showControls && isPlaying ? 'cursor-none' : ''
       }`}
     >
+      {/* Stadium Pitch Background behind video during transitions/buffering */}
+      <div className="absolute inset-0 z-0 pointer-events-none select-none opacity-20">
+        <img
+          src="/stadium_pitch_bg.png"
+          alt=""
+          className="w-full h-full object-cover"
+        />
+      </div>
+
       {/* HTML5 Video Element (without native controls to allow customized overlays) */}
       <video
         ref={videoRef}
         onDoubleClick={() => toggleFullscreen()}
-        className="w-full h-full object-contain"
+        className="w-full h-full object-contain relative z-5"
         playsInline
         autoPlay
       />
