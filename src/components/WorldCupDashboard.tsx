@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Award, Clock, X } from 'lucide-react';
+import { Award, Clock, X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export interface TeamStats {
@@ -201,6 +201,15 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
   const [selectedMatch, setSelectedMatch] = useState<MatchScore | null>(null);
   const [modalTab, setModalTab] = useState<'timeline' | 'stats'>('timeline');
   const [selectedGroup, setSelectedGroup] = useState<string>('Group A');
+  const [showGroupDropdown, setShowGroupDropdown] = useState<boolean>(false);
+
+  // Close group dropdown on outside click
+  useEffect(() => {
+    if (!showGroupDropdown) return;
+    const closeDropdown = () => setShowGroupDropdown(false);
+    window.addEventListener('click', closeDropdown);
+    return () => window.removeEventListener('click', closeDropdown);
+  }, [showGroupDropdown]);
 
   // 1. Fetch data from the API on mount and periodically
   useEffect(() => {
@@ -420,25 +429,61 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
               </div>
             </div>
 
-            {/* Scrollable group selection capsules */}
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1.5 max-w-full select-none">
-              {['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G', 'Group H', 'Group I', 'Group J', 'Group K', 'Group L'].map(groupName => {
-                const displayLetter = groupName.replace('Group ', '');
-                const isActive = selectedGroup === groupName;
-                return (
-                  <button
-                    key={groupName}
-                    onClick={() => setSelectedGroup(groupName)}
-                    className={`shrink-0 w-10 h-10 md:w-11 md:h-11 rounded-xl font-black text-xs md:text-sm uppercase transition-all flex items-center justify-center cursor-pointer border ${
-                      isActive
-                        ? 'bg-netflix-red text-white border-netflix-red shadow-lg shadow-red-950/40 scale-105'
-                        : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
-                    }`}
+            {/* Group Selection Dropdown List */}
+            <div className="relative inline-block w-48 select-none">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowGroupDropdown(!showGroupDropdown);
+                }}
+                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-black text-xs md:text-sm hover:bg-white/10 transition-all cursor-pointer focus:outline-none"
+              >
+                <span>
+                  {i18nObj.language === 'id'
+                    ? selectedGroup.replace('Group', 'Grup')
+                    : selectedGroup}
+                </span>
+                <ChevronDown
+                  size={16}
+                  className={`text-zinc-400 transition-transform duration-300 ${
+                    showGroupDropdown ? 'rotate-180 text-white' : ''
+                  }`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {showGroupDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-12 left-0 z-30 w-full bg-zinc-950 border border-white/10 rounded-xl p-1.5 flex flex-col gap-1 backdrop-blur-md shadow-2xl max-h-60 overflow-y-auto no-scrollbar"
                   >
-                    {displayLetter}
-                  </button>
-                );
-              })}
+                    {['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G', 'Group H', 'Group I', 'Group J', 'Group K', 'Group L'].map(groupName => {
+                      const isActive = selectedGroup === groupName;
+                      return (
+                        <button
+                          key={groupName}
+                          onClick={() => {
+                            setSelectedGroup(groupName);
+                            setShowGroupDropdown(false);
+                          }}
+                          className={`text-left px-3.5 py-2 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                            isActive
+                              ? 'bg-netflix-red text-white'
+                              : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                          }`}
+                        >
+                          {i18nObj.language === 'id'
+                            ? groupName.replace('Group', 'Grup')
+                            : groupName}
+                        </button>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
