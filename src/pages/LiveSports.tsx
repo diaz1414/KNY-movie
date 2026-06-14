@@ -947,56 +947,63 @@ const LiveSports: React.FC = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/90" />
 
-                        <div className="relative z-10 flex flex-col items-center gap-4 md:gap-6">
-                          {/* Flags */}
-                          <div className="flex items-center gap-3 md:gap-6">
-                            <FlagImage countryName={activeStream.player1 || ''} className="w-10 h-7 md:w-14 md:h-10 shadow-lg border border-white/10 opacity-60" />
-                            <span className="text-[10px] md:text-sm font-black text-zinc-500 font-outfit uppercase tracking-widest">VS</span>
-                            <FlagImage countryName={activeStream.player2 || ''} className="w-10 h-7 md:w-14 md:h-10 shadow-lg border border-white/10 opacity-60" />
+                        {/* Menggunakan flex-col-reverse di mobile agar tombol naik ke atas, dan flex-col di desktop */}
+                        <div className="relative z-10 flex flex-col-reverse md:flex-col items-center gap-5 md:gap-6 w-full max-w-sm md:max-w-md">
+
+                          {/* GROUP 1: Konten Teks & Trofi (Akan berada di bawah tombol saat di mobile) */}
+                          <div className="flex flex-col items-center gap-3 md:gap-4 w-full">
+                            {/* Trophy — disembunyikan di mobile agar menghemat vertical space layar player, tetap ada di desktop */}
+                            <Trophy size={42} className="text-zinc-500 animate-bounce duration-1000 hidden md:block" />
+
+                            <div className="flex flex-col items-center gap-1">
+                              <h3 className="text-sm md:text-2xl font-black font-outfit text-white uppercase tracking-wider">
+                                {t('match_ended')}
+                              </h3>
+                              <p className="text-zinc-400 text-[10px] md:text-sm leading-relaxed px-4 md:px-0">
+                                {i18n.language.startsWith('id')
+                                  ? 'Pertandingan ini telah selesai. Tonton tayangan olahraga lainnya di World Cup TV.'
+                                  : 'This match has ended. Watch other sports broadcasts on World Cup TV.'}
+                              </p>
+                            </div>
                           </div>
 
-                          {/* Trophy + Title */}
-                          <Trophy size={42} className="text-zinc-500 animate-bounce duration-1000" />
+                          {/* GROUP 2: Tombol Aksi Utama (Naik ke atas tepat di bawah bendera jika di mobile) */}
+                          <div className="flex flex-col items-center gap-4 md:gap-5 w-full">
+                            {/* ── TOMBOL KE CHANNEL WORLD CUP TV ── */}
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => {
+                                const worldCupChannel = sportsTv.find(
+                                  (c) =>
+                                    c.name.toLowerCase().includes('world cup') ||
+                                    getSlug(c.name) === 'worldcup-tv'
+                                );
 
-                          <div className="flex flex-col items-center gap-1">
-                            <h3 className="text-base md:text-2xl font-black font-outfit text-white uppercase tracking-wider">
-                              {t('match_ended')}
-                            </h3>
-                            <p className="text-zinc-400 text-[10px] md:text-sm max-w-[240px] md:max-w-sm leading-relaxed mb-2">
-                              {i18n.language.startsWith('id')
-                                ? 'Pertandingan ini telah selesai. Tonton tayangan olahraga lainnya di World Cup TV.'
-                                : 'This match has ended. Watch other sports broadcasts on World Cup TV.'}
-                            </p>
+                                if (worldCupChannel) {
+                                  selectStream(worldCupChannel, 'sports-tv');
+                                } else if (sportsTv.length > 0) {
+                                  selectStream(sportsTv[0], 'sports-tv');
+                                } else {
+                                  clearStream();
+                                  setActiveTab('sports-tv');
+                                }
+                              }}
+                              // Lebar penuh (w-full) di mobile agar gampang di-tap jari, otomatis menyesuaikan di desktop
+                              className="w-full md:w-auto px-6 py-3 md:px-7 md:py-3 rounded-xl bg-netflix-red text-white font-black text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-lg shadow-red-950/50 hover:bg-red-700 transition-all cursor-pointer"
+                            >
+                              <Tv size={16} fill="currentColor" />
+                              <span>Watch World Cup TV</span>
+                            </motion.button>
+
+                            {/* Flags — Selalu konstan bertindak sebagai jangkar visual atas */}
+                            <div className="flex items-center gap-3 md:gap-6">
+                              <FlagImage countryName={activeStream.player1 || ''} className="w-9 h-6 md:w-14 md:h-10 shadow-lg border border-white/10 opacity-60" />
+                              <span className="text-[10px] md:text-sm font-black text-zinc-500 font-outfit uppercase tracking-widest">VS</span>
+                              <FlagImage countryName={activeStream.player2 || ''} className="w-9 h-6 md:w-14 md:h-10 shadow-lg border border-white/10 opacity-60" />
+                            </div>
                           </div>
 
-                          {/* ── TOMBOL KE CHANNEL WORLD CUP TV ── */}
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-                              // Cari channel World Cup TV berdasarkan nama / keyword di list sportsTv
-                              const worldCupChannel = sportsTv.find(
-                                (c) =>
-                                  c.name.toLowerCase().includes('world cup') ||
-                                  getSlug(c.name) === 'worldcup-tv'
-                              );
-
-                              if (worldCupChannel) {
-                                selectStream(worldCupChannel, 'sports-tv');
-                              } else if (sportsTv.length > 0) {
-                                // Fallback jika nama tidak akurat, alihkan ke channel sport pertama yang tersedia
-                                selectStream(sportsTv[0], 'sports-tv');
-                              } else {
-                                // Jika tidak ada data channel sama sekali, balik ke menu utama sport
-                                clearStream();
-                                setActiveTab('sports-tv');
-                              }
-                            }}
-                            className="px-5 py-2.5 md:px-7 md:py-3 rounded-xl bg-netflix-red text-white font-black text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-950/50 hover:bg-red-700 transition-all cursor-pointer"
-                          >
-                            <Tv size={16} fill="currentColor" />
-                            <span>Watch World Cup TV</span>
-                          </motion.button>
                         </div>
                       </div>
                     ) : playerUrl ? (
