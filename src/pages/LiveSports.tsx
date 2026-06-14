@@ -767,7 +767,7 @@ const LiveSports: React.FC = () => {
         let liveData: ChannelEvent[] = [];
 
         try {
-          // Try fetching from the external GitHub raw URLs first (Primary Source)
+          // Primary Source: Fetch from the external GitHub raw URLs
           const [eventsRes, sportsRes, liveRes] = await Promise.all([
             axios.get<MatchEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-events.dat'),
             axios.get<ChannelEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-sports.dat'),
@@ -777,16 +777,31 @@ const LiveSports: React.FC = () => {
           sportsData = sportsRes.data;
           liveData = liveRes.data;
         } catch (githubErr) {
-          console.warn('Failed to fetch from Github source, falling back to local JSON data...', githubErr);
-          // Fallback to local JSON files served from the public/data folder
-          const [eventsRes, sportsRes, liveRes] = await Promise.all([
-            axios.get<MatchEvent[]>('/data/tv-events.json'),
-            axios.get<ChannelEvent[]>('/data/tv-sports.json'),
-            axios.get<ChannelEvent[]>('/data/tv-hiburan.json')
-          ]);
-          eventsData = eventsRes.data;
-          sportsData = sportsRes.data;
-          liveData = liveRes.data;
+          console.warn('Failed to fetch from Github source, trying Bot API fallback...', githubErr);
+
+          // First Fallback (Backup): Fetch from the bot's API endpoints
+          const BOT_API_URL = import.meta.env.VITE_BOT_API_URL || 'http://147.135.252.68:20114';
+          try {
+            const [eventsRes, sportsRes, liveRes] = await Promise.all([
+              axios.get<MatchEvent[]>(`${BOT_API_URL}/api/sports/events`),
+              axios.get<ChannelEvent[]>(`${BOT_API_URL}/api/sports/tv`),
+              axios.get<ChannelEvent[]>(`${BOT_API_URL}/api/sports/hiburan`)
+            ]);
+            eventsData = eventsRes.data;
+            sportsData = sportsRes.data;
+            liveData = liveRes.data;
+          } catch (botErr) {
+            console.warn('Failed to fetch from Bot API, falling back to local JSON data...', botErr);
+            // Second Fallback (Final Backup): Fetch local JSON files served from the public folder
+            const [eventsRes, sportsRes, liveRes] = await Promise.all([
+              axios.get<MatchEvent[]>('/data/tv-events.json'),
+              axios.get<ChannelEvent[]>('/data/tv-sports.json'),
+              axios.get<ChannelEvent[]>('/data/tv-hiburan.json')
+            ]);
+            eventsData = eventsRes.data;
+            sportsData = sportsRes.data;
+            liveData = liveRes.data;
+          }
         }
 
         // 1. Process Events (Match Schedule) - Deduplicated
