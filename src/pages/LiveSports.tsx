@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import axios from 'axios';
+import { supabase } from '../services/supabase';
 import { Trophy, Play, AlertCircle, ArrowLeft, Tv, ShieldAlert, Radio, Calendar, Clock, Film, Share2, Check, Award } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import { CustomPlayer } from '../components/CustomPlayer';
@@ -215,6 +216,19 @@ const formatJadwal = (jadwalStr?: string, locale: string = 'id'): string => {
   }
 };
 
+const formatViewerCount = (count: number, locale: string): string => {
+  const isId = locale.startsWith('id');
+  if (count >= 1000000) {
+    const millions = (count / 1000000).toFixed(1).replace('.', isId ? ',' : '.');
+    return isId ? `${millions}JT menonton` : `${millions}M watching`;
+  }
+  if (count >= 1000) {
+    const thousands = (count / 1000).toFixed(1).replace('.', isId ? ',' : '.');
+    return isId ? `${thousands}RB menonton` : `${thousands}K watching`;
+  }
+  return isId ? `${count} menonton` : `${count} watching`;
+};
+
 const getPlayableStatus = (stream: PlayableStream, t: any): { isPlayable: boolean; buttonText: string; status: 'live' | 'upcoming' | 'ended' } => {
   if (stream.isChannel) return { isPlayable: true, buttonText: t('play_now'), status: 'live' };
   if (!stream.jadwal_event) return { isPlayable: true, buttonText: t('play_now'), status: 'live' };
@@ -296,7 +310,9 @@ const ChannelCard: React.FC<{
   selectStream: (stream: PlayableStream, tab?: any) => void;
   setSidebarTab: (tab: any) => void;
   t: any;
-}> = ({ item, activeTab, selectStream, t }) => {
+  i18n: any;
+  viewerCount?: number;
+}> = ({ item, activeTab, selectStream, t, i18n, viewerCount }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (e: React.MouseEvent) => {
@@ -340,6 +356,11 @@ const ChannelCard: React.FC<{
       <div className="absolute top-4 left-4 bg-black/85 backdrop-blur-md border border-netflix-red/30 text-netflix-red text-[10px] font-black px-3 py-2 rounded-xl uppercase tracking-wider shadow-lg flex items-center gap-1.5 z-20 select-none">
         <span className="w-1.5 h-1.5 rounded-full bg-netflix-red animate-pulse" />
         LIVE
+        {viewerCount !== undefined && viewerCount > 0 && (
+          <span className="text-zinc-400 border-l border-white/20 pl-1.5 ml-1.5 font-bold uppercase tracking-wider">
+            {formatViewerCount(viewerCount, i18n.language)}
+          </span>
+        )}
       </div>
 
       {/* Share / Copy Link Button */}
@@ -412,7 +433,8 @@ const MatchCard: React.FC<{
   setSidebarTab: (tab: any) => void;
   t: any;
   i18n: any;
-}> = ({ item, selectStream, t, i18n }) => {
+  viewerCount?: number;
+}> = ({ item, selectStream, t, i18n, viewerCount }) => {
   const { isPlayable, buttonText, status } = getPlayableStatus(item, t);
   const [copied, setCopied] = useState(false);
 
@@ -459,6 +481,11 @@ const MatchCard: React.FC<{
           <>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-emerald-500">{t('live_now')}</span>
+            {viewerCount !== undefined && viewerCount > 0 && (
+              <span className="text-zinc-400 border-l border-white/20 pl-1.5 ml-1.5 font-bold uppercase tracking-wider">
+                {formatViewerCount(viewerCount, i18n.language)}
+              </span>
+            )}
           </>
         )}
         {status === 'upcoming' && (
@@ -696,10 +723,45 @@ const LiveSports: React.FC = () => {
   const [matches, setMatches] = useState<PlayableStream[]>([]);
   const [sportsTv, setSportsTv] = useState<PlayableStream[]>([]);
   const [liveTv, setLiveTv] = useState<PlayableStream[]>([]);
+  // Selected stream server info
+  const [activeStream, setActiveStream] = useState<PlayableStream | null>(null);
+  const [activeServerIdx, setActiveServerIdx] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<'events' | 'sports-tv' | 'live-tv' | 'stats'>('events');
   const [sidebarTab, setSidebarTab] = useState<'events' | 'sports-tv' | 'live-tv'>('events');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewerCounts, setViewerCounts] = useState<Record<string, number>>({});
+
+  // Real-time tracking of viewers using Supabase Presence
+  useEffect(() => {
+    const channel = supabase.channel('global-live-sports-presence');
+
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const presenceState = channel.presenceState();
+        const counts: Record<string, number> = {};
+        
+        Object.values(presenceState).forEach((presences: any) => {
+          presences.forEach((p: any) => {
+            if (p.watching) {
+              counts[p.watching] = (counts[p.watching] || 0) + 1;
+            }
+          });
+        });
+        
+        setViewerCounts(counts);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          const streamId = activeStream?.id || null;
+          await channel.track({ watching: streamId, joined_at: new Date().toISOString() });
+        }
+      });
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [activeStream?.id]);
 
   // Real-time ticking state to trigger countdown updates
   const [tick, setTick] = useState(0);
@@ -744,9 +806,7 @@ const LiveSports: React.FC = () => {
     }
   }, [loading, matches, sportsTv, liveTv]);
 
-  // Selected stream server info
-  const [activeStream, setActiveStream] = useState<PlayableStream | null>(null);
-  const [activeServerIdx, setActiveServerIdx] = useState<number>(0);
+
 
   useEffect(() => {
     if (activeStream) return;
@@ -1065,6 +1125,11 @@ const LiveSports: React.FC = () => {
                         <span className="text-netflix-red text-[9px] md:text-xs font-black uppercase tracking-[3px] animate-pulse flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-netflix-red animate-ping shrink-0" />
                           {activeStream.isChannel ? t('live_now') : (status === 'live' ? t('live_now') : (status === 'upcoming' ? t('upcoming') : t('match_ended')))}
+                          {(activeStream.isChannel || status === 'live') && viewerCounts[activeStream.id] && (
+                            <span className="text-zinc-400 border-l border-white/20 pl-1.5 ml-1.5 normal-case font-bold">
+                              {formatViewerCount(viewerCounts[activeStream.id], i18n.language)}
+                            </span>
+                          )}
                         </span>
                         {/* Share button inline on mobile */}
                         <div className="md:hidden shrink-0">
@@ -1198,6 +1263,11 @@ const LiveSports: React.FC = () => {
                               <span className="text-emerald-500 flex items-center gap-1.5">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                                 <span>LIVE</span>
+                                {viewerCounts[item.id] && (
+                                  <span className="text-zinc-400 border-l border-white/20 pl-1.5 ml-1.5">
+                                    {formatViewerCount(viewerCounts[item.id], i18n.language)}
+                                  </span>
+                                )}
                               </span>
                             )}
                             {status === 'upcoming' && <span className="text-amber-500">{t('upcoming')}</span>}
@@ -1261,9 +1331,17 @@ const LiveSports: React.FC = () => {
                             )}
                             <div className="truncate">
                               <h4 className="text-xs font-bold text-white truncate">{item.name}</h4>
-                              <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider truncate">
-                                {item.subName}
-                              </p>
+                              <div className="flex items-center gap-1.5 text-[9px] text-zinc-500 font-bold uppercase tracking-wider truncate">
+                                <span>{item.subName}</span>
+                                {viewerCounts[item.id] && (
+                                  <>
+                                    <span className="text-zinc-600">•</span>
+                                    <span className="text-netflix-red font-black">
+                                      {formatViewerCount(viewerCounts[item.id], i18n.language)}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
                             </div>
                           </div>
                           <Play size={10} className={`shrink-0 ${isCurrent ? 'text-netflix-red' : 'text-zinc-500'}`} fill={isCurrent ? 'currentColor' : 'none'} />
@@ -1469,6 +1547,7 @@ const LiveSports: React.FC = () => {
                         setSidebarTab={setSidebarTab}
                         t={t}
                         i18n={i18n}
+                        viewerCount={viewerCounts[item.id] || 0}
                       />
                     ))}
                   </div>
@@ -1498,6 +1577,8 @@ const LiveSports: React.FC = () => {
                         selectStream={selectStream}
                         setSidebarTab={setSidebarTab}
                         t={t}
+                        i18n={i18n}
+                        viewerCount={viewerCounts[item.id] || 0}
                       />
                     ))}
                   </div>
