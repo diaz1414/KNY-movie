@@ -440,7 +440,9 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       ref={containerRef}
       onMouseMove={resetControlsTimeout}
       onMouseLeave={() => isPlaying && setShowControls(false)}
-      className="relative w-full h-full bg-[#050505] flex items-center justify-center group overflow-hidden select-none"
+      className={`relative w-full h-full bg-[#050505] flex items-center justify-center group overflow-hidden select-none ${
+        !showControls && isPlaying ? 'cursor-none' : ''
+      }`}
     >
       {/* HTML5 Video Element (without native controls to allow customized overlays) */}
       <video
