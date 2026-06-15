@@ -216,6 +216,43 @@ const formatJadwal = (jadwalStr?: string, locale: string = 'id'): string => {
   }
 };
 
+const normalizeTeamName = (name: string): string => {
+  let lower = name.toLowerCase().trim();
+  if (lower.includes('ivoire') || lower.includes('ivory')) return 'ivorycoast';
+  if (lower.includes('curacao') || lower.includes('curaçao')) return 'curacao';
+  if (lower.includes('cabo verde') || lower.includes('cape verde')) return 'capeverde';
+  if (lower.includes('iran')) return 'iran';
+  if (lower.includes('dr congo') || lower.includes('democratic republic of the congo')) return 'congo';
+  return lower.replace(/[^a-z0-9]/g, '').trim();
+};
+
+const findWcGame = (stream: PlayableStream, wcGames: any[]) => {
+  if (!stream.player1 || !stream.player2) return null;
+  const p1 = normalizeTeamName(stream.player1);
+  const p2 = normalizeTeamName(stream.player2);
+
+  return wcGames.find(g => {
+    const home = normalizeTeamName(g.home_team_name_en || g.home_team_label || '');
+    const away = normalizeTeamName(g.away_team_name_en || g.away_team_label || '');
+    return (home === p1 && away === p2) || (home === p2 && away === p1);
+  });
+};
+
+const getWcScore = (stream: PlayableStream, game: any) => {
+  if (!game) return null;
+  const p1 = normalizeTeamName(stream.player1 || '');
+  const home = normalizeTeamName(game.home_team_name_en || game.home_team_label || '');
+  
+  const homeScore = game.home_score;
+  const awayScore = game.away_score;
+  
+  if (home === p1) {
+    return `${homeScore} - ${awayScore}`;
+  } else {
+    return `${awayScore} - ${homeScore}`;
+  }
+};
+
 const formatViewerCount = (count: number, locale: string): string => {
   const isId = locale.startsWith('id');
   if (count >= 1000000) {
@@ -434,8 +471,12 @@ const MatchCard: React.FC<{
   t: any;
   i18n: any;
   viewerCount?: number;
-}> = ({ item, selectStream, t, i18n, viewerCount }) => {
+  wcGames?: any[];
+  setActiveTab?: (tab: any) => void;
+}> = ({ item, selectStream, t, i18n, viewerCount, wcGames = [], setActiveTab }) => {
   const { isPlayable, buttonText, status } = getPlayableStatus(item, t);
+  const matchedGame = findWcGame(item, wcGames);
+  const score = getWcScore(item, matchedGame);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (e: React.MouseEvent) => {
@@ -454,7 +495,17 @@ const MatchCard: React.FC<{
       whileTap={{ scale: 0.96 }}
       transition={{ type: 'spring', damping: 18, stiffness: 220 }}
       onClick={() => {
-        selectStream(item, 'events');
+        if (status === 'ended' && setActiveTab) {
+          setActiveTab('stats');
+          setTimeout(() => {
+            const section = document.getElementById('sports-content');
+            if (section) {
+              section.scrollIntoView({ behavior: 'smooth' });
+            }
+          }, 100);
+        } else {
+          selectStream(item, 'events');
+        }
       }}
       className="relative group rounded-2xl overflow-hidden shadow-2xl bg-[#141414] border border-white/5 transition-all duration-300 w-full aspect-[2/3] cursor-pointer"
     >
@@ -520,9 +571,15 @@ const MatchCard: React.FC<{
               {item.player1}
             </span>
           </div>
-          <span className="text-sm md:text-base font-black text-netflix-red font-outfit uppercase tracking-widest mt-[-20px]">
-            VS
-          </span>
+          {status === 'ended' && score ? (
+            <span className="text-sm md:text-2xl font-black text-white font-outfit uppercase tracking-wider whitespace-nowrap mt-[-20px] bg-netflix-red/25 border border-netflix-red/35 px-2.5 py-1.5 md:px-4 md:py-2 rounded-xl md:rounded-2xl backdrop-blur-md shadow-lg shadow-red-950/20">
+              {score}
+            </span>
+          ) : (
+            <span className="text-sm md:text-base font-black text-netflix-red font-outfit uppercase tracking-widest mt-[-20px] whitespace-nowrap">
+              VS
+            </span>
+          )}
           <div className="flex flex-col items-center gap-2">
             <FlagImage countryName={item.player2 || ''} className="w-20 h-14 md:w-24 md:h-16 shadow-xl border border-white/10" />
             <span className="text-xs md:text-sm font-black text-zinc-300 max-w-[120px] truncate text-center mt-2">
@@ -731,6 +788,7 @@ const LiveSports: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewerCounts, setViewerCounts] = useState<Record<string, number>>({});
+  const [wcGames, setWcGames] = useState<any[]>([]);
 
   // Real-time tracking of viewers using Supabase Presence
   useEffect(() => {
@@ -834,6 +892,18 @@ const LiveSports: React.FC = () => {
             axios.get<ChannelEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-hiburan.dat')
           ]);
           eventsData = eventsRes.data;
+
+          // Try fetching World Cup games for score lookup on finished matches
+          let wcGamesData: any[] = [];
+          try {
+            const wcRes = await axios.get('https://worldcup26.ir/get/games');
+            if (wcRes && wcRes.data && wcRes.data.games) {
+              wcGamesData = wcRes.data.games;
+            }
+          } catch (wcErr) {
+            console.warn('Failed to fetch World Cup games for scoreboard syncing', wcErr);
+          }
+          setWcGames(wcGamesData);
           sportsData = sportsRes.data;
           liveData = liveRes.data;
         } catch (githubErr) {
@@ -1246,11 +1316,24 @@ const LiveSports: React.FC = () => {
                     matches.map((item) => {
                       const { isPlayable, buttonText, status } = getPlayableStatus(item, t);
                       const isCurrent = activeStream?.id === item.id;
+                      const matchedGame = findWcGame(item, wcGames);
+                      const score = getWcScore(item, matchedGame);
                       return (
                         <div
                           key={item.id}
                           onClick={() => {
-                            selectStream(item);
+                            if (status === 'ended') {
+                              clearStream();
+                              setActiveTab('stats');
+                              setTimeout(() => {
+                                const section = document.getElementById('sports-content');
+                                if (section) {
+                                  section.scrollIntoView({ behavior: 'smooth' });
+                                }
+                              }, 100);
+                            } else {
+                              selectStream(item);
+                            }
                           }}
                           className={`flex flex-col gap-2.5 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${isCurrent
                             ? 'bg-netflix-red/10 border-netflix-red'
@@ -1279,7 +1362,13 @@ const LiveSports: React.FC = () => {
                               <FlagImage countryName={item.player1 || ''} className="w-6 h-4 shrink-0 rounded-sm" />
                               <span className="text-xs font-bold text-white truncate">{item.player1}</span>
                             </div>
-                            <span className="text-[10px] font-black text-zinc-500 font-outfit select-none">VS</span>
+                            {status === 'ended' && score ? (
+                              <span className="text-[10px] font-black text-white bg-netflix-red/25 border border-netflix-red/35 px-2 py-0.5 rounded-md select-none font-outfit whitespace-nowrap">
+                                {score}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-black text-zinc-500 font-outfit select-none whitespace-nowrap">VS</span>
+                            )}
                             <div className="flex items-center gap-2 flex-1 justify-end truncate">
                               <span className="text-xs font-bold text-white truncate">{item.player2}</span>
                               <FlagImage countryName={item.player2 || ''} className="w-6 h-4 shrink-0 rounded-sm" />
@@ -1548,6 +1637,8 @@ const LiveSports: React.FC = () => {
                         t={t}
                         i18n={i18n}
                         viewerCount={viewerCounts[item.id] || 0}
+                        wcGames={wcGames}
+                        setActiveTab={setActiveTab}
                       />
                     ))}
                   </div>
