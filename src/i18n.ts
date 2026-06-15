@@ -292,42 +292,50 @@ const resources = {
   },
   ja: {
     translation: {
-      "home": "ホーム", "movies": "映画", "series": "シリーズ", "popular": "人気", "search": "映画を検索...", "watch_now": "今すぐ観る", "trending": "今トレンド"
+      "home": "ホーム", "movies": "映画", "series": "シリーズ", "popular": "人気", "search": "映画を検索...", "watch_now": "今すぐ観る", "trending": "今トレンド",
+      "news": "ニュース", "live_sports": "ライブスポーツ"
     }
   },
   ko: {
     translation: {
-      "home": "홈", "movies": "영화", "series": "시리즈", "popular": "인기", "search": "영화 검색...", "watch_now": "지금 시청하기", "trending": "지금 뜨는 콘텐츠"
+      "home": "홈", "movies": "영화", "series": "시리즈", "popular": "인기", "search": "영화 검색...", "watch_now": "지금 시청하기", "trending": "지금 뜨는 콘텐츠",
+      "news": "뉴스", "live_sports": "라이브 스포츠"
     }
   },
   es: {
     translation: {
-      "home": "Inicio", "movies": "Películas", "series": "Series", "popular": "Popular", "search": "Buscar películas...", "watch_now": "Ver ahora", "trending": "Tendencias"
+      "home": "Inicio", "movies": "Películas", "series": "Series", "popular": "Popular", "search": "Buscar películas...", "watch_now": "Ver ahora", "trending": "Tendencias",
+      "news": "Noticias", "live_sports": "Deportes en vivo"
     }
   },
   fr: {
     translation: {
-      "home": "Accueil", "movies": "Films", "series": "Séries", "popular": "Populaire", "search": "Rechercher...", "watch_now": "Regarder maintenant", "trending": "Tendances"
+      "home": "Accueil", "movies": "Films", "series": "Séries", "popular": "Populaire", "search": "Rechercher...", "watch_now": "Regarder maintenant", "trending": "Tendances",
+      "news": "Actualités", "live_sports": "Sports en direct"
     }
   },
   de: {
     translation: {
-      "home": "Home", "movies": "Filme", "series": "Serien", "popular": "Beliebt", "search": "Suche...", "watch_now": "Jetzt ansehen", "trending": "Angesagt"
+      "home": "Home", "movies": "Filme", "series": "Serien", "popular": "Beliebt", "search": "Suche...", "watch_now": "Jetzt ansehen", "trending": "Angesagt",
+      "news": "News", "live_sports": "Live-Sport"
     }
   },
   zh: {
     translation: {
-      "home": "首页", "movies": "电影", "series": "剧集", "popular": "热门", "search": "搜索...", "watch_now": "立即观看", "trending": "正在流行"
+      "home": "首页", "movies": "电影", "series": "剧集", "popular": "热门", "search": "搜索...", "watch_now": "立即观看", "trending": "正在流行",
+      "news": "新闻", "live_sports": "体育直播"
     }
   },
   ar: {
     translation: {
-      "home": "الرئيسية", "movies": "أفلام", "series": "مسلسلات", "popular": "شائع", "search": "بحث...", "watch_now": "شاهد الآن", "trending": "الأكثر رواجاً"
+      "home": "الرئيسية", "movies": "أفلام", "series": "مسلسلات", "popular": "شائع", "search": "بحث...", "watch_now": "شاهد الآن", "trending": "الأكثر رواجاً",
+      "news": "أخبار", "live_sports": "رياضة مباشرة"
     }
   },
   ru: {
     translation: {
-      "home": "Главная", "movies": "Фильмы", "series": "Сериалы", "popular": "Популярное", "search": "Поиск...", "watch_now": "Смотреть", "trending": "В тренде"
+      "home": "Главная", "movies": "Фильмы", "series": "Сериалы", "popular": "Популярное", "search": "Поиск...", "watch_now": "Смотреть", "trending": "В тренде",
+      "news": "Новости", "live_sports": "Спорт LIVE"
     }
   }
 };
