@@ -238,22 +238,85 @@ const getTimelineFromScorers = (
   return timeline;
 };
 
-const parseMatchDate = (dateStr: string): number => {
+const parseMatchDate = (dateStr: string, stadiumId?: string): number => {
   if (!dateStr) return 0;
   const parsed = Date.parse(dateStr);
-  if (!isNaN(parsed)) return parsed;
+  if (!isNaN(parsed) && !stadiumId) return parsed;
 
   try {
     const [datePart, timePart] = dateStr.split(' ');
-    const [m, d, y] = datePart.split('/').map(Number);
-    const [h, min] = timePart.split(':').map(Number);
-    return new Date(y, m - 1, d, h, min).getTime();
+    const [m, d, y] = datePart.split('/');
+    const [h, min] = timePart.split(':');
+    
+    let offset = '-05:00'; // Default Central
+    if (stadiumId) {
+      const sId = String(stadiumId).trim();
+      if (['7', '8', '9', '10', '11', '12'].includes(sId)) {
+        offset = '-04:00'; // Eastern (EDT)
+      } else if (['13', '14', '15', '16'].includes(sId)) {
+        offset = '-07:00'; // Western (PDT)
+      }
+    }
+    
+    const isoString = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}T${h.padStart(2, '0')}:${min.padStart(2, '0')}:00${offset}`;
+    const dateObj = new Date(isoString);
+    return isNaN(dateObj.getTime()) ? 0 : dateObj.getTime();
   } catch (e) {
     return 0;
   }
 };
 
-const calculateLiveMatchMinute = (apiTimeElapsed: string, kickoffDateStr: string, fetchTimeMs: number): string => {
+const formatMatchDateToLocal = (dateStr: string, stadiumId: string, locale: string = 'id'): string => {
+  if (!dateStr) return '';
+  try {
+    const [datePart, timePart] = dateStr.split(' ');
+    const [m, d, y] = datePart.split('/');
+    const [h, min] = timePart.split(':');
+    
+    let offset = '-05:00'; // Default Central (CDT)
+    const sId = String(stadiumId).trim();
+    if (['7', '8', '9', '10', '11', '12'].includes(sId)) {
+      offset = '-04:00'; // Eastern (EDT)
+    } else if (['13', '14', '15', '16'].includes(sId)) {
+      offset = '-07:00'; // Western (PDT)
+    }
+    
+    const isoString = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}T${h.padStart(2, '0')}:${min.padStart(2, '0')}:00${offset}`;
+    const dateObj = new Date(isoString);
+    if (isNaN(dateObj.getTime())) return dateStr;
+
+    const localeCode = locale.startsWith('id') ? 'id-ID' : 'en-US';
+    
+    const formatted = dateObj.toLocaleDateString(localeCode, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+
+    const timeZoneOffset = dateObj.getTimezoneOffset(); // in minutes
+    let tzLabel = '';
+    if (locale.startsWith('id')) {
+      if (timeZoneOffset === -420) tzLabel = ' WIB';
+      else if (timeZoneOffset === -480) tzLabel = ' WITA';
+      else if (timeZoneOffset === -540) tzLabel = ' WIT';
+      else {
+        const hoursOffset = -timeZoneOffset / 60;
+        tzLabel = ` GMT${hoursOffset >= 0 ? '+' : ''}${hoursOffset}`;
+      }
+    } else {
+      tzLabel = '';
+    }
+
+    return `${formatted}${tzLabel}`;
+  } catch (e) {
+    return dateStr;
+  }
+};
+
+const calculateLiveMatchMinute = (apiTimeElapsed: string, kickoffDateStr: string, fetchTimeMs: number, stadiumId?: string): string => {
   if (apiTimeElapsed === 'finished') return 'FT';
   if (apiTimeElapsed === 'notstarted') return '';
 
@@ -267,7 +330,7 @@ const calculateLiveMatchMinute = (apiTimeElapsed: string, kickoffDateStr: string
     return `${currentMin}'`;
   }
 
-  const kickoffMs = parseMatchDate(kickoffDateStr);
+  const kickoffMs = parseMatchDate(kickoffDateStr, stadiumId);
   if (kickoffMs > 0) {
     const elapsedSinceKickoff = Math.floor((Date.now() - kickoffMs) / 60000);
     if (elapsedSinceKickoff >= 0 && elapsedSinceKickoff <= 130) {
@@ -395,8 +458,8 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
 
         // Sort matches chronologically (earliest first, latest last)
         mappedMatches.sort((a, b) => {
-          const timeA = parseMatchDate(a.date);
-          const timeB = parseMatchDate(b.date);
+          const timeA = parseMatchDate(a.date, a.stadiumId);
+          const timeB = parseMatchDate(b.date, b.stadiumId);
           return timeA - timeB;
         });
 
@@ -507,7 +570,7 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
   const currentStandings = getGroupStandings(selectedGroup);
 
   const getMatchEventsList = (match: MatchScore): string[] => {
-    const liveTime = calculateLiveMatchMinute(match.rawTimeElapsed, match.date, fetchTimestamp);
+    const liveTime = calculateLiveMatchMinute(match.rawTimeElapsed, match.date, fetchTimestamp, match.stadiumId);
     return getTimelineFromScorers(match.homeTeam, match.awayTeam, match.homeScorers, match.awayScorers, match.status, liveTime);
   };
 
@@ -727,7 +790,7 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
                           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
                           <span>
                             {(() => {
-                              const liveTime = calculateLiveMatchMinute(match.rawTimeElapsed, match.date, fetchTimestamp);
+                              const liveTime = calculateLiveMatchMinute(match.rawTimeElapsed, match.date, fetchTimestamp, match.stadiumId);
                               return liveTime.toUpperCase().includes('LIVE') || liveTime === 'HT'
                                 ? liveTime
                                 : `LIVE ${liveTime}`;
@@ -737,10 +800,10 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
                       ) : match.status === 'UPCOMING' ? (
                         <span className="text-netflix-red font-black flex items-center gap-1">
                           <span className="w-1 h-1 rounded-full bg-netflix-red animate-pulse" />
-                          {match.date}
+                          {formatMatchDateToLocal(match.date, match.stadiumId, i18nObj.language)}
                         </span>
                       ) : (
-                        <span>{match.date}</span>
+                        <span>{formatMatchDateToLocal(match.date, match.stadiumId, i18nObj.language)}</span>
                       )}
                     </span>
                   </div>
@@ -807,7 +870,7 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
                 </button>
                 <div className="text-center">
                   <span className="text-[9px] md:text-xs font-black text-zinc-500 uppercase tracking-widest select-none">
-                    {selectedMatch.group} • {selectedMatch.date}
+                    {selectedMatch.group} • {formatMatchDateToLocal(selectedMatch.date, selectedMatch.stadiumId, i18nObj.language)}
                   </span>
                   
                   {/* Score & Flag view */}
@@ -841,7 +904,7 @@ export const WorldCupDashboard: React.FC<{ i18n?: any }> = ({ i18n: propsI18n })
                           <span className="w-1 h-1 rounded-full bg-amber-400 animate-ping" />
                           <span>
                             {(() => {
-                              const liveTime = calculateLiveMatchMinute(selectedMatch.rawTimeElapsed, selectedMatch.date, fetchTimestamp);
+                              const liveTime = calculateLiveMatchMinute(selectedMatch.rawTimeElapsed, selectedMatch.date, fetchTimestamp, selectedMatch.stadiumId);
                               return liveTime.toUpperCase().includes('LIVE') || liveTime === 'HT'
                                 ? liveTime
                                 : `LIVE ${liveTime}`;
