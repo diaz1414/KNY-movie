@@ -11,6 +11,14 @@ interface CustomPlayerProps {
   keyVal?: string; // Use keyVal to avoid React 'key' prop conflict
 }
 
+const getYouTubeEmbedUrl = (url: string): string => {
+  if (url.includes('embed/')) return url;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  const videoId = (match && match[2].length === 11) ? match[2] : '';
+  return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1` : url;
+};
+
 export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, keyVal }) => {
   const { t } = useTranslation();
   const [refreshKey, setRefreshKey] = useState(0);
@@ -36,6 +44,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
   const [abrEnabled, setAbrEnabled] = useState(true);
   const [showQualityMenu, setShowQualityMenu] = useState(false);
   const [buffering, setBuffering] = useState(false);
+  const [isLiveStream, setIsLiveStream] = useState(true);
   const isFirstLoadRef = useRef(true);
 
   // Auto-hide controls timer reference
@@ -124,6 +133,20 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
     const player = playerRef.current;
     if (!video) return;
 
+    if (type === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be')) {
+      setLoading(false);
+      setBuffering(false);
+      setIsPlaying(true);
+      if (video) {
+        video.pause();
+        video.src = '';
+      }
+      if (player) {
+        player.unload().catch(() => {});
+      }
+      return;
+    }
+
     let isCancelled = false;
 
     if (isFirstLoadRef.current) {
@@ -202,6 +225,9 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
         // Load new stream URL (Shaka automatically unloads the previous source cleanly)
         await player.load(url);
         if (isCancelled) return;
+
+        const isLive = player.isLive();
+        setIsLiveStream(isLive);
 
         setLoading(false);
         setIsPlaying(true);
@@ -516,11 +542,22 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
         </div>
       )}
 
-      {/* HTML5 Video Element (without native controls to allow customized overlays) */}
+      {/* Universal Player Element: YouTube iframe or HTML5 Video */}
+      {(type === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be')) && (
+        <iframe
+          src={getYouTubeEmbedUrl(url)}
+          className="w-full h-full object-contain relative z-5"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          frameBorder="0"
+        />
+      )}
       <video
         ref={videoRef}
         onDoubleClick={() => toggleFullscreen()}
-        className="w-full h-full object-contain relative z-5"
+        className={`w-full h-full object-contain relative z-5 ${
+          (type === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be')) ? 'hidden' : ''
+        }`}
         playsInline
         autoPlay
       />
@@ -609,7 +646,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       )}
 
       {/* Central Play/Pause overlay button */}
-      {!loading && !error && !buffering && (
+      {!loading && !error && !buffering && type !== 'youtube' && !url.includes('youtube.com') && !url.includes('youtu.be') && (
         <div
           className={`absolute inset-0 flex items-center justify-center z-15 transition-opacity duration-300 pointer-events-none ${showControls ? 'opacity-100' : 'opacity-0'
             }`}
@@ -643,7 +680,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       )}
 
       {/* CUSTOM PREMIUM CONTROLS BAR (Overlay) */}
-      {!loading && !error && (
+      {!loading && !error && type !== 'youtube' && !url.includes('youtube.com') && !url.includes('youtu.be') && (
         <div
           className={`absolute inset-x-0 bottom-0 z-20 p-4 bg-gradient-to-t from-black/95 via-black/80 to-transparent flex flex-col gap-3 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
@@ -692,7 +729,7 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
             </div>
 
             {/* Middle Controls: PREMIUM CLICKABLE REALTIME "LIVE" BADGE */}
-            {(() => {
+            {isLiveStream && (() => {
               const isLive = liveDelay <= 10;
               const displayDelay = liveDelay - 10;
               return (

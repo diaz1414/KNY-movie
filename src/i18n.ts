@@ -130,7 +130,20 @@ const resources = {
       "report_error": "Failed to send report. Please try again.",
       "playback_error": "Playback Error",
       "retry_button": "Retry",
-      "refresh_player": "Refresh Player"
+      "refresh_player": "Refresh Player",
+      "remind_me": "Remind Me",
+      "reminded": "Reminded",
+      "watch_highlights": "Watch Highlights",
+      "highlights": "Highlights",
+      "notif_granted": "Reminders active! You will be notified 30 and 10 minutes before kickoff.",
+      "notif_blocked": "Notification permission is blocked. Please enable it in browser settings.",
+      "live_chat": "Live Chat",
+      "quick_channels": "Channels",
+      "choose_nickname": "Choose Nickname",
+      "nickname_placeholder": "Enter your nickname...",
+      "chat_placeholder": "Say something...",
+      "join_chat": "Join Chat",
+      "randomize": "Randomize"
     }
   },
   id: {
@@ -261,7 +274,20 @@ const resources = {
       "report_error": "Gagal mengirim laporan. Silakan coba lagi.",
       "playback_error": "Kesalahan Pemutaran",
       "retry_button": "Coba Lagi",
-      "refresh_player": "Muat Ulang Player"
+      "refresh_player": "Muat Ulang Player",
+      "remind_me": "Ingatkan Saya",
+      "reminded": "Sudah Diingatkan",
+      "watch_highlights": "Tonton Cuplikan",
+      "highlights": "Highlights",
+      "notif_granted": "Pengingat aktif! Kami akan memberi notifikasi 30 menit dan 10 menit sebelum kickoff.",
+      "notif_blocked": "Izin notifikasi diblokir. Silakan aktifkan di pengaturan browser.",
+      "live_chat": "Live Chat",
+      "quick_channels": "Saluran",
+      "choose_nickname": "Pilih Nickname",
+      "nickname_placeholder": "Masukkan nickname Anda...",
+      "chat_placeholder": "Tulis pesan...",
+      "join_chat": "Gabung Chat",
+      "randomize": "Acak"
     }
   },
   ja: {

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import axios from 'axios';
 import { supabase } from '../services/supabase';
-import { Trophy, Play, AlertCircle, ArrowLeft, Tv, ShieldAlert, Radio, Calendar, Clock, Film, Share2, Check, Award } from 'lucide-react';
+import { Trophy, Play, AlertCircle, ArrowLeft, Tv, ShieldAlert, Radio, Calendar, Clock, Film, Share2, Check, Award, Bell, Send } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import { CustomPlayer } from '../components/CustomPlayer';
 import { WorldCupDashboard } from '../components/WorldCupDashboard';
@@ -88,7 +88,41 @@ const decryptLicense = (ciphertext: string): string => {
   }
 };
 
+const usernameColors = [
+  '#f87171', // red-400
+  '#60a5fa', // blue-400
+  '#34d399', // emerald-400
+  '#fbbf24', // amber-400
+  '#c084fc', // purple-400
+  '#f472b6', // pink-400
+  '#2dd4bf', // teal-400
+  '#f59e0b', // orange-400
+  '#818cf8', // indigo-400
+  '#fb7185'  // rose-400
+];
 
+const getUsernameColor = (username: string) => {
+  const hash = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return usernameColors[hash % usernameColors.length];
+};
+
+const avatarGradients = [
+  'from-pink-500 to-rose-500',
+  'from-purple-600 to-indigo-600',
+  'from-blue-500 to-teal-500',
+  'from-emerald-500 to-teal-600',
+  'from-amber-500 to-orange-500',
+  'from-red-500 to-orange-600',
+  'from-fuchsia-500 to-purple-600',
+  'from-cyan-500 to-blue-500',
+  'from-violet-500 to-purple-600',
+  'from-rose-500 to-red-600'
+];
+
+const getAvatarGradient = (username: string) => {
+  const hash = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return avatarGradients[hash % avatarGradients.length];
+};
 
 const buildServers = (urlIptv: string, urlLicense: string | undefined, jenis: string): StreamServer[] => {
   const decryptedLicense = urlLicense ? decryptLicense(urlLicense) : '';
@@ -472,8 +506,9 @@ const MatchCard: React.FC<{
   i18n: any;
   viewerCount?: number;
   wcGames?: any[];
-  setActiveTab?: (tab: any) => void;
-}> = ({ item, selectStream, t, i18n, viewerCount, wcGames = [], setActiveTab }) => {
+  activeReminders?: string[];
+  toggleReminder?: (matchId: string) => void;
+}> = ({ item, selectStream, t, i18n, viewerCount, wcGames = [], activeReminders = [], toggleReminder }) => {
   const { isPlayable, buttonText, status } = getPlayableStatus(item, t);
   const matchedGame = findWcGame(item, wcGames);
   const score = getWcScore(item, matchedGame);
@@ -495,17 +530,7 @@ const MatchCard: React.FC<{
       whileTap={{ scale: 0.96 }}
       transition={{ type: 'spring', damping: 18, stiffness: 220 }}
       onClick={() => {
-        if (status === 'ended' && setActiveTab) {
-          setActiveTab('stats');
-          setTimeout(() => {
-            const section = document.getElementById('sports-content');
-            if (section) {
-              section.scrollIntoView({ behavior: 'smooth' });
-            }
-          }, 100);
-        } else {
-          selectStream(item, 'events');
-        }
+        selectStream(item, 'events');
       }}
       className="relative group rounded-2xl overflow-hidden shadow-2xl bg-[#141414] border border-white/5 transition-all duration-300 w-full aspect-[2/3] cursor-pointer"
     >
@@ -562,6 +587,24 @@ const MatchCard: React.FC<{
         {copied ? <Check size={14} className="text-green-500" /> : <Share2 size={14} />}
       </button>
 
+      {/* Remind Me / Notification Toggle Button */}
+      {status === 'upcoming' && item.id && toggleReminder && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleReminder(item.id);
+          }}
+          className={`absolute top-[60px] right-4 z-30 w-9 h-9 rounded-xl backdrop-blur-md border flex items-center justify-center transition-all shadow-lg cursor-pointer hover:scale-105 active:scale-95 ${
+            activeReminders.includes(item.id)
+              ? 'bg-netflix-red border-netflix-red text-white'
+              : 'bg-black/80 border-white/10 text-white hover:bg-netflix-red hover:border-netflix-red'
+          }`}
+          title={activeReminders.includes(item.id) ? t('reminded') : t('remind_me')}
+        >
+          <Bell size={14} fill={activeReminders.includes(item.id) ? 'currentColor' : 'none'} className={activeReminders.includes(item.id) ? 'animate-bounce' : ''} />
+        </button>
+      )}
+
       {/* Flag / Matchup Hero graphic */}
       <div className="relative z-10 w-full h-full flex flex-col justify-center items-center p-6 select-none gap-8 pb-20">
         <div className="flex items-center gap-4 justify-center w-full">
@@ -616,8 +659,14 @@ const MatchCard: React.FC<{
           <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider truncate max-w-[200px]">
             {item.subName}
           </p>
-          <span className="text-[10px] uppercase font-black bg-netflix-red text-white px-2.5 py-1 rounded-sm tracking-wider shadow-lg">
-            LIVE
+          <span className={`text-[10px] uppercase font-black px-2.5 py-1 rounded-sm tracking-wider shadow-lg ${
+            status === 'live' 
+              ? 'bg-netflix-red text-white' 
+              : status === 'upcoming'
+                ? 'bg-amber-500 text-white'
+                : 'bg-zinc-600 text-white'
+          }`}>
+            {status === 'live' ? 'LIVE' : status === 'upcoming' ? t('upcoming') : t('match_ended')}
           </span>
         </div>
 
@@ -776,7 +825,6 @@ const LiveSports: React.FC = () => {
       objectFit: 'object-cover'
     }
   ];
-
   const [matches, setMatches] = useState<PlayableStream[]>([]);
   const [sportsTv, setSportsTv] = useState<PlayableStream[]>([]);
   const [liveTv, setLiveTv] = useState<PlayableStream[]>([]);
@@ -789,6 +837,196 @@ const LiveSports: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [viewerCounts, setViewerCounts] = useState<Record<string, number>>({});
   const [wcGames, setWcGames] = useState<any[]>([]);
+  const [activeReminders, setActiveReminders] = useState<string[]>([]);
+
+  // Live Match Chat & Real-Time Emoji Reactions States
+  const [chatNickname, setChatNickname] = useState<string>('');
+  const [hasJoinedChat, setHasJoinedChat] = useState<boolean>(false);
+  const [chatInput, setChatInput] = useState<string>('');
+  const [chatMessages, setChatMessages] = useState<{ id: string; user: string; text: string; timestamp: string; color: string }[]>([]);
+  const [floatingEmojis, setFloatingEmojis] = useState<{ id: string; emoji: string; x: number; y: number }[]>([]);
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Load chat nickname and reminders from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('kny_match_reminders');
+      if (stored) {
+        setActiveReminders(JSON.parse(stored));
+      }
+      const saved = localStorage.getItem('kny_chat_nickname');
+      if (saved) {
+        setChatNickname(saved);
+        setHasJoinedChat(true);
+      }
+    } catch (e) {
+      console.error('Failed to load initial storage data', e);
+    }
+  }, []);
+
+  // Auto-scroll chat window when new messages arrive
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [chatMessages]);
+
+  // Real-Time message/reaction subscriber specific to activeStream.id
+  useEffect(() => {
+    if (!activeStream) return;
+
+    // Reset messages feed for this channel/match room
+    setChatMessages([]);
+
+    const channelId = `room-${activeStream.id}`;
+    const channel = supabase.channel(channelId, {
+      config: {
+        broadcast: { self: true }
+      }
+    });
+
+    const usernameColors = [
+      'text-red-400',
+      'text-blue-400',
+      'text-green-400',
+      'text-yellow-400',
+      'text-purple-400',
+      'text-pink-400',
+      'text-teal-400',
+      'text-amber-400',
+      'text-indigo-400',
+      'text-emerald-400'
+    ];
+    const getRandomColor = (username: string) => {
+      const hash = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      return usernameColors[hash % usernameColors.length];
+    };
+
+    channel
+      .on('broadcast', { event: 'message' }, ({ payload }) => {
+        setChatMessages(prev => {
+          if (prev.some(m => m.id === payload.id)) return prev;
+          return [...prev, {
+            id: payload.id,
+            user: payload.user,
+            text: payload.text,
+            timestamp: payload.timestamp,
+            color: getRandomColor(payload.user)
+          }].slice(-100);
+        });
+      })
+      .on('broadcast', { event: 'reaction' }, ({ payload }) => {
+        const id = Math.random().toString();
+        const x = Math.random() * 80 + 10; // 10% to 90% horizontal position
+        const y = Math.random() * 20 + 75; // Starting float point
+        const newEmoji = { id, emoji: payload.emoji, x, y };
+
+        setFloatingEmojis(prev => [...prev, newEmoji]);
+
+        setTimeout(() => {
+          setFloatingEmojis(prev => prev.filter(e => e.id !== id));
+        }, 2000);
+      })
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [activeStream?.id]);
+
+  const sendChatMessage = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!chatInput.trim() || !chatNickname.trim() || !activeStream) return;
+
+    const channelId = `room-${activeStream.id}`;
+    const channel = supabase.channel(channelId);
+
+    const messageId = Math.random().toString();
+    const payload = {
+      id: messageId,
+      user: chatNickname.trim(),
+      text: chatInput.trim(),
+      timestamp: new Date().toLocaleTimeString(i18n.language.startsWith('id') ? 'id-ID' : 'en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })
+    };
+
+    channel.send({
+      type: 'broadcast',
+      event: 'message',
+      payload
+    }).then(() => {
+      setChatInput('');
+    }).catch(err => {
+      console.error('Failed to send broadcast chat message:', err);
+    });
+  };
+
+  const sendEmojiReaction = (emoji: string) => {
+    if (!activeStream) return;
+
+    const channelId = `room-${activeStream.id}`;
+    const channel = supabase.channel(channelId);
+
+    channel.send({
+      type: 'broadcast',
+      event: 'reaction',
+      payload: { emoji }
+    }).catch(err => {
+      console.error('Failed to send emoji reaction broadcast:', err);
+    });
+  };
+
+  const generateRandomNickname = () => {
+    const adjectives_id = ['Penonton', 'Fans', 'Suporter', 'Pengamat', 'Pakar', 'Komentator', 'Pencinta', 'Jagoan', 'Penyemangat', 'Kawan'];
+    const nouns_id = ['Bola', 'Sepak', 'Dunia', 'Laga', 'WorldCup', 'YKN', 'Nonton', 'Juara', 'Gol', 'Striker', 'Kiper'];
+    
+    const adjectives_en = ['Viewer', 'Fan', 'Supporter', 'Observer', 'Expert', 'Pundit', 'Lover', 'Champ', 'Cheerer', 'Buddy'];
+    const nouns_en = ['Football', 'Soccer', 'Cup', 'Match', 'WorldCup', 'YKN', 'Streaming', 'Winner', 'Goal', 'Striker', 'Keeper'];
+
+    const isId = i18n.language.startsWith('id');
+    const adjs = isId ? adjectives_id : adjectives_en;
+    const nouns = isId ? nouns_id : nouns_en;
+
+    const adj = adjs[Math.floor(Math.random() * adjs.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    const num = Math.floor(Math.random() * 9000) + 1000;
+
+    return `${adj}_${noun}_${num}`;
+  };
+
+  const toggleReminder = (matchId: string) => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      alert(t('notif_blocked'));
+      return;
+    }
+
+    const toggle = (currentList: string[]) => {
+      let updated: string[];
+      if (currentList.includes(matchId)) {
+        updated = currentList.filter(id => id !== matchId);
+      } else {
+        updated = [...currentList, matchId];
+        alert(t('notif_granted'));
+      }
+      localStorage.setItem('kny_match_reminders', JSON.stringify(updated));
+      return updated;
+    };
+
+    if (Notification.permission === 'granted') {
+      setActiveReminders(prev => toggle(prev));
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          setActiveReminders(prev => toggle(prev));
+        } else {
+          alert(t('notif_blocked'));
+        }
+      });
+    } else {
+      alert(t('notif_blocked'));
+    }
+  };
 
   // Real-time tracking of viewers using Supabase Presence
   useEffect(() => {
@@ -829,6 +1067,80 @@ const LiveSports: React.FC = () => {
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Background check effect for scheduled kickoff push notifications
+  useEffect(() => {
+    if (matches.length === 0) return;
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const stored = localStorage.getItem('kny_match_reminders');
+      if (!stored) return;
+
+      const reminders: string[] = JSON.parse(stored);
+      if (reminders.length === 0) return;
+
+      reminders.forEach(id => {
+        const match = matches.find(m => m.id === id);
+        if (!match || !match.jadwal_event) return;
+
+        try {
+          let safeStartStr = match.jadwal_event.trim();
+          if (safeStartStr.includes(' ')) {
+            safeStartStr = safeStartStr.replace(' ', 'T');
+          }
+          const startMatch = safeStartStr.match(/([+-])(\d{2})$/);
+          if (startMatch) {
+            safeStartStr = safeStartStr + ':00';
+          }
+          const kickoffTime = new Date(safeStartStr).getTime();
+          if (isNaN(kickoffTime)) return;
+
+          const diffMins = (kickoffTime - now) / 60000;
+
+          // 1. 30 Minutes Before Kickoff (Stream Unlocked)
+          if (diffMins <= 30 && diffMins > 10) {
+            const hasNotified30 = localStorage.getItem(`kny_notified_30_${id}`);
+            if (!hasNotified30 && Notification.permission === 'granted') {
+              localStorage.setItem(`kny_notified_30_${id}`, 'true');
+              const title = i18n.language.startsWith('id')
+                ? `${match.name} - Siaran Dibuka!`
+                : `${match.name} - Stream Unlocked!`;
+              const body = i18n.language.startsWith('id')
+                ? `Siaran langsung sudah dibuka dan bisa diputar sekarang. Mari bersiap menonton!`
+                : `The live stream is now unlocked and playable. Get ready to watch!`;
+              new Notification(title, {
+                body,
+                icon: '/favicon.png'
+              });
+            }
+          }
+
+          // 2. 10 Minutes Before Kickoff (Starting Soon)
+          if (diffMins <= 10 && diffMins > 0) {
+            const hasNotified10 = localStorage.getItem(`kny_notified_10_${id}`);
+            if (!hasNotified10 && Notification.permission === 'granted') {
+              localStorage.setItem(`kny_notified_10_${id}`, 'true');
+              const title = i18n.language.startsWith('id')
+                ? `${match.name} - 10 Menit Menuju Kickoff!`
+                : `${match.name} - 10 Mins to Kickoff!`;
+              const body = i18n.language.startsWith('id')
+                ? `Pertandingan akan segera dimulai dalam 10 menit. Jangan sampai terlewat!`
+                : `Kickoff is starting in 10 minutes. Don't miss the action!`;
+              new Notification(title, {
+                body,
+                icon: '/favicon.png'
+              });
+            }
+          }
+        } catch (err) {
+          console.error('Error checking match reminder notifications', err);
+        }
+      });
+    }, 15000); // Check every 15 seconds
+
+    return () => clearInterval(interval);
+  }, [matches, i18n.language]);
 
   // Reference tick to trigger re-evaluations and satisfy unused variable lint rules
   void tick;
@@ -1169,12 +1481,48 @@ const LiveSports: React.FC = () => {
                         </div>
                       </div>
                     ) : activeStream.servers[activeServerIdx] ? (
-                      <CustomPlayer
-                        url={activeStream.servers[activeServerIdx].url}
-                        type={activeStream.servers[activeServerIdx].type}
-                        keyId={activeStream.servers[activeServerIdx].keyId}
-                        keyVal={activeStream.servers[activeServerIdx].key}
-                      />
+                      <>
+                        <CustomPlayer
+                          url={activeStream.servers[activeServerIdx].url}
+                          type={activeStream.servers[activeServerIdx].type}
+                          keyId={activeStream.servers[activeServerIdx].keyId}
+                          keyVal={activeStream.servers[activeServerIdx].key}
+                        />
+                        {/* Floating Emojis Overlay */}
+                        <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">
+                          {floatingEmojis.map((emoji) => (
+                            <div
+                              key={emoji.id}
+                              className="absolute text-3xl md:text-4xl floating-emoji select-none"
+                              style={{
+                                left: `${emoji.x}%`,
+                                bottom: `${100 - emoji.y}%`
+                              }}
+                            >
+                              {emoji.emoji}
+                            </div>
+                          ))}
+                        </div>
+                        <style dangerouslySetInnerHTML={{__html: `
+                          @keyframes floatUpAndFade {
+                            0% {
+                              transform: translateY(0) scale(0.6);
+                              opacity: 0;
+                            }
+                            15% {
+                              transform: translateY(-20px) scale(1.2);
+                              opacity: 0.9;
+                            }
+                            100% {
+                              transform: translateY(-150px) scale(0.8);
+                              opacity: 0;
+                            }
+                          }
+                          .floating-emoji {
+                            animation: floatUpAndFade 2s cubic-bezier(0.25, 1, 0.50, 1) forwards;
+                          }
+                        `}} />
+                      </>
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <NetflixLoader />
@@ -1261,7 +1609,179 @@ const LiveSports: React.FC = () => {
                 );
               })()}
 
+              {/* Live Match Chat */}
+              <div className="bg-white/[0.01] border border-white/5 rounded-3xl backdrop-blur-3xl p-4 md:p-6 shadow-2xl overflow-hidden flex flex-col h-[400px] md:h-[500px] w-full gap-4">
+                <div className="flex items-center justify-between border-b border-white/5 pb-3 shrink-0 select-none">
+                  <div className="flex items-center gap-2">
+                    <Film size={16} className="text-netflix-red" />
+                    <h3 className="text-sm font-black text-white uppercase tracking-wider font-outfit flex items-center gap-1.5">
+                      {t('live_chat')}
+                      <span className="flex h-2 w-2 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                    </h3>
+                  </div>
+                  {hasJoinedChat && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
+                        Nickname: <span className="text-netflix-red font-black">{chatNickname}</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          localStorage.removeItem('kny_chat_nickname');
+                          setHasJoinedChat(false);
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer flex items-center justify-center border border-transparent hover:border-white/5"
+                        title="Edit Nickname"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
 
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {!hasJoinedChat ? (
+                    /* Username Selector Form */
+                    <div className="flex-1 flex flex-col justify-center items-center text-center p-4 gap-4 animate-fade-in">
+                      <div className="w-14 h-14 bg-netflix-red/10 border border-netflix-red/20 text-netflix-red rounded-2xl flex items-center justify-center mb-1 shadow-lg shadow-black/20">
+                        <Film size={26} />
+                      </div>
+                      <h4 className="text-sm font-black text-white uppercase tracking-wider font-outfit">{t('choose_nickname')}</h4>
+                      
+                      <div className="w-full max-w-sm flex flex-col gap-3">
+                        <div className="relative w-full flex items-center bg-white/5 border border-white/10 rounded-xl focus-within:border-netflix-red/50 focus-within:bg-white/[0.08] transition-all pr-2.5">
+                          <input
+                            type="text"
+                            maxLength={20}
+                            placeholder={t('nickname_placeholder')}
+                            value={chatNickname}
+                            onChange={(e) => setChatNickname(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && chatNickname.trim()) {
+                                localStorage.setItem('kny_chat_nickname', chatNickname.trim());
+                                setHasJoinedChat(true);
+                              }
+                            }}
+                            className="w-full pl-4 pr-24 py-3 bg-transparent border-none text-white text-xs font-semibold focus:outline-none focus:ring-0 placeholder-zinc-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const name = generateRandomNickname();
+                              setChatNickname(name);
+                            }}
+                            className="absolute right-2 px-3 py-1.5 rounded-lg bg-white/10 border border-white/5 hover:bg-white/20 text-white text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer shrink-0"
+                          >
+                            {t('randomize')}
+                          </button>
+                        </div>
+                        
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (chatNickname.trim()) {
+                              localStorage.setItem('kny_chat_nickname', chatNickname.trim());
+                              setHasJoinedChat(true);
+                            }
+                          }}
+                          disabled={!chatNickname.trim()}
+                          className="w-full py-3.5 rounded-xl bg-netflix-red disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-black text-xs uppercase tracking-wider hover:bg-red-700 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer shadow-lg shadow-red-950/40"
+                        >
+                          {t('join_chat')}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Chat Room Messages & Send panel */
+                    <div className="flex-1 flex flex-col overflow-hidden animate-fade-in relative">
+                      {/* Messages Feed */}
+                      <div className="flex-1 overflow-y-auto space-y-4 pr-1.5 custom-scrollbar mb-3 select-text">
+                        {chatMessages.length === 0 ? (
+                          <div className="h-full flex flex-col justify-center items-center text-center text-zinc-500 text-xs font-bold gap-2 select-none">
+                            <Film size={20} className="text-zinc-600 animate-pulse" />
+                            <span>Mulai percakapan...</span>
+                          </div>
+                        ) : (
+                          chatMessages.map((msg) => {
+                            const isMe = msg.user.trim().toLowerCase() === chatNickname.trim().toLowerCase();
+                            const avatarGrad = getAvatarGradient(msg.user);
+                            const userColor = getUsernameColor(msg.user);
+                            const initial = msg.user.trim().charAt(0) || '?';
+
+                            return (
+                              <div key={msg.id} className={`flex items-start gap-3 ${isMe ? 'flex-row-reverse' : ''} animate-fade-in`}>
+                                {/* Avatar */}
+                                <div className={`w-8 h-8 rounded-full bg-gradient-to-tr ${avatarGrad} flex items-center justify-center text-xs font-black uppercase text-white shadow-md shadow-black/20 shrink-0 select-none`}>
+                                  {initial}
+                                </div>
+
+                                {/* Content column */}
+                                <div className={`flex flex-col max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
+                                  <div className="flex items-center gap-2 mb-0.5 select-none">
+                                    <span 
+                                      className="text-[10px] font-black uppercase tracking-wider"
+                                      style={{ color: userColor }}
+                                    >
+                                      {msg.user}
+                                    </span>
+                                    <span className="text-[8px] text-zinc-500 font-bold">{msg.timestamp}</span>
+                                  </div>
+                                  <div className={`px-4 py-2.5 rounded-2xl text-xs font-medium leading-relaxed break-words select-text border transition-all ${
+                                    isMe 
+                                      ? 'bg-netflix-red/10 border-netflix-red/25 text-white rounded-tr-none shadow-[0_4px_12px_rgba(229,9,20,0.15)]'
+                                      : 'bg-white/[0.03] border-white/5 text-zinc-200 rounded-tl-none shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:bg-white/[0.05]'
+                                  }`}>
+                                    {msg.text}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                        
+                        {/* Auto-scroll target */}
+                        <div ref={chatEndRef} />
+                      </div>
+
+                      {/* Emoji Reactions Bar */}
+                      <div className="flex justify-between items-center gap-2 bg-white/[0.02] border border-white/5 p-1.5 rounded-2xl mb-3 shrink-0 backdrop-blur-md shadow-inner select-none">
+                        {['⚽', '🔥', '👏', '😂', '❤️', '😮'].map((emoji) => (
+                          <button
+                            type="button"
+                            key={emoji}
+                            onClick={() => sendEmojiReaction(emoji)}
+                            className="flex-1 py-1.5 hover:bg-white/10 active:scale-135 rounded-xl text-xl transition-all duration-200 cursor-pointer flex items-center justify-center select-none hover:shadow-lg hover:shadow-black/20"
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Chat Input Form */}
+                      <form onSubmit={sendChatMessage} className="flex items-center gap-2 bg-white/[0.02] border border-white/5 p-1.5 rounded-2xl shrink-0 focus-within:border-netflix-red/50 focus-within:bg-white/[0.04] transition-all">
+                        <input
+                          type="text"
+                          maxLength={150}
+                          placeholder={t('chat_placeholder')}
+                          value={chatInput}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          className="flex-1 px-3.5 py-2 bg-transparent border-0 text-white text-xs font-semibold focus:outline-none focus:ring-0 placeholder-zinc-500"
+                        />
+                        <button
+                          type="submit"
+                          disabled={!chatInput.trim()}
+                          className="w-9 h-9 rounded-xl bg-netflix-red disabled:bg-zinc-800/80 disabled:text-zinc-600 text-white font-black hover:bg-red-700 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-lg shadow-red-950/20"
+                        >
+                          <Send size={14} />
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {/* Safety Tips Banner */}
               <div className="flex gap-4 p-6 bg-amber-950/20 border-l-4 border-amber-500/80 rounded-r-2xl text-zinc-400 text-sm">
@@ -1277,10 +1797,12 @@ const LiveSports: React.FC = () => {
 
             {/* Sidebar Quick Channels (Right) */}
             <div className="lg:col-span-4 flex flex-col h-[450px] lg:h-[540px] w-full bg-white/[0.01] border border-white/5 rounded-3xl backdrop-blur-3xl p-6 overflow-hidden shadow-2xl">
-              <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2 select-none">
-                <Radio size={18} className="text-netflix-red animate-pulse shrink-0" />
-                <span>Quick Channels</span>
-              </h3>
+              <div className="flex items-center gap-2 mb-4 shrink-0">
+                <Radio size={16} className="animate-pulse text-netflix-red" />
+                <h3 className="text-sm font-black text-white uppercase tracking-wider font-outfit">
+                  {t('quick_channels')}
+                </h3>
+              </div>
 
               {/* Sidebar Tabs */}
               <div className="flex gap-1 p-0.5 bg-white/[0.02] border border-white/5 rounded-xl mb-4 shrink-0 overflow-x-auto no-scrollbar">
@@ -1322,23 +1844,13 @@ const LiveSports: React.FC = () => {
                         <div
                           key={item.id}
                           onClick={() => {
-                            if (status === 'ended') {
-                              clearStream();
-                              setActiveTab('stats');
-                              setTimeout(() => {
-                                const section = document.getElementById('sports-content');
-                                if (section) {
-                                  section.scrollIntoView({ behavior: 'smooth' });
-                                }
-                              }, 100);
-                            } else {
-                              selectStream(item);
-                            }
+                            selectStream(item);
                           }}
-                          className={`flex flex-col gap-2.5 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${isCurrent
-                            ? 'bg-netflix-red/10 border-netflix-red'
-                            : 'bg-white/[0.01] border-white/5 hover:bg-white/5 hover:border-white/10'
-                            }`}
+                          className={`flex flex-col gap-2.5 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                            isCurrent
+                              ? 'bg-netflix-red/10 border-netflix-red'
+                              : 'bg-white/[0.01] border-white/5 hover:bg-white/5 hover:border-white/10'
+                          }`}
                         >
                           <div className="flex items-center justify-between text-[9px] font-black tracking-wider uppercase">
                             <span className="text-zinc-500 truncate max-w-[120px]">{item.subName}</span>
@@ -1376,9 +1888,27 @@ const LiveSports: React.FC = () => {
                           </div>
 
                           {item.jadwal_event && (
-                            <div className="text-[9px] font-black text-zinc-500 flex items-center gap-1.5 select-none">
-                              <Clock size={11} className="text-netflix-red shrink-0" />
-                              <span>{formatJadwal(item.jadwal_event, i18n.language)}</span>
+                            <div className="flex items-center justify-between select-none">
+                              <div className="text-[9px] font-black text-zinc-500 flex items-center gap-1.5">
+                                <Clock size={11} className="text-netflix-red shrink-0" />
+                                <span>{formatJadwal(item.jadwal_event, i18n.language)}</span>
+                              </div>
+                              {status === 'upcoming' && item.id && toggleReminder && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleReminder(item.id);
+                                  }}
+                                  className={`p-1 rounded-md border transition-all cursor-pointer ${
+                                    activeReminders.includes(item.id)
+                                      ? 'bg-netflix-red border-netflix-red text-white'
+                                      : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
+                                  }`}
+                                  title={activeReminders.includes(item.id) ? t('reminded') : t('remind_me')}
+                                >
+                                  <Bell size={9} fill={activeReminders.includes(item.id) ? 'currentColor' : 'none'} />
+                                </button>
+                              )}
                             </div>
                           )}
 
@@ -1638,7 +2168,8 @@ const LiveSports: React.FC = () => {
                         i18n={i18n}
                         viewerCount={viewerCounts[item.id] || 0}
                         wcGames={wcGames}
-                        setActiveTab={setActiveTab}
+                        activeReminders={activeReminders}
+                        toggleReminder={toggleReminder}
                       />
                     ))}
                   </div>
