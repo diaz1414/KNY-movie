@@ -839,6 +839,17 @@ const LiveSports: React.FC = () => {
   const [wcGames, setWcGames] = useState<any[]>([]);
   const [activeReminders, setActiveReminders] = useState<string[]>([]);
 
+  // Custom Toast State
+  const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  };
+
   // Live Match Chat & Real-Time Emoji Reactions States
   const [chatNickname, setChatNickname] = useState<string>('');
   const [hasJoinedChat, setHasJoinedChat] = useState<boolean>(false);
@@ -997,34 +1008,37 @@ const LiveSports: React.FC = () => {
 
   const toggleReminder = (matchId: string) => {
     if (typeof window === 'undefined' || !('Notification' in window)) {
-      alert(t('notif_blocked'));
+      showToast(t('notif_blocked'), 'error');
       return;
     }
 
-    const toggle = (currentList: string[]) => {
-      let updated: string[];
-      if (currentList.includes(matchId)) {
-        updated = currentList.filter(id => id !== matchId);
+    const handleToggle = () => {
+      const isCurrentlyReminded = activeReminders.includes(matchId);
+      const updatedList = isCurrentlyReminded
+        ? activeReminders.filter(id => id !== matchId)
+        : [...activeReminders, matchId];
+
+      if (isCurrentlyReminded) {
+        showToast(t('notif_removed'), 'info');
       } else {
-        updated = [...currentList, matchId];
-        alert(t('notif_granted'));
+        showToast(t('notif_granted'), 'success');
       }
-      localStorage.setItem('kny_match_reminders', JSON.stringify(updated));
-      return updated;
+      localStorage.setItem('kny_match_reminders', JSON.stringify(updatedList));
+      setActiveReminders(updatedList);
     };
 
     if (Notification.permission === 'granted') {
-      setActiveReminders(prev => toggle(prev));
+      handleToggle();
     } else if (Notification.permission !== 'denied') {
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
-          setActiveReminders(prev => toggle(prev));
+          handleToggle();
         } else {
-          alert(t('notif_blocked'));
+          showToast(t('notif_blocked'), 'error');
         }
       });
     } else {
-      alert(t('notif_blocked'));
+      showToast(t('notif_blocked'), 'error');
     }
   };
 
@@ -2211,6 +2225,70 @@ const LiveSports: React.FC = () => {
         </>
       )}
     </motion.main>
+
+    {/* Custom Premium Toast Notifications */}
+    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none w-full max-w-sm px-4 sm:px-0">
+      <AnimatePresence>
+        {toasts.map((toast) => (
+          <motion.div
+            key={toast.id}
+            initial={{ opacity: 0, y: 50, scale: 0.9, rotateX: -15 }}
+            animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+            exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.15 } }}
+            transition={{ type: 'spring', damping: 15, stiffness: 150 }}
+            className="pointer-events-auto flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-950/90 border border-white/10 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] overflow-hidden relative group w-full"
+          >
+            {/* Countdown Progress Bar */}
+            <motion.div
+              initial={{ width: "100%" }}
+              animate={{ width: 0 }}
+              transition={{ duration: 4, ease: "linear" }}
+              className={`absolute bottom-0 left-0 h-[3px] ${
+                toast.type === 'success' 
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-400' 
+                  : toast.type === 'error' 
+                    ? 'bg-gradient-to-r from-netflix-red to-red-500' 
+                    : 'bg-gradient-to-r from-blue-500 to-indigo-400'
+              }`}
+            />
+
+            {/* Icon Column */}
+            <div className={`p-2 rounded-xl shrink-0 ${
+              toast.type === 'success' 
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                : toast.type === 'error' 
+                  ? 'bg-netflix-red/10 text-netflix-red border border-netflix-red/20' 
+                  : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+            }`}>
+              {toast.type === 'success' && <Check size={18} className="stroke-[3]" />}
+              {toast.type === 'error' && <ShieldAlert size={18} className="stroke-[2.5]" />}
+              {toast.type === 'info' && <Bell size={18} className="stroke-[2.5]" />}
+            </div>
+
+            {/* Text Content */}
+            <div className="flex-1 min-w-0 pt-0.5">
+              <h5 className="text-xs font-black text-white uppercase tracking-wider font-outfit">
+                {toast.type === 'success' ? t('success') : toast.type === 'error' ? t('error') : t('info')}
+              </h5>
+              <p className="text-zinc-400 text-xs font-semibold mt-0.5 leading-relaxed">
+                {toast.message}
+              </p>
+            </div>
+
+            {/* Manual Dismiss Button */}
+            <button
+              onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+              className="text-zinc-500 hover:text-white transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5 shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
 
     <Footer />
   </div>
