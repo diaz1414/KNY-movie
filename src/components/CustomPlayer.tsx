@@ -324,11 +324,23 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
       setBuffering(false);
       setHasPlayed(true);
       setError(null); // Clear any transient errors on successful playback
+      if (playerRef.current) {
+        const activeTrack = playerRef.current.getVariantTracks().find(t => t.active);
+        if (activeTrack) {
+          setCurrentTrack(activeTrack);
+        }
+      }
     };
     const onCanPlay = () => {
       setBuffering(false);
       setHasPlayed(true);
       setError(null); // Clear any transient errors on successful playback
+      if (playerRef.current) {
+        const activeTrack = playerRef.current.getVariantTracks().find(t => t.active);
+        if (activeTrack) {
+          setCurrentTrack(activeTrack);
+        }
+      }
     };
 
     video.addEventListener('play', onPlay);
@@ -807,7 +819,18 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
                         onClick={(e) => {
                           e.stopPropagation();
                           if (playerRef.current) {
-                            playerRef.current.configure({ abr: { enabled: true } });
+                            const tracksList = playerRef.current.getVariantTracks();
+                            const sortedTracks = [...tracksList].sort((a, b) => (a.height || 0) - (b.height || 0));
+                            const mediumTrack = sortedTracks.find(t => (t.height || 0) >= 480) || sortedTracks[0];
+                            if (mediumTrack) {
+                              playerRef.current.selectVariantTrack(mediumTrack, true);
+                            }
+                            playerRef.current.configure({
+                              abr: {
+                                enabled: true,
+                                clearBufferSwitch: true
+                              }
+                            });
                             setAbrEnabled(true);
                             const active = playerRef.current.getVariantTracks().find(t => t.active);
                             setCurrentTrack(active || null);
