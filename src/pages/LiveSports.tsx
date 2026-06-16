@@ -16,6 +16,7 @@ interface StreamServer {
   type: string;
   keyId?: string;
   key?: string;
+  keys?: Record<string, string>;
 }
 
 interface PlayableStream {
@@ -137,9 +138,23 @@ const buildServers = (urlIptv: string, urlLicense: string | undefined, jenis: st
   if (decryptedLicense) {
     if (decryptedLicense.includes(':') && !decryptedLicense.startsWith('http')) {
       // It's a DRM key pair (KeyID:Key) -> Update Server 1 with keys
-      const [keyId, key] = decryptedLicense.split(':');
-      servers[0].keyId = keyId;
-      servers[0].key = key;
+      const keys: Record<string, string> = {};
+      const pairs = decryptedLicense.split(',');
+      pairs.forEach(pair => {
+        const parts = pair.split(':');
+        if (parts.length === 2) {
+          const [kid, k] = parts;
+          if (kid && k) {
+            keys[kid.trim()] = k.trim();
+          }
+        }
+      });
+      if (Object.keys(keys).length > 0) {
+        servers[0].keys = keys;
+        const firstKeyId = Object.keys(keys)[0];
+        servers[0].keyId = firstKeyId;
+        servers[0].key = keys[firstKeyId];
+      }
     } else if (decryptedLicense.startsWith('http')) {
       // It's a second HLS stream URL -> Add as Server 2
       servers.push({
@@ -1501,6 +1516,7 @@ const LiveSports: React.FC = () => {
                           type={activeStream.servers[activeServerIdx].type}
                           keyId={activeStream.servers[activeServerIdx].keyId}
                           keyVal={activeStream.servers[activeServerIdx].key}
+                          keys={activeStream.servers[activeServerIdx].keys}
                         />
                         {/* Floating Emojis Overlay */}
                         <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">

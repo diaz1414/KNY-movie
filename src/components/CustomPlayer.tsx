@@ -9,6 +9,7 @@ interface CustomPlayerProps {
   type: string;
   keyId?: string;
   keyVal?: string; // Use keyVal to avoid React 'key' prop conflict
+  keys?: Record<string, string>;
 }
 
 const getYouTubeEmbedUrl = (url: string): string => {
@@ -19,7 +20,7 @@ const getYouTubeEmbedUrl = (url: string): string => {
   return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1` : url;
 };
 
-export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, keyVal }) => {
+export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, keyVal, keys }) => {
   const { t } = useTranslation();
   const [refreshKey, setRefreshKey] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -212,14 +213,22 @@ export const CustomPlayer: React.FC<CustomPlayerProps> = ({ url, type, keyId, ke
           }
         });
 
-        if (type === 'dash-clearkey' && keyId && keyVal) {
-          player.configure({
-            drm: {
-              clearKeys: {
-                [keyId.trim()]: keyVal.trim()
+        if (type === 'dash-clearkey') {
+          if (keys && Object.keys(keys).length > 0) {
+            player.configure({
+              drm: {
+                clearKeys: keys
               }
-            }
-          });
+            });
+          } else if (keyId && keyVal) {
+            player.configure({
+              drm: {
+                clearKeys: {
+                  [keyId.trim()]: keyVal.trim()
+                }
+              }
+            });
+          }
         }
 
         // Load new stream URL (Shaka automatically unloads the previous source cleanly)
