@@ -147,7 +147,11 @@ const resources = {
       "nickname_placeholder": "Enter your nickname...",
       "chat_placeholder": "Say something...",
       "join_chat": "Join Chat",
-      "randomize": "Randomize"
+      "randomize": "Randomize",
+      "ykn_tv_promo_badge": "Official Streaming Partner",
+      "ykn_tv_promo_title": "Watch Also on YKN TV",
+      "ykn_tv_promo_desc": "Besides watching on YKN Movies, you can also enjoy live broadcasts of FIFA World Cup 2026 matches and other complete premium sports TV channels directly on YKN TV!",
+      "ykn_tv_promo_btn": "Open YKN TV"
     }
   },
   id: {
@@ -295,57 +299,93 @@ const resources = {
       "nickname_placeholder": "Masukkan nickname Anda...",
       "chat_placeholder": "Tulis pesan...",
       "join_chat": "Gabung Chat",
-      "randomize": "Acak"
+      "randomize": "Acak",
+      "ykn_tv_promo_badge": "Partner Resmi Streaming",
+      "ykn_tv_promo_title": "Saksikan Juga di YKN TV",
+      "ykn_tv_promo_desc": "Selain menonton di YKN Movies, Anda juga bisa menikmati siaran langsung pertandingan Piala Dunia FIFA 2026 dan saluran TV olahraga premium terlengkap lainnya secara langsung di YKN TV!",
+      "ykn_tv_promo_btn": "Buka YKN TV"
     }
   },
   ja: {
     translation: {
       "home": "ホーム", "movies": "映画", "series": "シリーズ", "popular": "人気", "search": "映画を検索...", "watch_now": "今すぐ観る", "trending": "今トレンド",
-      "news": "ニュース", "live_sports": "ライブスポーツ"
+      "news": "ニュース", "live_sports": "ライブスポーツ",
+      "ykn_tv_promo_badge": "公式ストリーミングパートナー",
+      "ykn_tv_promo_title": "YKN TVでもご視聴いただけます",
+      "ykn_tv_promo_desc": "YKN Moviesでの視聴に加えて、FIFAワールドカップ2026の試合の生中継や、その他の充実したプレミアムスポーツTVチャンネルをYKN TVで直接お楽しみいただけます！",
+      "ykn_tv_promo_btn": "YKN TVを開く"
     }
   },
   ko: {
     translation: {
       "home": "홈", "movies": "영화", "series": "시리즈", "popular": "인기", "search": "영화 검색...", "watch_now": "지금 시청하기", "trending": "지금 뜨는 콘텐츠",
-      "news": "뉴스", "live_sports": "라이브 스포츠"
+      "news": "뉴스", "live_sports": "라이브 스포츠",
+      "ykn_tv_promo_badge": "공식 스트리밍 파트너",
+      "ykn_tv_promo_title": "YKN TV에서도 시청하세요",
+      "ykn_tv_promo_desc": "YKN Movies 시청 외에도 FIFA 월드컵 2026 경기 생중계 및 기타 다양한 프리미엄 스포츠 TV 채널을 YKN TV에서 직접 즐기실 수 있습니다!",
+      "ykn_tv_promo_btn": "YKN TV 열기"
     }
   },
   es: {
     translation: {
       "home": "Inicio", "movies": "Películas", "series": "Series", "popular": "Popular", "search": "Buscar películas...", "watch_now": "Ver ahora", "trending": "Tendencias",
-      "news": "Noticias", "live_sports": "Deportes en vivo"
+      "news": "Noticias", "live_sports": "Deportes en vivo",
+      "ykn_tv_promo_badge": "Socio oficial de streaming",
+      "ykn_tv_promo_title": "Míralo también en YKN TV",
+      "ykn_tv_promo_desc": "Además de ver en YKN Movies, ¡también puedes disfrutar de las transmisiones en vivo de los partidos de la Copa Mundial de la FIFA 2026 y otros canales premium de televisión deportiva directamente en YKN TV!",
+      "ykn_tv_promo_btn": "Abrir YKN TV"
     }
   },
   fr: {
     translation: {
       "home": "Accueil", "movies": "Films", "series": "Séries", "popular": "Populaire", "search": "Rechercher...", "watch_now": "Regarder maintenant", "trending": "Tendances",
-      "news": "Actualités", "live_sports": "Sports en direct"
+      "news": "Actualités", "live_sports": "Sports en direct",
+      "ykn_tv_promo_badge": "Partenaire officiel de streaming",
+      "ykn_tv_promo_title": "Regardez également sur YKN TV",
+      "ykn_tv_promo_desc": "En plus de regarder sur YKN Movies, vous pouvez également profiter des diffusions en direct des matchs de la Coupe du Monde de la FIFA 2026 et d'autres chaînes de télévision sportives premium complètes directement sur YKN TV !",
+      "ykn_tv_promo_btn": "Ouvrir YKN TV"
     }
   },
   de: {
     translation: {
       "home": "Home", "movies": "Filme", "series": "Serien", "popular": "Beliebt", "search": "Suche...", "watch_now": "Jetzt ansehen", "trending": "Angesagt",
-      "news": "News", "live_sports": "Live-Sport"
+      "news": "News", "live_sports": "Live-Sport",
+      "ykn_tv_promo_badge": "Offizieller Streaming-Partner",
+      "ykn_tv_promo_title": "Schauen Sie auch auf YKN TV",
+      "ykn_tv_promo_desc": "Zusätzlich zum Anschauen auf YKN Movies können Sie die Live-Übertragungen der Spiele der FIFA Fussball-Weltmeisterschaft 2026 und andere umfassende Premium-Sport-TV-Kanäle direkt auf YKN TV genießen!",
+      "ykn_tv_promo_btn": "YKN TV öffnen"
     }
   },
   zh: {
     translation: {
       "home": "首页", "movies": "电影", "series": "剧集", "popular": "热门", "search": "搜索...", "watch_now": "立即观看", "trending": "正在流行",
-      "news": "新闻", "live_sports": "体育直播"
+      "news": "新闻", "live_sports": "体育直播",
+      "ykn_tv_promo_badge": "官方流媒体合作伙伴",
+      "ykn_tv_promo_title": "也可以在 YKN TV 上观看",
+      "ykn_tv_promo_desc": "除了在 YKN Movies 上观看外，您还可以在 YKN TV 上直接享受 2026 年 FIFA 世界杯比赛 the 现场直播以及其他完整的优质体育电视栏目！",
+      "ykn_tv_promo_btn": "打开 YKN TV"
     }
   },
   ar: {
     translation: {
       "home": "الرئيسية", "movies": "أفلام", "series": "مسلسلات", "popular": "شائع", "search": "بحث...", "watch_now": "شاهد الآن", "trending": "الأكثر رواجاً",
-      "news": "أخبار", "live_sports": "رياضة مباشرة"
+      "news": "أخبار", "live_sports": "رياضة مباشرة",
+      "ykn_tv_promo_badge": "شريك البث الرسمي",
+      "ykn_tv_promo_title": "شاهد أيضاً على YKN TV",
+      "ykn_tv_promo_desc": "بالإضافة إلى المشاهدة على YKN Movies، يمكنك أيضاً الاستمتاع بالبث المباشر لمباريات كأس العالم فيفا 2026 وقنوات التلفزيون الرياضية الممتازة الأخرى مباشرة على YKN TV!",
+      "ykn_tv_promo_btn": "افتح YKN TV"
     }
   },
   ru: {
     translation: {
       "home": "Главная", "movies": "Фильмы", "series": "Сериалы", "popular": "Популярное", "search": "Поиск...", "watch_now": "Смотреть", "trending": "В тренде",
-      "news": "Новости", "live_sports": "Спорт LIVE"
+      "news": "Новости", "live_sports": "Спорт LIVE",
+      "ykn_tv_promo_badge": "Официальный стриминговый партнер",
+      "ykn_tv_promo_title": "Смотрите также на YKN TV",
+      "ykn_tv_promo_desc": "Помимо просмотра на YKN Movies, вы также можете наслаждаться прямыми трансляциями матчей Чемпионата мира по футболу FIFA 2026 и другими полными пакетами премиальных спортивных телеканалов прямо на YKN TV!",
+      "ykn_tv_promo_btn": "Открыть YKN TV"
     }
-  }
+  },
 };
 
 // Helper to get cookie value

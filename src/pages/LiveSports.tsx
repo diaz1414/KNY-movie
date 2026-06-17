@@ -2174,6 +2174,61 @@ const LiveSports: React.FC = () => {
                 </div>
               </div>
 
+              {!loading && !error && (
+                <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-r from-zinc-950/80 via-zinc-900/60 to-black/80 backdrop-blur-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-netflix-red/20 transition-all duration-300 shadow-[0_15px_35px_rgba(0,0,0,0.5)]">
+                  {/* Stadium background overlay for premium look */}
+                  <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
+                    <img src="/stadium_pitch_bg.png" alt="" className="w-full h-full object-cover" />
+                  </div>
+                  {/* Gold/Red highlight line on the left */}
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-netflix-red to-amber-500 rounded-l-3xl" />
+                  
+                  <div className="relative z-10 flex flex-col md:flex-row items-center gap-5 md:gap-7 flex-1">
+                    {/* Logo Container */}
+                    <div className="flex items-center gap-3 bg-white/[0.03] border border-white/5 p-3.5 rounded-2xl shadow-inner select-none shrink-0">
+                      <img
+                        src="/yknwc-logo.png"
+                        alt="YKN TV Logo"
+                        className="w-10 h-10 object-contain rounded-xl"
+                      />
+                      <div className="text-left font-outfit">
+                        <span className="text-lg md:text-xl font-black tracking-tighter uppercase italic text-white block">
+                          YKN <span className="text-[#D4AF37]">TV</span>
+                        </span>
+                        <span className="inline-block text-[8px] bg-gradient-to-r from-[#D4AF37] to-emerald-500 text-black font-black px-1.5 py-0.5 rounded tracking-widest uppercase mt-0.5">
+                          WC 2026
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Text Content */}
+                    <div className="text-center md:text-left space-y-1 md:space-y-1.5 max-w-xl">
+                      <span className="inline-block text-[9px] font-black bg-netflix-red/10 border border-netflix-red/20 text-netflix-red px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                        {t('ykn_tv_promo_badge')}
+                      </span>
+                      <h3 className="text-sm md:text-base font-black uppercase text-white tracking-wide font-outfit">
+                        {t('ykn_tv_promo_title')}
+                      </h3>
+                      <p className="text-xs md:text-sm text-zinc-400 font-medium leading-relaxed">
+                        {t('ykn_tv_promo_desc')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Button Container */}
+                  <div className="relative z-10 w-full md:w-auto flex justify-center shrink-0">
+                    <a
+                      href="https://worldcup2026-ykntv.diaww.my.id"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full md:w-auto px-6 py-3.5 rounded-xl bg-netflix-red text-white font-black text-xs md:text-sm uppercase tracking-wider hover:bg-red-700 hover:scale-105 active:scale-95 transition-all text-center cursor-pointer shadow-lg shadow-red-950/40 border border-red-500/20"
+                    >
+                      {t('ykn_tv_promo_btn')}
+                    </a>
+                  </div>
+                </div>
+              )}
+
               {loading ? (
                 <div className="py-20 flex justify-center">
                   <NetflixLoader />
