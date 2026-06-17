@@ -1335,7 +1335,16 @@ const LiveSports: React.FC = () => {
           });
         }
 
-        setMatches(mappedEvents);
+        // Sort matches: live first, upcoming second, ended last
+        const sortedEvents = [...mappedEvents].sort((a, b) => {
+          const statusA = getPlayableStatus(a, (k: string) => k).status;
+          const statusB = getPlayableStatus(b, (k: string) => k).status;
+          
+          const score = { live: 1, upcoming: 2, ended: 3 };
+          return score[statusA] - score[statusB];
+        });
+
+        setMatches(sortedEvents);
         setSportsTv(mappedSports);
         setLiveTv(mappedLive);
       } catch (err: any) {
