@@ -1233,18 +1233,6 @@ const LiveSports: React.FC = () => {
             axios.get<ChannelEvent[]>('https://raw.githubusercontent.com/movietrailersxxi-pixel/web/main/assets/tv-hiburan.dat')
           ]);
           eventsData = eventsRes.data;
-
-          // Try fetching World Cup games for score lookup on finished matches
-          let wcGamesData: any[] = [];
-          try {
-            const wcRes = await axios.get('https://worldcup26.ir/get/games');
-            if (wcRes && wcRes.data && wcRes.data.games) {
-              wcGamesData = wcRes.data.games;
-            }
-          } catch (wcErr) {
-            console.warn('Failed to fetch World Cup games for scoreboard syncing', wcErr);
-          }
-          setWcGames(wcGamesData);
           sportsData = sportsRes.data;
           liveData = liveRes.data;
         } catch (githubErr) {
@@ -1274,6 +1262,56 @@ const LiveSports: React.FC = () => {
             liveData = liveRes.data;
           }
         }
+
+        // Try fetching World Cup games for score lookup on finished matches from both primary and backup sources
+        let wcGamesData: any[] = [];
+        try {
+          const wcRes = await axios.get('https://worldcup26.ir/get/games');
+          if (wcRes && wcRes.data && wcRes.data.games) {
+            wcGamesData = wcRes.data.games;
+          }
+        } catch (wcErr) {
+          console.warn('Failed to fetch World Cup games for scoreboard syncing', wcErr);
+        }
+
+        // Backup Source: ESPN Scoreboard API
+        try {
+          const espnRes = await axios.get('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard');
+          if (espnRes && espnRes.data && espnRes.data.events) {
+            espnRes.data.events.forEach((event: any) => {
+              const comp = event.competitions?.[0];
+              if (comp) {
+                const homeComp = comp.competitors?.find((c: any) => c.homeAway === 'home');
+                const awayComp = comp.competitors?.find((c: any) => c.homeAway === 'away');
+                if (homeComp && awayComp) {
+                  const mappedGame = {
+                    home_team_name_en: homeComp.team?.displayName || homeComp.team?.name || '',
+                    away_team_name_en: awayComp.team?.displayName || awayComp.team?.name || '',
+                    home_score: homeComp.score,
+                    away_score: awayComp.score
+                  };
+                  
+                  // Avoid duplicating if already present in wcGamesData
+                  const homeNorm = normalizeTeamName(mappedGame.home_team_name_en);
+                  const awayNorm = normalizeTeamName(mappedGame.away_team_name_en);
+                  const exists = wcGamesData.some(g => {
+                    const h = normalizeTeamName(g.home_team_name_en || g.home_team_label || '');
+                    const a = normalizeTeamName(g.away_team_name_en || g.away_team_label || '');
+                    return (h === homeNorm && a === awayNorm) || (h === awayNorm && a === homeNorm);
+                  });
+                  
+                  if (!exists) {
+                    wcGamesData.push(mappedGame);
+                  }
+                }
+              }
+            });
+          }
+        } catch (espnErr) {
+          console.warn('Failed to fetch from backup ESPN scoreboard API', espnErr);
+        }
+
+        setWcGames(wcGamesData);
 
         // 1. Process Events (Match Schedule) - Deduplicated
         const seenEvents = new Set<string>();
