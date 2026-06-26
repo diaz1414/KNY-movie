@@ -40,7 +40,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        navigateFallbackDenylist: [/^\/watch\.html/],
+        navigateFallbackDenylist: [/^\/watch/],
       }
     }),
     {
