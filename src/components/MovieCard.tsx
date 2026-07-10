@@ -37,18 +37,28 @@ const MovieCard: React.FC<{ movie: UnifiedMovie; inRow?: boolean }> = ({ movie, 
 
   const showComingSoon = isComingSoon(movie.releaseDate);
 
+const prefetchWatchPage = () => {
+  const link = document.createElement('link');
+  link.rel = 'prefetch';
+  link.href = '/watch.html';
+  link.as = 'document';
+  document.head.appendChild(link);
+};
+
   return (
     <motion.div
-      whileHover={{ scale: 1.06, y: -6 }}
-      whileTap={{ scale: 0.96 }}
-      transition={{ type: 'spring', damping: 18, stiffness: 220 }}
-      className={`relative group cursor-pointer rounded-2xl overflow-hidden shadow-2xl bg-[var(--bg-tertiary)] border border-white/5 transition-all duration-300 ${
-        inRow 
-          ? 'w-[var(--card-width)] h-[var(--card-height)] shrink-0' 
-          : 'w-full aspect-[2/3]'
-      }`}
-      onClick={handleClick}
-    >
+  whileHover={{ scale: 1.06, y: -6 }}
+  whileTap={{ scale: 0.96 }}
+  transition={{ type: 'spring', damping: 18, stiffness: 220 }}
+  className={`relative group cursor-pointer rounded-2xl overflow-hidden shadow-2xl bg-[var(--bg-tertiary)] border border-white/5 transition-all duration-300 ${
+    inRow 
+      ? 'w-[var(--card-width)] h-[var(--card-height)] shrink-0' 
+      : 'w-full aspect-[2/3]'
+  }`}
+  onMouseEnter={prefetchWatchPage}
+  onTouchStart={prefetchWatchPage}
+  onClick={handleClick}
+>
       {showComingSoon && (
         <div className="absolute top-3 left-3 bg-black/85 backdrop-blur-md border border-amber-500/30 text-amber-400 text-[9px] font-black px-2.5 py-1.5 rounded-lg uppercase tracking-wider shadow-lg flex items-center gap-1.5 z-20">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
