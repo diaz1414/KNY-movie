@@ -39,7 +39,11 @@ export default defineConfig({
       ]
     },
     workbox: {
-  navigateFallbackDenylist: [/^\/api\//],
+  navigateFallbackDenylist: [
+  /^\/api\//,
+  /^\/watch\.html/,
+  /^\/watch/,
+],
   runtimeCaching: [
     {
       urlPattern: ({ url }) => url.pathname === '/watch.html',
