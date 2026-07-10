@@ -83,7 +83,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, movieType, onClose }) 
   const handleWatch = () => {
     const cleanId = activeMovieId ? activeMovieId.replace(/^(movie|series|tv)-/, '') : '';
     const type = movie?.type || movieType || (activeMovieId?.startsWith('tv-') || activeMovieId?.startsWith('series-') ? 'series' : 'movie');
-    navigateWithAdRedirect(`/watch.html?id=${cleanId}&type=${type}`);
+    navigateWithAdRedirect(`/watch?id=${cleanId}&type=${type}`);
   };
 
   const handlePersonClick = (personId: number) => {

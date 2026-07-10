@@ -9,7 +9,7 @@ const MovieCard: React.FC<{ movie: UnifiedMovie; inRow?: boolean }> = ({ movie, 
   const { t } = useTranslation();
   
   const handleClick = () => {
-    navigateWithAdRedirect(`/watch.html?id=${movie.id}&type=${movie.type}`);
+    navigateWithAdRedirect(`/watch?id=${movie.id}&type=${movie.type}`);
   };
 
   const parseLocalDate = (dateStr: string): Date | null => {

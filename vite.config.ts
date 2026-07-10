@@ -70,18 +70,7 @@ export default defineConfig({
     },
   ],
 }
-  }), {
-    name: 'rewrite-watch',
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        if (req.url && req.url.startsWith('/watch') && !req.url.includes('.html')) {
-          const url = new URL(req.url, `http://${req.headers.host}`);
-          req.url = '/watch.html' + url.search;
-        }
-        next();
-      });
-    }
-  }],
+  })],
   build: {
     rollupOptions: {
       input: {

@@ -10,7 +10,7 @@ const Hero: React.FC<{ movie?: UnifiedMovie }> = ({ movie }) => {
 
   const handleWatch = () => {
     if (movie) {
-      navigateWithAdRedirect(`/watch.html?id=${movie.id}`);
+      navigateWithAdRedirect(`/watch?id=${movie.id}`);
     }
   };
 

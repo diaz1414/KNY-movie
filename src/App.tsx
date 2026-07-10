@@ -8,6 +8,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import Watch from './pages/Watch';
 import Genre from './pages/Genre';
 import SeriesGenre from './pages/SeriesGenre';
 import Maintenance from './pages/Maintenance';
@@ -26,6 +27,7 @@ import UpdateModal from './components/UpdateModal';
 
 const App: React.FC = () => {
   const [isAndroidOffline, setIsAndroidOffline] = useState(false);
+  const isWatchRoute = window.location.pathname === '/watch' || window.location.pathname.startsWith('/watch/');
 
   useEffect(() => {
     if (isAndroid()) {
@@ -96,12 +98,14 @@ const App: React.FC = () => {
   return (
     <ThemeProvider>
       {isAndroid() && <UpdateModal />}
-      <OfflineOverlay />
-      <NetflixIntro />
+      {!isWatchRoute && <OfflineOverlay />}
+      {!isWatchRoute && <NetflixIntro />}
       <Router>
-        <ScrollToTop />
+        {!isWatchRoute && <ScrollToTop />}
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/watch" element={<Watch />} />
+          <Route path="/watch/*" element={<Watch />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/terms" element={<Terms />} />
