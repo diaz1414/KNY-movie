@@ -5,6 +5,7 @@ import { movieService, type UnifiedMovieDetail, type UnifiedMovie, getLanguageNa
 import { useTranslation } from 'react-i18next';
 import NetflixLoader from './NetflixLoader';
 import { useNavigate } from 'react-router-dom';
+import { navigateWithAdRedirect } from '../utils/adRedirect';
 
 interface MovieModalProps {
   movieId: string | null;
@@ -82,7 +83,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movieId, movieType, onClose }) 
   const handleWatch = () => {
     const cleanId = activeMovieId ? activeMovieId.replace(/^(movie|series|tv)-/, '') : '';
     const type = movie?.type || movieType || (activeMovieId?.startsWith('tv-') || activeMovieId?.startsWith('series-') ? 'series' : 'movie');
-    window.location.href = `/watch.html?id=${cleanId}&type=${type}`;
+    navigateWithAdRedirect(`/watch.html?id=${cleanId}&type=${type}`);
   };
 
   const handlePersonClick = (personId: number) => {

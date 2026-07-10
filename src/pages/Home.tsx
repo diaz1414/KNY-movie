@@ -14,6 +14,7 @@ import MovieModal from '../components/MovieModal';
 import AdBanner from '../components/AdBanner';
 import RandomPickModal from '../components/RandomPickModal';
 import ReportModal from '../components/ReportModal';
+import { navigateWithAdRedirect } from '../utils/adRedirect';
 
 const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -347,7 +348,7 @@ const Home: React.FC = () => {
                         </div>
 
                         <div
-                          onClick={() => window.location.href = `/watch.html?id=${item.id}${item.type === 'tv' ? `&s=${item.season}&e=${item.episode}` : ''}`}
+                          onClick={() => navigateWithAdRedirect(`/watch.html?id=${item.id}${item.type === 'tv' ? `&s=${item.season}&e=${item.episode}` : ''}`)}
                           className="group relative w-full md:w-[450px] aspect-[16/9] rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-netflix-red transition-all duration-500 shadow-2xl"
                         >
                           <img src={item.poster} alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />

@@ -3,12 +3,13 @@ import { motion } from 'framer-motion';
 import { Star, Play } from 'lucide-react';
 import type { UnifiedMovie } from '../services/api';
 import { useTranslation } from 'react-i18next';
+import { navigateWithAdRedirect } from '../utils/adRedirect';
 
 const MovieCard: React.FC<{ movie: UnifiedMovie; inRow?: boolean }> = ({ movie, inRow = false }) => {
   const { t } = useTranslation();
   
   const handleClick = () => {
-    window.location.href = `/watch.html?id=${movie.id}&type=${movie.type}`;
+    navigateWithAdRedirect(`/watch.html?id=${movie.id}&type=${movie.type}`);
   };
 
   const parseLocalDate = (dateStr: string): Date | null => {

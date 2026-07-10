@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Play, Info } from 'lucide-react';
 import type { UnifiedMovie } from '../services/api';
+import { navigateWithAdRedirect } from '../utils/adRedirect';
 
 const Hero: React.FC<{ movie?: UnifiedMovie }> = ({ movie }) => {
   const { t } = useTranslation();
 
   const handleWatch = () => {
     if (movie) {
-      window.location.href = `/watch.html?id=${movie.id}`;
+      navigateWithAdRedirect(`/watch.html?id=${movie.id}`);
     }
   };
 
