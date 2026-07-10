@@ -38,6 +38,8 @@ const MovieCard: React.FC<{ movie: UnifiedMovie; inRow?: boolean }> = ({ movie, 
   const showComingSoon = isComingSoon(movie.releaseDate);
 
 const prefetchWatchPage = () => {
+  if (document.querySelector('link[href="/watch.html"]')) return;
+
   const link = document.createElement('link');
   link.rel = 'prefetch';
   link.href = '/watch.html';
