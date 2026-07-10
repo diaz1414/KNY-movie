@@ -39,8 +39,35 @@ export default defineConfig({
       ]
     },
     workbox: {
-      navigateFallbackDenylist: [/^\/watch/],
-    }
+  navigateFallbackDenylist: [/^\/api\//],
+  runtimeCaching: [
+    {
+      urlPattern: ({ url }) => url.pathname === '/watch.html',
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'watch-html',
+        networkTimeoutSeconds: 2,
+        expiration: {
+          maxEntries: 3,
+          maxAgeSeconds: 60 * 60 * 24,
+        },
+      },
+    },
+    {
+      urlPattern: ({ request }) =>
+        request.destination === 'script' ||
+        request.destination === 'style',
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'watch-assets',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 60 * 60 * 24 * 7,
+        },
+      },
+    },
+  ],
+}
   }), {
     name: 'rewrite-watch',
     configureServer(server) {
