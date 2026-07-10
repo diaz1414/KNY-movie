@@ -4,8 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'path'
 
-import { cloudflare } from "@cloudflare/vite-plugin";
-
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), VitePWA({
@@ -83,7 +81,7 @@ export default defineConfig({
         next();
       });
     }
-  }, cloudflare()],
+  }],
   build: {
     rollupOptions: {
       input: {
