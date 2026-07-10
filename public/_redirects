@@ -1,1 +1,2 @@
-# No redirects
+/watch /watch.html 200
+/watch/* /watch.html 200
