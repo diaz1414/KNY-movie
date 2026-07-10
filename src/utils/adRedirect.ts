@@ -1,5 +1,5 @@
 const AD_REDIRECT_URL = 'https://www.effectivecpmnetwork.com/iadikppi?key=1ef3c31f6d59e0b786859466ce1bb939';
-const AD_COOLDOWN_MS = 15 * 60 * 1000;
+const AD_COOLDOWN_MS = 45 * 60 * 1000;
 const AD_LAST_SHOWN_KEY = 'ykn_last_ad_redirect_at';
 
 const shouldShowAdRedirect = () => {
