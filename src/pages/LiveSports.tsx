@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import axios from 'axios';
-import { supabase } from '../services/supabase';
+import { isSupabaseEnabled, supabase } from '../services/supabase';
 import { Trophy, Play, AlertCircle, ArrowLeft, Tv, ShieldAlert, Radio, Calendar, Clock, Film, Share2, Check, Award, Bell, Send } from 'lucide-react';
 import NetflixLoader from '../components/NetflixLoader';
 import { CustomPlayer } from '../components/CustomPlayer';
@@ -902,6 +902,8 @@ const LiveSports: React.FC = () => {
     // Reset messages feed for this channel/match room
     setChatMessages([]);
 
+    if (!isSupabaseEnabled) return;
+
     const channelId = `room-${activeStream.id}`;
     const channel = supabase.channel(channelId, {
       config: {
@@ -962,9 +964,6 @@ const LiveSports: React.FC = () => {
     if (e) e.preventDefault();
     if (!chatInput.trim() || !chatNickname.trim() || !activeStream) return;
 
-    const channelId = `room-${activeStream.id}`;
-    const channel = supabase.channel(channelId);
-
     const messageId = Math.random().toString();
     const payload = {
       id: messageId,
@@ -976,6 +975,18 @@ const LiveSports: React.FC = () => {
         hour12: false
       })
     };
+
+    if (!isSupabaseEnabled) {
+      setChatMessages(prev => [...prev, {
+        ...payload,
+        color: getUsernameColor(payload.user)
+      }].slice(-100));
+      setChatInput('');
+      return;
+    }
+
+    const channelId = `room-${activeStream.id}`;
+    const channel = supabase.channel(channelId);
 
     channel.send({
       type: 'broadcast',
@@ -990,6 +1001,18 @@ const LiveSports: React.FC = () => {
 
   const sendEmojiReaction = (emoji: string) => {
     if (!activeStream) return;
+
+    if (!isSupabaseEnabled) {
+      const id = Math.random().toString();
+      const x = Math.random() * 80 + 10;
+      const y = Math.random() * 20 + 75;
+      setFloatingEmojis(prev => [...prev, { id, emoji, x, y }]);
+
+      setTimeout(() => {
+        setFloatingEmojis(prev => prev.filter(e => e.id !== id));
+      }, 2000);
+      return;
+    }
 
     const channelId = `room-${activeStream.id}`;
     const channel = supabase.channel(channelId);
@@ -1059,6 +1082,11 @@ const LiveSports: React.FC = () => {
 
   // Real-time tracking of viewers using Supabase Presence
   useEffect(() => {
+    if (!isSupabaseEnabled) {
+      setViewerCounts({});
+      return;
+    }
+
     const channel = supabase.channel('global-live-sports-presence');
 
     channel

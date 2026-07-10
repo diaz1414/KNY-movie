@@ -1,6 +1,6 @@
 import axios from 'axios';
 import i18n from '../i18n';
-import { supabase } from './supabase';
+import { isSupabaseEnabled, supabase } from './supabase';
 
 const getLangCode = () => {
   const lng = i18n.language || 'en';
@@ -128,8 +128,17 @@ const api = axios.create({
   }
 });
 
+const getTmdbPopularMovies = async (page: number = 1): Promise<UnifiedMovie[]> => {
+  const res = await api.get('/movie/popular', { params: { language: getLangCode(), region: 'US', page } });
+  return res.data.results.map(normalizeTMDB);
+};
+
 export const movieService = {
   getPopularMovies: async (page: number = 1) => {
+    if (!isSupabaseEnabled) {
+      return getTmdbPopularMovies(page);
+    }
+
     try {
       // 1. Fetch top viewed items from Supabase
       // Minimum 5 views to be considered "trending" — needs real engagement, not just 1-2 accidental views
@@ -174,8 +183,7 @@ export const movieService = {
       return combined.slice(0, 20);
     } catch (err) {
       console.error('Failed to get popular/trending movies from Supabase:', err);
-      const res = await api.get('/movie/popular', { params: { language: getLangCode(), region: 'US', page } });
-      return res.data.results.map(normalizeTMDB);
+      return getTmdbPopularMovies(page);
     }
   },
 
