@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Home from './pages/Home';
 import Movies from './pages/Movies';
 import Series from './pages/Series';
@@ -122,6 +123,7 @@ const App: React.FC = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
+      <Analytics />
     </ThemeProvider>
   );
 };
