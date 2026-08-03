@@ -59,7 +59,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
   const currentMovie = movies[currentIndex];
 
   const handleWatch = () => {
-    navigateWithAdRedirect(`/watch.html?id=${currentMovie.id}&type=${currentMovie.type}`);
+    navigateWithAdRedirect(`/watch?id=${currentMovie.id}&type=${currentMovie.type}`);
   };
 
   const { scrollY } = useScroll();

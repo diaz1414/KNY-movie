@@ -4,8 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'path'
 
-import { cloudflare } from "@cloudflare/vite-plugin";
-
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), VitePWA({
@@ -39,20 +37,40 @@ export default defineConfig({
       ]
     },
     workbox: {
-      navigateFallbackDenylist: [/^\/watch/],
-    }
-  }), {
-    name: 'rewrite-watch',
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        if (req.url && req.url.startsWith('/watch') && !req.url.includes('.html')) {
-          const url = new URL(req.url, `http://${req.headers.host}`);
-          req.url = '/watch.html' + url.search;
-        }
-        next();
-      });
-    }
-  }, cloudflare()],
+  navigateFallbackDenylist: [
+  /^\/api\//,
+  /^\/watch\.html/,
+  /^\/watch/,
+],
+  runtimeCaching: [
+    {
+      urlPattern: ({ url }) => url.pathname === '/watch.html',
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'watch-html',
+        networkTimeoutSeconds: 2,
+        expiration: {
+          maxEntries: 3,
+          maxAgeSeconds: 60 * 60 * 24,
+        },
+      },
+    },
+    {
+      urlPattern: ({ request }) =>
+        request.destination === 'script' ||
+        request.destination === 'style',
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'watch-assets',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 60 * 60 * 24 * 7,
+        },
+      },
+    },
+  ],
+}
+  })],
   build: {
     rollupOptions: {
       input: {
