@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, AlertCircle } from 'lucide-react';
 
-const CURRENT_VERSION = '1.0.3'; // Manually track version
+const CURRENT_ANDROID_SHELL_VERSION = '1.0.3'; // Manually track native APK shell version
 const VERSION_CHECK_URL = 'https://movies.ykn.my.id/version.json';
 
 interface UpdateInfo {
   version: string;
+  androidVersion?: string;
   downloadUrl: string;
   changelog: string;
   isCritical: boolean;
+  requiresApkUpdate?: boolean;
 }
 
 const UpdateModal: React.FC = () => {
@@ -21,9 +23,10 @@ const UpdateModal: React.FC = () => {
       try {
         const response = await fetch(`${VERSION_CHECK_URL}?t=${Date.now()}`);
         const data = await response.json();
+        const nextAndroidVersion = data.androidVersion || data.version;
         
-        if (data.version !== CURRENT_VERSION) {
-          setUpdateInfo(data);
+        if (data.requiresApkUpdate && nextAndroidVersion !== CURRENT_ANDROID_SHELL_VERSION) {
+          setUpdateInfo({ ...data, version: nextAndroidVersion });
           setIsVisible(true);
         }
       } catch (error) {

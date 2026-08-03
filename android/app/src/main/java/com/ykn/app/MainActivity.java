@@ -33,7 +33,9 @@ public class MainActivity extends BridgeActivity {
         return host != null && (
             host.equals("movies.ykn.my.id") ||
             host.endsWith(".movies.ykn.my.id") ||
-            host.endsWith(".ykn.my.id")
+            host.endsWith(".ykn.my.id") ||
+            host.equals("diaww.my.id") ||
+            host.endsWith(".diaww.my.id")
         );
     }
 
