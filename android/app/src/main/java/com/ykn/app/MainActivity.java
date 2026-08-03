@@ -1,6 +1,7 @@
 package com.ykn.app;
 
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebChromeClient;
@@ -23,6 +24,19 @@ public class MainActivity extends BridgeActivity {
         "propellerads.com", "creative.ak.kickads.com", "adservice.google"
     );
 
+    private boolean isAllowedAppUrl(String url) {
+        if (url.startsWith("capacitor://") || url.startsWith("http://localhost")) {
+            return true;
+        }
+
+        String host = Uri.parse(url).getHost();
+        return host != null && (
+            host.equals("movies.ykn.my.id") ||
+            host.endsWith(".movies.ykn.my.id") ||
+            host.endsWith(".ykn.my.id")
+        );
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +53,7 @@ public class MainActivity extends BridgeActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                if (url.contains("diaww.my.id") || url.startsWith("capacitor://") || url.startsWith("http://localhost")) {
+                if (isAllowedAppUrl(url)) {
                     return false;
                 }
                 return true; 

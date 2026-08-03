@@ -66,7 +66,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, defaultMovie
     try {
       const payload = {
         username: 'YKN Report Bot',
-        avatar_url: 'https://yknmovies.diaww.my.id/logo.png',
+        avatar_url: 'https://movies.ykn.my.id/logo.png',
         embeds: [{
           title: `🚨 ${activeOpt.label}`,
           description: [

@@ -6,12 +6,12 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     cleartext: true,
-    hostname: 'id.yknmovies.diaww.my.id',
+    hostname: 'movies.ykn.my.id',
     androidScheme: 'https',
     allowNavigation: [
-      'yknmovies.diaww.my.id',
-      'id.yknmovies.diaww.my.id',
-      '*.diaww.my.id'
+      'movies.ykn.my.id',
+      '*.movies.ykn.my.id',
+      '*.ykn.my.id'
     ]
   },
   android: {

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Download, AlertCircle } from 'lucide-react';
 
 const CURRENT_VERSION = '1.0.3'; // Manually track version
-const VERSION_CHECK_URL = 'https://yknmovies.diaww.my.id/version.json';
+const VERSION_CHECK_URL = 'https://movies.ykn.my.id/version.json';
 
 interface UpdateInfo {
   version: string;
