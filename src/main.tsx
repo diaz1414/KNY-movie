@@ -5,11 +5,17 @@ import './index.css'
 import './i18n'
 import { ThemeProvider } from './context/ThemeContext'
 import { RegionProvider } from './context/RegionContext'
+import { isAndroid } from './utils/platform'
 
 import { registerSW } from 'virtual:pwa-register'
 
 const updateSW = registerSW({
   onNeedRefresh() {
+    if (isAndroid()) {
+      updateSW(true);
+      return;
+    }
+
     if (confirm('New content available. Reload?')) {
       updateSW(true);
     }
