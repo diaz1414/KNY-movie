@@ -1,17 +1,26 @@
 package com.ykn.app;
 
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import com.getcapacitor.BridgeActivity;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
@@ -94,6 +103,28 @@ public class MainActivity extends BridgeActivity {
         return isMainFrame;
     }
 
+    private int dp(float value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    private GradientDrawable roundedBackground(int color, float radiusDp) {
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(color);
+        background.setCornerRadius(dp(radiusDp));
+        return background;
+    }
+
+    private TextView createDialogText(String text, float sizeSp, int color, int style) {
+        TextView view = new TextView(this);
+        view.setText(text);
+        view.setTextSize(sizeSp);
+        view.setTextColor(color);
+        view.setGravity(Gravity.CENTER);
+        view.setTypeface(Typeface.DEFAULT, style);
+        view.setIncludeFontPadding(true);
+        return view;
+    }
+
     private void showAndroidSessionAdGate(WebView webView) {
         if (androidSessionAdGatePassed || androidSessionAdGateShowing || isFinishing()) {
             return;
@@ -102,17 +133,103 @@ public class MainActivity extends BridgeActivity {
         androidSessionAdGateShowing = true;
         webView.setVisibility(View.INVISIBLE);
 
-        new AlertDialog.Builder(this)
-            .setTitle("YKN Movie")
-            .setMessage("Tekan OK untuk membuka sponsor sekali sebelum masuk.")
-            .setCancelable(false)
-            .setPositiveButton("OK", (dialog, which) -> {
-                androidSessionAdGatePassed = true;
-                androidSessionAdGateShowing = false;
-                webView.setVisibility(View.VISIBLE);
-                openExternalUrl(AD_REDIRECT_URL);
-            })
-            .show();
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setGravity(Gravity.CENTER_HORIZONTAL);
+        card.setPadding(dp(26), dp(28), dp(26), dp(24));
+
+        GradientDrawable cardBackground = new GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            new int[] { Color.rgb(18, 18, 22), Color.rgb(5, 5, 8) }
+        );
+        cardBackground.setCornerRadius(dp(28));
+        cardBackground.setStroke(dp(1), Color.argb(95, 229, 9, 20));
+        card.setBackground(cardBackground);
+
+        TextView logo = createDialogText("YKN", 22, Color.WHITE, Typeface.BOLD);
+        GradientDrawable logoBackground = roundedBackground(Color.rgb(229, 9, 20), 20);
+        logo.setBackground(logoBackground);
+        LinearLayout.LayoutParams logoParams = new LinearLayout.LayoutParams(dp(72), dp(58));
+        logoParams.bottomMargin = dp(18);
+        card.addView(logo, logoParams);
+
+        TextView title = createDialogText("Continue to YKN", 24, Color.WHITE, Typeface.BOLD);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        titleParams.bottomMargin = dp(10);
+        card.addView(title, titleParams);
+
+        TextView message = createDialogText(
+            "Please open our sponsor once to start this app session.",
+            15,
+            Color.argb(210, 255, 255, 255),
+            Typeface.NORMAL
+        );
+        message.setLineSpacing(dp(2), 1.0f);
+        LinearLayout.LayoutParams messageParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        messageParams.bottomMargin = dp(20);
+        card.addView(message, messageParams);
+
+        TextView note = createDialogText(
+            "After that, player redirects stay blocked until you restart the app.",
+            12,
+            Color.argb(135, 255, 255, 255),
+            Typeface.NORMAL
+        );
+        note.setLineSpacing(dp(2), 1.0f);
+        LinearLayout.LayoutParams noteParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        noteParams.bottomMargin = dp(22);
+        card.addView(note, noteParams);
+
+        TextView button = createDialogText("OPEN SPONSOR", 14, Color.WHITE, Typeface.BOLD);
+        button.setLetterSpacing(0.08f);
+        button.setPadding(dp(18), dp(15), dp(18), dp(15));
+        GradientDrawable buttonBackground = roundedBackground(Color.rgb(229, 9, 20), 999);
+        button.setBackground(buttonBackground);
+        button.setOnClickListener(view -> {
+            androidSessionAdGatePassed = true;
+            androidSessionAdGateShowing = false;
+            webView.setVisibility(View.VISIBLE);
+            dialog.dismiss();
+            openExternalUrl(AD_REDIRECT_URL);
+        });
+        LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        card.addView(button, buttonParams);
+
+        dialog.setContentView(card);
+        dialog.setOnCancelListener(cancelledDialog -> {
+            androidSessionAdGateShowing = false;
+            if (!androidSessionAdGatePassed) {
+                webView.setVisibility(View.INVISIBLE);
+            }
+        });
+        dialog.show();
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams attrs = window.getAttributes();
+            attrs.dimAmount = 0.86f;
+            window.setAttributes(attrs);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            int width = Math.min(getResources().getDisplayMetrics().widthPixels - dp(42), dp(430));
+            window.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT);
+        }
     }
 
     @Override

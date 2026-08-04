@@ -104,7 +104,7 @@ const YKNInstallBanner: React.FC = () => {
               </button>
             ) : (
               <a
-                href="https://sfile.co/Vkc5mstPBny" target="_blank"
+                href="https://sfile.co/SEzTlp0GbOG" target="_blank"
                 
                 className="px-12 py-5 rounded-2xl bg-white text-black font-black flex items-center justify-center gap-4 hover:bg-netflix-red hover:text-white transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl shadow-white/5 uppercase tracking-widest text-sm"
               >
