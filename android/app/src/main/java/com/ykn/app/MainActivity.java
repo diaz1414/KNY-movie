@@ -1,5 +1,6 @@
 package com.ykn.app;
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,6 +17,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends BridgeActivity {
+    private static final String AD_REDIRECT_HOST = "www.effectivecpmnetwork.com";
+    private static final String AD_REDIRECT_PATH = "/iadikppi";
+    private static final String AD_REDIRECT_KEY = "1ef3c31f6d59e0b786859466ce1bb939";
     
     private static final List<String> AD_DOMAINS = Arrays.asList(
         "adsterra.com", "doubleclick.net", "googlesyndication.com",
@@ -39,6 +43,41 @@ public class MainActivity extends BridgeActivity {
         );
     }
 
+    private boolean isAllowedAdRedirectUrl(String url) {
+        Uri uri = Uri.parse(url);
+        String host = uri.getHost();
+        String path = uri.getPath();
+        String key = uri.getQueryParameter("key");
+
+        return "https".equalsIgnoreCase(uri.getScheme()) &&
+            AD_REDIRECT_HOST.equalsIgnoreCase(host) &&
+            AD_REDIRECT_PATH.equals(path) &&
+            AD_REDIRECT_KEY.equals(key);
+    }
+
+    private void openExternalUrl(String url) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception ignored) {
+            // If Android cannot find a handler, keep the app on the current screen.
+        }
+    }
+
+    private boolean handleUrlOverride(String url, boolean isMainFrame) {
+        if (isAllowedAppUrl(url)) {
+            return false;
+        }
+
+        if (isAllowedAdRedirectUrl(url)) {
+            openExternalUrl(url);
+            return true;
+        }
+
+        return isMainFrame;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,10 +94,12 @@ public class MainActivity extends BridgeActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                if (isAllowedAppUrl(url)) {
-                    return false;
-                }
-                return true; 
+                return handleUrlOverride(url, request.isForMainFrame());
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return handleUrlOverride(url, true);
             }
 
             @Override

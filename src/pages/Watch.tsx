@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 const Watch: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSlow, setIsSlow] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [reloadKey, setReloadKey] = useState(0);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const watchSrc = useMemo(() => {
     return `/watch.html${window.location.search}${window.location.hash}`;
@@ -27,6 +28,40 @@ const Watch: React.FC = () => {
       window.removeEventListener('offline', handleOffline);
     };
   }, [isLoaded, reloadKey]);
+
+  useEffect(() => {
+    let redirectGuardUntil = 0;
+    const REDIRECT_GUARD_MS = 8000;
+
+    const markIframeInteraction = () => {
+      if (document.activeElement === iframeRef.current) {
+        redirectGuardUntil = Date.now() + REDIRECT_GUARD_MS;
+      }
+    };
+
+    const clearIframeInteraction = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Node && iframeRef.current?.contains(target)) return;
+      redirectGuardUntil = 0;
+    };
+
+    const blockRecentIframeRedirect = (event: BeforeUnloadEvent) => {
+      if (Date.now() >= redirectGuardUntil) return;
+
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('blur', markIframeInteraction);
+    window.addEventListener('beforeunload', blockRecentIframeRedirect);
+    document.addEventListener('pointerdown', clearIframeInteraction, true);
+
+    return () => {
+      window.removeEventListener('blur', markIframeInteraction);
+      window.removeEventListener('beforeunload', blockRecentIframeRedirect);
+      document.removeEventListener('pointerdown', clearIframeInteraction, true);
+    };
+  }, []);
 
   const retry = () => {
     setIsLoaded(false);
@@ -76,6 +111,7 @@ const Watch: React.FC = () => {
         </section>
       )}
       <iframe
+        ref={iframeRef}
         key={reloadKey}
         title="YKN Watch Player"
         src={watchSrc}

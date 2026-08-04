@@ -157,19 +157,105 @@
 
         // --- ANTI-REDIRECT & ANTI-POPUP SYSTEM ---
         (function () {
+            const AD_REDIRECT_URL = 'https://www.effectivecpmnetwork.com/iadikppi?key=1ef3c31f6d59e0b786859466ce1bb939';
+            const PLAYER_REDIRECT_GUARD_MS = 8000;
             const originalOpen = window.open;
-            window.open = function () {
-                console.log("Blocked a popup attempt.");
+            let playerRedirectGuardUntil = 0;
+
+            function normalizeUrl(url) {
+                try {
+                    return new URL(url, window.location.href).href;
+                } catch (e) {
+                    return '';
+                }
+            }
+
+            function isAllowedAdRedirect(url) {
+                return normalizeUrl(url) === AD_REDIRECT_URL;
+            }
+
+            window.open = function (url, target, features) {
+                if (isAllowedAdRedirect(url)) {
+                    return originalOpen.call(window, url, target || '_blank', features || 'noopener,noreferrer');
+                }
+
+                console.log("Blocked a popup attempt.", url || '');
                 return null;
             };
 
-            // Prevent programmatic top-level navigation from iframes
-            // This is a second layer of defense alongside the sandbox attribute
-            window.onbeforeunload = function () {
-                // If the app is redirecting itself (e.g. back to home), allow it.
-                // But if it's an external domain, we might want to alert or block.
-                // However, onbeforeunload is limited.
+            function markPlayerInteraction() {
+                playerRedirectGuardUntil = Date.now() + PLAYER_REDIRECT_GUARD_MS;
+            }
+
+            function clearPlayerInteraction() {
+                playerRedirectGuardUntil = 0;
+            }
+
+            window.armPlayerClickShield = function (isReady) {
+                const shield = document.getElementById('player-click-shield');
+                if (!shield) return;
+
+                shield.dataset.ready = isReady ? 'true' : 'false';
+                shield.style.display = 'block';
+                shield.style.pointerEvents = 'auto';
             };
+
+            window.disarmPlayerClickShield = function (event) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                const shield = document.getElementById('player-click-shield');
+                if (!shield || shield.dataset.ready !== 'true') return;
+
+                shield.style.display = 'none';
+                shield.style.pointerEvents = 'none';
+                markPlayerInteraction();
+            };
+
+            window.addEventListener('blur', () => {
+                if (document.activeElement && document.activeElement.id === 'player') {
+                    markPlayerInteraction();
+                }
+            });
+
+            window.addEventListener('beforeunload', (event) => {
+                if (Date.now() >= playerRedirectGuardUntil) return;
+
+                event.preventDefault();
+                event.returnValue = '';
+                return '';
+            });
+
+            document.addEventListener('pointerdown', (event) => {
+                const target = event.target;
+                if (target instanceof Element && !target.closest('#player-wrapper')) {
+                    clearPlayerInteraction();
+                }
+            }, true);
+
+            document.addEventListener('click', (event) => {
+                const target = event.target;
+                const anchor = target instanceof Element ? target.closest('a[href]') : null;
+                if (!anchor) return;
+
+                const href = anchor.getAttribute('href') || '';
+                const normalized = normalizeUrl(href);
+                if (!normalized || normalized.startsWith(window.location.origin) || isAllowedAdRedirect(normalized)) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+                console.log("Blocked an external navigation attempt.", href);
+            }, true);
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const shield = document.getElementById('player-click-shield');
+                if (!shield) return;
+
+                shield.addEventListener('pointerdown', window.disarmPlayerClickShield);
+                shield.addEventListener('click', window.disarmPlayerClickShield);
+            });
 
             // Override location for current window to prevent hijacking
             // Note: This is tricky, but we can at least block some common patterns
@@ -353,6 +439,8 @@
                         </div>
                     </div>
                 </div>
+                <div id="player-click-shield" class="absolute inset-0 z-[6] cursor-pointer bg-transparent"
+                    aria-hidden="true" style="display: none;" data-ready="false"></div>
                 <iframe id="player" class="w-full h-full border-none transition-opacity duration-400"
                     allow="fullscreen *; autoplay *; encrypted-media *; picture-in-picture *" allowfullscreen
                     webkitallowfullscreen mozallowfullscreen referrerpolicy="no-referrer" loading="lazy"></iframe>
@@ -1274,6 +1362,7 @@
                     const loader = document.querySelector('.player-loader');
 
                     if (!player) return;
+                    if (window.armPlayerClickShield) window.armPlayerClickShield(false);
 
                     // Show loader for smooth transition & block clicks
                     if (loader) {
@@ -1289,20 +1378,22 @@
                             loader.style.opacity = '0';
                             loader.style.pointerEvents = 'none';
                         }
+                        if (window.armPlayerClickShield) window.armPlayerClickShield(true);
                         player.style.opacity = '1';
                     }, 6000);
 
                     // Small delay to let the animation start nicely
                     setTimeout(() => {
-                        player.src = url;
                         player.onload = () => {
                             clearTimeout(safetyTimeout);
                             if (loader) {
                                 loader.style.opacity = '0';
                                 loader.style.pointerEvents = 'none';
                             }
+                            if (window.armPlayerClickShield) window.armPlayerClickShield(true);
                             player.style.opacity = '1';
                         };
+                        player.src = url;
                     }, 400);
                 }
 
