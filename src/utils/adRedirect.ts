@@ -24,17 +24,14 @@ const shouldShowAdRedirect = () => {
 export const navigateWithAdRedirect = (targetUrl: string) => {
   if (typeof window === 'undefined') return;
 
+  if (isAndroidWebView()) {
+    window.location.href = targetUrl;
+    return;
+  }
+
   if (shouldShowAdRedirect()) {
     window.sessionStorage.setItem(AD_LAST_SHOWN_KEY, String(Date.now()));
-    const adWindow = window.open(AD_REDIRECT_URL, '_blank', 'noopener,noreferrer');
-
-    if (!adWindow && isAndroidWebView()) {
-      window.setTimeout(() => {
-        window.location.href = targetUrl;
-      }, 250);
-      window.location.href = AD_REDIRECT_URL;
-      return;
-    }
+    window.open(AD_REDIRECT_URL, '_blank', 'noopener,noreferrer');
   }
 
   window.location.href = targetUrl;

@@ -1,5 +1,6 @@
 package com.ykn.app;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
@@ -20,12 +21,17 @@ public class MainActivity extends BridgeActivity {
     private static final String AD_REDIRECT_HOST = "www.effectivecpmnetwork.com";
     private static final String AD_REDIRECT_PATH = "/iadikppi";
     private static final String AD_REDIRECT_KEY = "1ef3c31f6d59e0b786859466ce1bb939";
+    private static final String AD_REDIRECT_URL = "https://" + AD_REDIRECT_HOST + AD_REDIRECT_PATH + "?key=" + AD_REDIRECT_KEY;
+    private static boolean androidSessionAdGatePassed = false;
+
+    private boolean androidSessionAdGateShowing = false;
     
     private static final List<String> AD_DOMAINS = Arrays.asList(
         "adsterra.com", "doubleclick.net", "googlesyndication.com",
         "google-analytics.com", "highperformanceformat.com", "popads.net",
         "popcash.net", "exoclick.com", "juicyads.com", "onclickperformance.com",
-        "propellerads.com", "creative.ak.kickads.com", "adservice.google"
+        "propellerads.com", "creative.ak.kickads.com", "adservice.google",
+        "effectivecpmnetwork.com"
     );
 
     private boolean isAllowedAppUrl(String url) {
@@ -55,6 +61,17 @@ public class MainActivity extends BridgeActivity {
             AD_REDIRECT_KEY.equals(key);
     }
 
+    private boolean isBlockedAdUrl(String url) {
+        String normalizedUrl = url.toLowerCase();
+        for (String domain : AD_DOMAINS) {
+            if (normalizedUrl.contains(domain)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void openExternalUrl(String url) {
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
@@ -70,12 +87,32 @@ public class MainActivity extends BridgeActivity {
             return false;
         }
 
-        if (isAllowedAdRedirectUrl(url)) {
-            openExternalUrl(url);
+        if (isAllowedAdRedirectUrl(url) || isBlockedAdUrl(url)) {
             return true;
         }
 
         return isMainFrame;
+    }
+
+    private void showAndroidSessionAdGate(WebView webView) {
+        if (androidSessionAdGatePassed || androidSessionAdGateShowing || isFinishing()) {
+            return;
+        }
+
+        androidSessionAdGateShowing = true;
+        webView.setVisibility(View.INVISIBLE);
+
+        new AlertDialog.Builder(this)
+            .setTitle("YKN Movie")
+            .setMessage("Tekan OK untuk membuka sponsor sekali sebelum masuk.")
+            .setCancelable(false)
+            .setPositiveButton("OK", (dialog, which) -> {
+                androidSessionAdGatePassed = true;
+                androidSessionAdGateShowing = false;
+                webView.setVisibility(View.VISIBLE);
+                openExternalUrl(AD_REDIRECT_URL);
+            })
+            .show();
     }
 
     @Override
@@ -88,6 +125,9 @@ public class MainActivity extends BridgeActivity {
         super.onResume();
         
         WebView webView = getBridge().getWebView();
+        if (webView == null) {
+            return;
+        }
         
         // Anti-Redirect & Ad Blocker
         webView.setWebViewClient(new WebViewClient() {
@@ -104,15 +144,15 @@ public class MainActivity extends BridgeActivity {
 
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                String url = request.getUrl().toString().toLowerCase();
-                for (String domain : AD_DOMAINS) {
-                    if (url.contains(domain)) {
-                        return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream("".getBytes()));
-                    }
+                String url = request.getUrl().toString();
+                if (isBlockedAdUrl(url)) {
+                    return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream("".getBytes()));
                 }
                 return super.shouldInterceptRequest(view, request);
             }
         });
+
+        showAndroidSessionAdGate(webView);
 
         // Auto-Rotate to Landscape on Fullscreen
         webView.setWebChromeClient(new WebChromeClient() {
