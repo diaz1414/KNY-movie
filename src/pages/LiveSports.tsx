@@ -134,41 +134,41 @@ const LiveSports: React.FC = () => {
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto w-full space-y-10 px-4 md:px-8 py-10">
+      <main className="max-w-7xl mx-auto w-full space-y-8 px-3 md:px-8 py-8">
         
-        {/* Navigation Tabs Header */}
-        <div className="flex justify-center md:justify-start gap-3 p-1.5 bg-white/[0.02] border border-white/5 rounded-2xl w-fit">
+        {/* Navigation Tabs Header — horizontally scrollable on mobile */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none p-1.5 bg-white/[0.02] border border-white/5 rounded-2xl w-full sm:w-fit">
           <button
             onClick={() => switchTab('home')}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wide transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeTab === 'home'
                 ? 'bg-netflix-red text-white shadow-lg shadow-red-900/30'
                 : 'text-zinc-500 hover:text-white'
             }`}
           >
-            <Radio size={14} />
+            <Radio size={12} />
             Beranda
           </button>
           <button
             onClick={() => switchTab('channels')}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wide transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeTab === 'channels'
                 ? 'bg-netflix-red text-white shadow-lg shadow-red-900/30'
                 : 'text-zinc-500 hover:text-white'
             }`}
           >
-            <Tv size={14} />
+            <Tv size={12} />
             Saluran TV
           </button>
           <button
             onClick={() => switchTab('live')}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wide transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeTab === 'live'
                 ? 'bg-netflix-red text-white shadow-lg shadow-red-900/30'
                 : 'text-zinc-500 hover:text-white'
             }`}
           >
-            <Zap size={14} />
+            <Zap size={12} />
             Live Center
           </button>
         </div>
@@ -251,23 +251,25 @@ const LiveSports: React.FC = () => {
               className="space-y-8"
             >
               {/* Category tabs and Search bar */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-netflix-red border border-white/5 shadow-md">
-                    <Tv size={20} />
+              <div className="flex flex-col gap-4 border-b border-white/5 pb-5">
+                {/* Title row */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-netflix-red border border-white/5 shadow-md shrink-0">
+                    <Tv size={18} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-outfit font-black uppercase tracking-tighter italic leading-none">Saluran TV</h3>
-                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Siaran Langsung 24 Jam</p>
+                    <h3 className="text-xl md:text-2xl font-outfit font-black uppercase tracking-tighter italic leading-none">Saluran TV</h3>
+                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">Siaran Langsung 24 Jam</p>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                {/* Controls row */}
+                <div className="flex flex-row items-center gap-2 flex-wrap">
                   {/* Category switcher */}
                   <div className="flex p-1 bg-white/[0.02] border border-white/5 rounded-xl select-none">
                     <button
                       onClick={() => setActiveSubTab('sports')}
-                      className={`px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                      className={`px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wide transition-all cursor-pointer ${
                         activeSubTab === 'sports'
                           ? 'bg-netflix-red text-white shadow-md'
                           : 'text-zinc-500 hover:text-white'
@@ -277,7 +279,7 @@ const LiveSports: React.FC = () => {
                     </button>
                     <button
                       onClick={() => setActiveSubTab('general')}
-                      className={`px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                      className={`px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wide transition-all cursor-pointer ${
                         activeSubTab === 'general'
                           ? 'bg-netflix-red text-white shadow-md'
                           : 'text-zinc-500 hover:text-white'
@@ -287,15 +289,15 @@ const LiveSports: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Search box */}
-                  <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                  {/* Search box — flex-1 on mobile */}
+                  <div className="relative flex-1 min-w-[140px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
                     <input
                       type="text"
                       placeholder="Cari saluran..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="bg-white/5 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-xs font-bold focus:outline-none focus:border-netflix-red/60 transition-all placeholder:text-zinc-600 w-full sm:w-[220px]"
+                      className="bg-white/5 border border-white/10 rounded-xl py-2.5 pl-9 pr-3 text-xs font-bold focus:outline-none focus:border-netflix-red/60 transition-all placeholder:text-zinc-600 w-full"
                     />
                   </div>
                 </div>
@@ -303,12 +305,12 @@ const LiveSports: React.FC = () => {
 
               {/* Grid content */}
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-4">
-                  <Loader2 className="text-netflix-red animate-spin" size={36} />
+                <div className="flex flex-col items-center justify-center py-16 gap-4">
+                  <Loader2 className="text-netflix-red animate-spin" size={32} />
                   <p className="text-zinc-500 font-black uppercase tracking-[0.15em] text-[10px]">Memuat Saluran TV...</p>
                 </div>
               ) : filteredChannels.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
                   {filteredChannels.map((stream) => (
                     <ChannelCard
                       key={stream.id}
@@ -318,8 +320,8 @@ const LiveSports: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="py-20 text-center bg-white/[0.01] border border-white/5 rounded-3xl">
-                  <p className="text-zinc-500 text-lg font-black uppercase italic tracking-wider">Tidak Ada Saluran</p>
+                <div className="py-16 text-center bg-white/[0.01] border border-white/5 rounded-3xl">
+                  <p className="text-zinc-500 text-base font-black uppercase italic tracking-wider">Tidak Ada Saluran</p>
                   <button onClick={() => setSearchTerm('')} className="text-netflix-red font-black mt-2 text-xs uppercase tracking-wider hover:underline cursor-pointer">Bersihkan Pencarian</button>
                 </div>
               )}

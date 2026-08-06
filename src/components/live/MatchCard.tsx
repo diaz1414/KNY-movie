@@ -107,7 +107,7 @@ const MatchCard = ({ match, onClick, viewerCount }: MatchCardProps) => {
     <motion.div
       whileHover={{ y: -4, scale: 1.01 }}
       onClick={onClick}
-      className={`relative overflow-hidden rounded-3xl p-5 cursor-pointer border transition-all duration-300 backdrop-blur-2xl bg-[#0a0a0a]/98 ${
+      className={`relative overflow-hidden rounded-2xl md:rounded-3xl p-3 md:p-5 cursor-pointer border transition-all duration-300 backdrop-blur-2xl bg-[#0a0a0a]/98 ${
         isLive
           ? 'border-netflix-red/40 shadow-lg shadow-netflix-red/5'
           : isStartingSoon
@@ -129,44 +129,41 @@ const MatchCard = ({ match, onClick, viewerCount }: MatchCardProps) => {
       )}
 
       {/* League Header */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 truncate flex items-center gap-1.5">
+      <div className="flex items-center justify-between mb-3 md:mb-5">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
+          <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500 truncate">
             {formatBracketText(match.league.name)}
           </span>
         </div>
 
         {/* Status badge */}
         {isLive && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-netflix-red/10 rounded-full border border-netflix-red/25 shrink-0">
-            <Radio size={10} className="text-netflix-red animate-pulse" />
-            <span className="text-[10px] font-black text-netflix-red uppercase tracking-widest whitespace-nowrap">
+          <div className="flex items-center gap-1 px-2 py-0.5 bg-netflix-red/10 rounded-full border border-netflix-red/25 shrink-0">
+            <Radio size={8} className="text-netflix-red animate-pulse" />
+            <span className="text-[8px] md:text-[10px] font-black text-netflix-red uppercase tracking-widest whitespace-nowrap">
               LIVE{viewers && viewerCount ? ` · ${viewers}` : ''}
             </span>
-            {viewerCount ? (
-              <Users size={9} className="text-netflix-red/70" />
-            ) : null}
           </div>
         )}
         {isStartingSoon && !isLive && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 rounded-full border border-amber-500/25 shrink-0 animate-pulse">
-            <Clock size={10} className="text-amber-400" />
-            <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest whitespace-nowrap">SEGERA</span>
+          <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 rounded-full border border-amber-500/25 shrink-0 animate-pulse">
+            <Clock size={8} className="text-amber-400" />
+            <span className="text-[8px] md:text-[10px] font-black text-amber-400 uppercase tracking-widest whitespace-nowrap">SEGERA</span>
           </div>
         )}
         {isFinished && !isGracePeriod && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/30 rounded-full border border-zinc-700/10 shrink-0">
-            <CheckCircle size={10} className="text-zinc-600" />
-            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Selesai</span>
+          <div className="flex items-center gap-1 px-2 py-0.5 bg-zinc-800/30 rounded-full border border-zinc-700/10 shrink-0">
+            <CheckCircle size={8} className="text-zinc-600" />
+            <span className="text-[8px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">Selesai</span>
           </div>
         )}
       </div>
 
       {/* Teams vs Teams */}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 mb-5">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 mb-3 md:mb-5">
         {/* Home Team */}
-        <div className="flex flex-col items-center gap-2 min-w-0">
-          <div className="w-12 h-9 rounded-xl bg-white/5 p-1.5 flex items-center justify-center border border-white/5 overflow-hidden">
+        <div className="flex flex-col items-center gap-1.5 min-w-0">
+          <div className="w-9 h-7 md:w-12 md:h-9 rounded-lg md:rounded-xl bg-white/5 p-1 md:p-1.5 flex items-center justify-center border border-white/5 overflow-hidden">
             <img
               src={match.homeTeam.logo}
               alt={match.homeTeam.name}
@@ -174,26 +171,26 @@ const MatchCard = ({ match, onClick, viewerCount }: MatchCardProps) => {
               onError={(e) => { (e.target as HTMLImageElement).src = '/favicon.png'; }}
             />
           </div>
-          <span className="text-xs font-black text-center text-zinc-200 truncate w-full leading-tight">{match.homeTeam.name}</span>
+          <span className="text-[9px] md:text-xs font-black text-center text-zinc-200 truncate w-full leading-tight">{match.homeTeam.name}</span>
         </div>
 
         {/* Score / Time */}
         <div className="flex flex-col items-center gap-1">
           {(isLive || isFinished) && match.score ? (
-            <div className="text-xl font-black tracking-tighter text-white">
+            <div className="text-base md:text-xl font-black tracking-tighter text-white">
               {match.score}
             </div>
           ) : (
-            <div className="text-[11px] font-black text-zinc-500 uppercase tracking-tight bg-white/5 px-2 py-1 rounded-lg border border-white/5">
+            <div className="text-[9px] md:text-[11px] font-black text-zinc-500 uppercase tracking-tight bg-white/5 px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg border border-white/5">
               {match.time}
             </div>
           )}
-          <div className="text-[9px] font-black text-zinc-600 uppercase select-none">VS</div>
+          <div className="text-[8px] font-black text-zinc-600 uppercase select-none">VS</div>
         </div>
 
         {/* Away Team */}
-        <div className="flex flex-col items-center gap-2 min-w-0">
-          <div className="w-12 h-9 rounded-xl bg-white/5 p-1.5 flex items-center justify-center border border-white/5 overflow-hidden">
+        <div className="flex flex-col items-center gap-1.5 min-w-0">
+          <div className="w-9 h-7 md:w-12 md:h-9 rounded-lg md:rounded-xl bg-white/5 p-1 md:p-1.5 flex items-center justify-center border border-white/5 overflow-hidden">
             <img
               src={match.awayTeam.logo}
               alt={match.awayTeam.name}
@@ -201,7 +198,7 @@ const MatchCard = ({ match, onClick, viewerCount }: MatchCardProps) => {
               onError={(e) => { (e.target as HTMLImageElement).src = '/favicon.png'; }}
             />
           </div>
-          <span className="text-xs font-black text-center text-zinc-200 truncate w-full leading-tight">{match.awayTeam.name}</span>
+          <span className="text-[9px] md:text-xs font-black text-center text-zinc-200 truncate w-full leading-tight">{match.awayTeam.name}</span>
         </div>
       </div>
 
