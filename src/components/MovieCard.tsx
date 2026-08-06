@@ -4,12 +4,14 @@ import { Star, Play } from 'lucide-react';
 import type { UnifiedMovie } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { navigateWithAdRedirect } from '../utils/adRedirect';
+import { useNavigate } from 'react-router-dom';
 
 const MovieCard: React.FC<{ movie: UnifiedMovie; inRow?: boolean }> = ({ movie, inRow = false }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   
   const handleClick = () => {
-    navigateWithAdRedirect(`/watch?id=${movie.id}&type=${movie.type}`);
+    navigateWithAdRedirect(`/watch?id=${movie.id}&type=${movie.type}`, navigate);
   };
 
   const parseLocalDate = (dateStr: string): Date | null => {

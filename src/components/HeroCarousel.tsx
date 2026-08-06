@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Play, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { UnifiedMovie } from '../services/api';
-import { navigateWithAdRedirect } from '../utils/adRedirect';
+import { useNavigate } from 'react-router-dom';
 
 interface HeroCarouselProps {
   movies: UnifiedMovie[];
@@ -35,6 +35,7 @@ const isComingSoon = (releaseDate?: string) => {
 
 const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -59,7 +60,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ movies, onMoreInfo }) => {
   const currentMovie = movies[currentIndex];
 
   const handleWatch = () => {
-    navigateWithAdRedirect(`/watch?id=${currentMovie.id}&type=${currentMovie.type}`);
+    navigate(`/watch?id=${currentMovie.id}&type=${currentMovie.type}`);
   };
 
   const { scrollY } = useScroll();

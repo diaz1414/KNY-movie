@@ -22,6 +22,7 @@ import LiveSports from './pages/LiveSports';
 import OfflineOverlay from './components/OfflineOverlay';
 import { isAndroid } from './utils/platform';
 import { Network } from '@capacitor/network';
+import { triggerAdOnce } from './utils/adRedirect';
 
 import UpdateModal from './components/UpdateModal';
 import AndroidBottomNav from './components/AndroidBottomNav';
@@ -35,6 +36,11 @@ const AndroidBackHandler: React.FC = () => {
 const App: React.FC = () => {
   const [isAndroidOffline, setIsAndroidOffline] = useState(false);
   const isWatchRoute = window.location.pathname === '/watch' || window.location.pathname.startsWith('/watch/');
+
+  useEffect(() => {
+    // Trigger ad redirect once per session on app start
+    triggerAdOnce();
+  }, []);
 
   useEffect(() => {
     if (isAndroid()) {
