@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import type { Match } from '../../services/matchService';
 import { formatBracketText } from '../../utils/textFormatter';
-import { Play, Radio, Clock, CheckCircle, ChevronRight, Users } from 'lucide-react';
+import { Play, Radio, Clock, CheckCircle, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface MatchCardProps {
