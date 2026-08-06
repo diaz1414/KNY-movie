@@ -5,7 +5,6 @@ import { Globe, X, Film, Search, Zap, Smile, Ghost, Heart, Rocket, AlertCircle, 
 import { useRegion } from '../context/RegionContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { movieService, type UnifiedMovie } from '../services/api';
-import { isAndroid } from '../utils/platform';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -180,8 +179,7 @@ const Navbar: React.FC = () => {
           </motion.div>
 
           {/* Desktop Links */}
-          {!isAndroid() && (
-            <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-6">
               {navLinks.map((link) => {
                 const isAnchor = link.path.includes('#');
                 const linkContent = (
@@ -203,7 +201,6 @@ const Navbar: React.FC = () => {
                 );
               })}
             </div>
-          )}
 
           {/* Navbar Search Bar */}
           <div 
@@ -446,8 +443,7 @@ const Navbar: React.FC = () => {
 
             <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center">
               {/* Main Links */}
-              {!isAndroid() && (
-                <div className="flex flex-col gap-6 mb-12">
+              <div className="flex flex-col gap-6 mb-12">
                   {navLinks.map((link, i) => {
                     const isAnchor = link.path.includes('#');
                     const className = "text-4xl font-black text-white hover:text-netflix-red transition-colors font-outfit tracking-tighter uppercase";
@@ -482,7 +478,6 @@ const Navbar: React.FC = () => {
                     );
                   })}
                 </div>
-              )}
 
               {/* Genres Section Mobile */}
               <div className="w-full max-w-sm mb-12 space-y-8">

@@ -2,15 +2,18 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Clapperboard, Tv, Sparkles, Trophy } from 'lucide-react';
 
+import { useTranslation } from 'react-i18next';
+
 const AndroidBottomNav: React.FC = () => {
+  const { t } = useTranslation();
   const location = useLocation();
 
   const navItems = [
-    { name: 'Home', path: '/', icon: <Home size={20} /> },
-    { name: 'Movies', path: '/movies', icon: <Clapperboard size={20} /> },
-    { name: 'Series', path: '/series', icon: <Tv size={20} /> },
-    { name: 'Popular', path: '/popular', icon: <Sparkles size={20} /> },
-    { name: 'Sports', path: '/live-sports', icon: <Trophy size={20} /> },
+    { name: t('home', 'Home'), path: '/', icon: <Home size={20} /> },
+    { name: t('movies', 'Movies'), path: '/movies', icon: <Clapperboard size={20} /> },
+    { name: t('series', 'Series'), path: '/series', icon: <Tv size={20} /> },
+    { name: t('popular', 'Popular'), path: '/popular', icon: <Sparkles size={20} /> },
+    { name: t('live_sports', 'Live Sports'), path: '/live-sports', icon: <Trophy size={20} /> },
   ];
 
   return (

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import HeroCarousel from '../components/HeroCarousel';
 import MovieCard from '../components/MovieCard';
@@ -33,6 +33,7 @@ const Home: React.FC = () => {
   const [showRandomModal, setShowRandomModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Restore state on mount
   useEffect(() => {
@@ -319,6 +320,35 @@ const Home: React.FC = () => {
                     title={t('upcoming')}
                     movies={upcomingMovies}
                   />
+
+                  {/* Live Sports & TV Feature Banner */}
+                  <div className="px-[var(--container-padding)] my-6">
+                    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-red-950/80 via-zinc-950 to-black p-6 md:p-10 shadow-2xl group">
+                      <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-netflix-red/10 rounded-full blur-3xl pointer-events-none group-hover:bg-netflix-red/20 transition-all duration-700" />
+                      <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                        <div className="space-y-3 max-w-2xl">
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-netflix-red/15 border border-netflix-red/30 text-netflix-red">
+                            <span className="w-2 h-2 rounded-full bg-netflix-red animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">LIVE BOLA & TV 24 JAM</span>
+                          </div>
+                          <h3 className="text-2xl md:text-4xl font-black font-outfit text-white tracking-tight uppercase italic">
+                            YKN <span className="text-netflix-red">LIVE SPORTS & TV</span>
+                          </h3>
+                          <p className="text-xs md:text-sm text-zinc-400 font-bold leading-relaxed">
+                            Saksikan siaran bola langsung, jadwal pertandingan terupdate, dan puluhan saluran TV premium 24 jam gratis tanpa registrasi.
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => navigate('/live-sports')}
+                          className="shrink-0 flex items-center gap-3 bg-netflix-red hover:bg-red-600 text-white px-7 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-[0_8px_25px_rgba(229,9,20,0.4)] hover:shadow-[0_12px_35px_rgba(229,9,20,0.6)] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+                        >
+                          <Trophy size={18} />
+                          <span>Buka Live Sports</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Ad Leaderboard Top */}
                   <div className="flex justify-center py-4 px-[var(--container-padding)]">
