@@ -1,0 +1,73 @@
+import { Play, Radio, Tv } from 'lucide-react';
+import type { PlayableStream } from '../../services/streamService';
+import { formatBracketText } from '../../utils/textFormatter';
+
+interface ChannelCardProps {
+  stream: PlayableStream;
+  onClick: () => void;
+}
+
+const ChannelCard = ({ stream, onClick }: ChannelCardProps) => {
+  const handleClick = () => {
+    if (typeof window !== 'undefined' && (window as any).yknAdRedirect) {
+      try {
+        (window as any).yknAdRedirect();
+      } catch (err) {
+        console.error('[Ads] Redirect error:', err);
+      }
+    }
+    onClick();
+  };
+
+  const hasLogo = stream.logo && stream.logo.trim().length > 0;
+
+  return (
+    <div
+      onClick={handleClick}
+      className="group bg-zinc-950/96 backdrop-blur-2xl hover:bg-zinc-900/98 border border-white/10 rounded-3xl p-6 transition-all duration-300 cursor-pointer hover:border-netflix-red/35 relative overflow-hidden shadow-xl"
+      tabIndex={0}
+    >
+      {/* Accent Glow */}
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-netflix-red/5 rounded-full blur-3xl group-hover:bg-netflix-red/10 transition-all duration-500" />
+
+      <div className="flex flex-col gap-6 relative z-10">
+        <div className="flex justify-between items-start">
+          {hasLogo ? (
+            <div className="h-14 w-20 bg-white/5 rounded-2xl flex items-center justify-center p-2 group-hover:scale-105 transition-transform overflow-hidden border border-white/5">
+              <img 
+                src={stream.logo} 
+                alt={stream.name} 
+                className="h-full max-w-full object-contain filter brightness-110" 
+                onError={(e) => { (e.target as HTMLImageElement).src = '/favicon.png'; }}
+              />
+            </div>
+          ) : (
+            <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center p-3 group-hover:scale-105 transition-transform border border-white/5 text-zinc-500">
+              <Tv size={28} />
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20 select-none">
+            <Radio size={12} className="text-emerald-400 animate-pulse" />
+            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">LIVE</span>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-outfit font-black tracking-tight text-white group-hover:text-netflix-red transition-colors">{stream.name}</h3>
+          <div className="text-xs text-zinc-500 font-bold line-clamp-1 italic mt-1 uppercase tracking-wider flex items-center gap-1.5 flex-wrap">
+            {formatBracketText(stream.subName)}
+          </div>
+        </div>
+
+        <button className="flex items-center justify-between w-full py-3.5 px-4 bg-white/5 group-hover:bg-netflix-red group-hover:text-white text-white rounded-2xl font-black transition-all duration-300">
+          <span className="text-xs uppercase tracking-wider">Mulai Menonton</span>
+          <div className="w-7 h-7 rounded-full bg-white/10 group-hover:bg-white/20 flex items-center justify-center">
+            <Play size={12} fill="currentColor" className="ml-0.5" />
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ChannelCard;

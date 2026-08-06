@@ -24,6 +24,13 @@ import { isAndroid } from './utils/platform';
 import { Network } from '@capacitor/network';
 
 import UpdateModal from './components/UpdateModal';
+import AndroidBottomNav from './components/AndroidBottomNav';
+import { useAndroidBack } from './hooks/useAndroidBack';
+
+const AndroidBackHandler: React.FC = () => {
+  useAndroidBack();
+  return null;
+};
 
 const App: React.FC = () => {
   const [isAndroidOffline, setIsAndroidOffline] = useState(false);
@@ -101,6 +108,7 @@ const App: React.FC = () => {
       {!isWatchRoute && <OfflineOverlay />}
       {!isWatchRoute && <NetflixIntro />}
       <Router>
+        {isAndroid() && <AndroidBackHandler />}
         {!isWatchRoute && <ScrollToTop />}
         <Routes>
           <Route path="/" element={<Home />} />
@@ -121,6 +129,7 @@ const App: React.FC = () => {
           {/* Catch-all route for Not Found (404) */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        {isAndroid() && <AndroidBottomNav />}
       </Router>
     </ThemeProvider>
   );

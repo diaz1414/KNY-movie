@@ -5,6 +5,7 @@ import { Globe, X, Film, Search, Zap, Smile, Ghost, Heart, Rocket, AlertCircle, 
 import { useRegion } from '../context/RegionContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { movieService, type UnifiedMovie } from '../services/api';
+import { isAndroid } from '../utils/platform';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -179,28 +180,30 @@ const Navbar: React.FC = () => {
           </motion.div>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => {
-              const isAnchor = link.path.includes('#');
-              const linkContent = (
-                <>
-                  {link.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-netflix-red transition-all duration-300 group-hover:w-full" />
-                </>
-              );
-              const className = "text-sm font-bold tracking-tight text-[var(--text-primary)] opacity-60 hover:opacity-100 hover:text-netflix-red transition-all duration-300 relative group uppercase tracking-widest";
+          {!isAndroid() && (
+            <div className="hidden md:flex items-center gap-6">
+              {navLinks.map((link) => {
+                const isAnchor = link.path.includes('#');
+                const linkContent = (
+                  <>
+                    {link.name}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-netflix-red transition-all duration-300 group-hover:w-full" />
+                  </>
+                );
+                const className = "text-sm font-bold tracking-tight text-[var(--text-primary)] opacity-60 hover:opacity-100 hover:text-netflix-red transition-all duration-300 relative group uppercase tracking-widest";
 
-              return isAnchor ? (
-                <a key={link.name} href={link.path} className={className}>
-                  {linkContent}
-                </a>
-              ) : (
-                <Link key={link.name} to={link.path} className={className}>
-                  {linkContent}
-                </Link>
-              );
-            })}
-          </div>
+                return isAnchor ? (
+                  <a key={link.name} href={link.path} className={className}>
+                    {linkContent}
+                  </a>
+                ) : (
+                  <Link key={link.name} to={link.path} className={className}>
+                    {linkContent}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
 
           {/* Navbar Search Bar */}
           <div 
@@ -443,41 +446,43 @@ const Navbar: React.FC = () => {
 
             <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center">
               {/* Main Links */}
-              <div className="flex flex-col gap-6 mb-12">
-                {navLinks.map((link, i) => {
-                  const isAnchor = link.path.includes('#');
-                  const className = "text-4xl font-black text-white hover:text-netflix-red transition-colors font-outfit tracking-tighter uppercase";
-                  
-                  return isAnchor ? (
-                    <motion.a
-                      key={link.name}
-                      href={link.path}
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.1 + i * 0.1 }}
-                      onClick={() => setIsOpen(false)}
-                      className={className}
-                    >
-                      {link.name}
-                    </motion.a>
-                  ) : (
-                    <motion.div
-                      key={link.name}
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.1 + i * 0.1 }}
-                    >
-                      <Link
-                        to={link.path}
+              {!isAndroid() && (
+                <div className="flex flex-col gap-6 mb-12">
+                  {navLinks.map((link, i) => {
+                    const isAnchor = link.path.includes('#');
+                    const className = "text-4xl font-black text-white hover:text-netflix-red transition-colors font-outfit tracking-tighter uppercase";
+                    
+                    return isAnchor ? (
+                      <motion.a
+                        key={link.name}
+                        href={link.path}
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.1 + i * 0.1 }}
                         onClick={() => setIsOpen(false)}
                         className={className}
                       >
                         {link.name}
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </div>
+                      </motion.a>
+                    ) : (
+                      <motion.div
+                        key={link.name}
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.1 + i * 0.1 }}
+                      >
+                        <Link
+                          to={link.path}
+                          onClick={() => setIsOpen(false)}
+                          className={className}
+                        >
+                          {link.name}
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Genres Section Mobile */}
               <div className="w-full max-w-sm mb-12 space-y-8">

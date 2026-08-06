@@ -1,0 +1,225 @@
+import { startTransition, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Loader2, RadioTower, Radio, Trophy, Activity, Compass, Flame, Zap } from 'lucide-react';
+import MatchCard from './MatchCard';
+import { getTodayMatches, MATCH_SCHEDULE_REFRESH_MS, type Match } from '../../services/matchService';
+import { getXoilacMatches, XOILAC_SPORTS, type XoilacSport } from '../../services/xoilacService';
+import { slugify } from '../../services/streamService';
+
+type SportTab = 'main' | XoilacSport;
+
+interface TabDef {
+  id: SportTab;
+  label: string;
+  color: string;
+}
+
+const TABS: TabDef[] = [
+  { id: 'main', label: 'Utama', color: '#E50914' },
+  ...Object.entries(XOILAC_SPORTS).map(([id, meta]) => ({
+    id: id as XoilacSport,
+    label: meta.label,
+    color: '#E50914',
+  })),
+];
+
+const getSportIcon = (sportId: string) => {
+  switch (sportId) {
+    case 'main': return <Radio size={14} />;
+    case 'football': return <Flame size={14} />;
+    case 'basketball': return <Trophy size={14} />;
+    case 'amfootball': return <Trophy size={14} />;
+    case 'race': return <Compass size={14} />;
+    case 'fight': return <Zap size={14} />;
+    default: return <Activity size={14} />;
+  }
+};
+
+const matchBelongsToSport = (match: Match, sport: XoilacSport): boolean => {
+  const sportLabel = XOILAC_SPORTS[sport]?.label.toLowerCase() ?? sport.toLowerCase();
+  const providerPrefixes = [`esportex-${sport}-`, `xoilac-${sport}-`];
+
+  return (
+    providerPrefixes.some((prefix) => match.id.includes(prefix)) ||
+    match.league.name.toLowerCase().includes(sportLabel)
+  );
+};
+
+const MatchSchedule = ({ viewerCounts = {} }: { viewerCounts?: Record<string, number> }) => {
+  const [activeTab, setActiveTab] = useState<SportTab>('main');
+  const [mainMatches, setMainMatches] = useState<Match[]>([]);
+  const [xoilacMatches, setXoilacMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const lastMainSig = useRef<string>('');
+  const lastXoilacSig = useRef<string>('');
+
+  const fetchMain = async (silent = false) => {
+    if (!silent) setLoading(true);
+    try {
+      const data = await getTodayMatches(true);
+      const sig = JSON.stringify(data);
+      if (sig !== lastMainSig.current) {
+        lastMainSig.current = sig;
+        startTransition(() => setMainMatches(data));
+      }
+    } catch (err) {
+      console.warn('[MatchSchedule] Failed to refresh main matches:', err);
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  };
+
+  const fetchXoilac = async (silent = false) => {
+    if (!silent && activeTab !== 'main') setLoading(true);
+    try {
+      const data = await getXoilacMatches(true);
+      const sig = JSON.stringify(data);
+      if (sig !== lastXoilacSig.current) {
+        lastXoilacSig.current = sig;
+        startTransition(() => setXoilacMatches(data));
+      }
+    } catch (err) {
+      console.warn('[MatchSchedule] Failed to refresh Esportex matches:', err);
+    } finally {
+      if (!silent && activeTab !== 'main') setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    const init = async () => {
+      setLoading(true);
+      await Promise.all([fetchMain(true), fetchXoilac(true)]);
+      if (mounted) setLoading(false);
+    };
+
+    init();
+
+    const interval = setInterval(() => {
+      fetchMain(true);
+      fetchXoilac(true);
+    }, MATCH_SCHEDULE_REFRESH_MS);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    const t = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(t);
+  }, [activeTab]);
+
+  const displayedMatches: Match[] = (() => {
+    if (activeTab === 'main') return mainMatches;
+
+    const sport = activeTab as XoilacSport;
+    return xoilacMatches.filter((match) => matchBelongsToSport(match, sport));
+  })();
+
+  const handleMatchClick = (match: Match) => {
+    const slugName = `${match.homeTeam.name} vs ${match.awayTeam.name}`;
+    navigate(`/watch?live=${slugify(slugName)}-${match.id}`);
+  };
+
+  const liveCounts = TABS.reduce<Record<SportTab, number>>((counts, tab) => {
+    if (tab.id === 'main') {
+      counts[tab.id] = mainMatches.filter((match) => match.status === 'live').length;
+      return counts;
+    }
+
+    counts[tab.id] = xoilacMatches.filter((match) => (
+      match.status === 'live' && matchBelongsToSport(match, tab.id as XoilacSport)
+    )).length;
+
+    return counts;
+  }, {} as Record<SportTab, number>);
+
+  return (
+    <section className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-netflix-red border border-white/5 shadow-md">
+            <RadioTower size={20} />
+          </div>
+          <div>
+            <h3 className="text-2xl md:text-3xl font-outfit font-black uppercase tracking-tighter italic leading-none">
+              Jadwal Pertandingan
+            </h3>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
+              Multi-Sport Live Schedule
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto pb-1 premium-scroll">
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.id;
+          const liveCount = liveCounts[tab.id] ?? 0;
+
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={[
+                'flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-200 border cursor-pointer',
+                isActive
+                  ? 'text-white border-transparent shadow-lg scale-105'
+                  : 'bg-white/5 text-zinc-400 border-white/10 hover:bg-white/10 hover:text-white',
+              ].join(' ')}
+              style={isActive ? { background: '#E50914', boxShadow: `0 0 16px rgba(229, 9, 20, 0.45)` } : {}}
+            >
+              <span className="flex items-center justify-center">{getSportIcon(tab.id)}</span>
+              <span>{tab.label}</span>
+              {liveCount > 0 && (
+                <span
+                  className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
+                  style={{
+                    background: isActive ? 'rgba(0,0,0,0.25)' : '#E50914',
+                    color: '#fff',
+                  }}
+                >
+                  {liveCount} LIVE
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-4 bg-zinc-950/40 border border-white/5 rounded-[2rem] animate-pulse">
+          <Loader2 className="text-netflix-red animate-spin" size={36} />
+          <p className="text-zinc-500 font-black uppercase tracking-[0.15em] text-[10px]">
+            Memuat Jadwal...
+          </p>
+        </div>
+      ) : displayedMatches.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {displayedMatches.map((match) => (
+            <MatchCard
+              key={match.id}
+              match={match}
+              onClick={() => handleMatchClick(match)}
+              viewerCount={viewerCounts[match.id]}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="py-16 text-center bg-white/[0.01] border border-white/5 rounded-[2rem]">
+          <p className="text-zinc-500 font-black uppercase tracking-wider text-xs">
+            Tidak ada pertandingan untuk kategori ini.
+          </p>
+        </div>
+      )}
+    </section>
+  );
+};
+
+export default MatchSchedule;
