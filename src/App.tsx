@@ -54,44 +54,8 @@ const App: React.FC = () => {
         setIsAndroidOffline(!status.connected);
       });
 
-      // --- GESTURE NAVIGATION (SWIPE BACK/FORWARD) ---
-      let touchStartX = 0;
-      let touchStartY = 0;
-      const SWIPE_THRESHOLD = 80; // pixels
-      const EDGE_THRESHOLD = 50;  // pixels from edge
-
-      const handleTouchStart = (e: TouchEvent) => {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-      };
-
-      const handleTouchEnd = (e: TouchEvent) => {
-        const touchEndX = e.changedTouches[0].clientX;
-        const touchEndY = e.changedTouches[0].clientY;
-
-        const deltaX = touchEndX - touchStartX;
-        const deltaY = Math.abs(touchEndY - touchStartY);
-
-        // Horizontal swipe only if vertical movement is small
-        if (deltaY < 100) {
-          // Swipe Right (Back) - from left edge
-          if (deltaX > SWIPE_THRESHOLD && touchStartX < EDGE_THRESHOLD) {
-            window.history.back();
-          }
-          // Swipe Left (Forward) - from right edge
-          else if (deltaX < -SWIPE_THRESHOLD && touchStartX > window.innerWidth - EDGE_THRESHOLD) {
-            window.history.forward();
-          }
-        }
-      };
-
-      window.addEventListener('touchstart', (handleTouchStart as unknown) as EventListener);
-      window.addEventListener('touchend', (handleTouchEnd as unknown) as EventListener);
-
       return () => {
         listener.then(l => l.remove());
-        window.removeEventListener('touchstart', (handleTouchStart as unknown) as EventListener);
-        window.removeEventListener('touchend', (handleTouchEnd as unknown) as EventListener);
       };
     }
   }, []);
