@@ -21,6 +21,26 @@ const Watch: React.FC = () => {
   const [liveLoading, setLiveLoading] = useState(false);
   const [liveError, setLiveError] = useState<string | null>(null);
 
+  // Sync navigation events from embedded watch.html iframe
+  useEffect(() => {
+    const handleIframeMessage = (event: MessageEvent) => {
+      if (event.data && typeof event.data === 'object') {
+        if (event.data.type === 'YKN_NAVIGATE' && event.data.url) {
+          navigate(event.data.url);
+        } else if (event.data.type === 'YKN_BACK') {
+          if (window.history.length > 1) {
+            navigate(-1);
+          } else {
+            navigate('/');
+          }
+        }
+      }
+    };
+
+    window.addEventListener('message', handleIframeMessage);
+    return () => window.removeEventListener('message', handleIframeMessage);
+  }, [navigate]);
+
   // 1. Fetch live stream if liveId is active
   useEffect(() => {
     if (!liveId) return;

@@ -261,6 +261,68 @@
             // Note: This is tricky, but we can at least block some common patterns
         })();
 
+        // --- TOP-LEVEL NAVIGATION & HISTORY SYNC ---
+        function goBack(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            if (window.top && window.top !== window.self) {
+                try {
+                    window.parent.postMessage({ type: 'YKN_BACK' }, '*');
+                } catch (err) {}
+                if (window.top.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+                    window.top.history.back();
+                } else {
+                    window.top.location.href = '/';
+                }
+            } else {
+                if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+                    window.history.back();
+                } else {
+                    window.location.href = '/';
+                }
+            }
+        }
+
+        function navigateParent(url, e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            if (window.top && window.top !== window.self) {
+                try {
+                    window.parent.postMessage({ type: 'YKN_NAVIGATE', url: url }, '*');
+                } catch (err) {}
+                window.top.location.href = url;
+            } else {
+                window.location.href = url;
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            const target = e.target;
+            const anchor = target instanceof Element ? target.closest('a') : null;
+            if (!anchor) return;
+
+            const href = anchor.getAttribute('href') || '';
+            if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+            if (anchor.target === '_blank' || href.startsWith('http://') || href.startsWith('https://') || href.startsWith('mailto:')) return;
+
+            if (anchor.classList.contains('back-nav')) {
+                e.preventDefault();
+                e.stopPropagation();
+                goBack(e);
+                return;
+            }
+
+            if (href.startsWith('/')) {
+                e.preventDefault();
+                e.stopPropagation();
+                navigateParent(href, e);
+            }
+        });
+
         function closeSecurityAlert() {
             window.close();
             window.location.href = "about:blank";
@@ -380,9 +442,10 @@
         style="display: none;">
         <nav class="animate-slide-up [animation-delay:0.1s]">
             <a href="/"
-                class="back-nav inline-flex items-center gap-3 text-white/60 hover:text-white no-underline font-semibold text-[0.85rem] uppercase tracking-[2px] mb-12 px-5 py-3 rounded-full bg-white/3 border border-white/10 backdrop-blur-xl transition-all duration-500 hover:bg-white/10 hover:-translate-x-2">
+                onclick="goBack(event)"
+                class="back-nav inline-flex items-center gap-3 text-white/60 hover:text-white no-underline font-semibold text-[0.85rem] uppercase tracking-[2px] mb-12 px-5 py-3 rounded-full bg-white/3 border border-white/10 backdrop-blur-xl transition-all duration-500 hover:bg-white/10 hover:-translate-x-2 cursor-pointer">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                Home
+                <span data-lang-key="back">Home</span>
             </a>
         </nav>
 
@@ -927,7 +990,7 @@
         }
 
         if (!movieId) {
-            window.location.href = '/';
+            navigateParent('/');
         }
 
         async function init() {
@@ -937,8 +1000,8 @@
                 const uiLang = hostname.startsWith('id.') ? 'id' : 'en';
 
                 const labels = {
-                    en: { synopsis: 'Synopsis', director: 'Director', cast: 'Key Cast Spotlight', share: 'Share This Content', servers: 'Streaming Servers', next: 'Next Episode' },
-                    id: { synopsis: 'Sinopsis', director: 'Sutradara', cast: 'Pemeran Utama Spotlight', share: 'Bagikan Konten Ini', servers: 'Server Streaming', next: 'Episode Selanjutnya' }
+                    en: { synopsis: 'Synopsis', director: 'Director', cast: 'Key Cast Spotlight', share: 'Share This Content', servers: 'Streaming Servers', next: 'Next Episode', back: 'Home' },
+                    id: { synopsis: 'Sinopsis', director: 'Sutradara', cast: 'Pemeran Utama Spotlight', share: 'Bagikan Konten Ini', servers: 'Server Streaming', next: 'Episode Selanjutnya', back: 'Kembali' }
                 };
                 const t = labels[uiLang];
 
@@ -1354,6 +1417,16 @@
                         newUrl.searchParams.set('e', currentEp);
                     }
                     history.replaceState(null, '', newUrl);
+                    if (window.top && window.top !== window.self) {
+                        try {
+                            const topUrl = new URL(window.top.location.href);
+                            if (isTV) {
+                                topUrl.searchParams.set('s', currentSeason);
+                                topUrl.searchParams.set('e', currentEp);
+                            }
+                            window.top.history.replaceState(null, '', topUrl.pathname + topUrl.search + topUrl.hash);
+                        } catch (e) {}
+                    }
                     saveProgress(currentSeason, currentEp, currentServerIndex);
                 }
 
@@ -1552,7 +1625,7 @@
                         const rating = m.vote_average ? m.vote_average.toFixed(1) : 'NR';
 
                         return `
-                            <div class="flex-[0_0_160px] md:flex-[0_0_200px] relative aspect-[2/3] rounded-xl overflow-hidden cursor-pointer transition-all duration-500 border border-white/10 shadow-2xl hover:scale-105 hover:-translate-y-2.5 hover:border-netflix-red hover:shadow-[0_20px_40px_rgba(229,9,20,0.4)] group" onclick="window.location.href='/watch?id=${m.id}'">
+                            <div class="flex-[0_0_160px] md:flex-[0_0_200px] relative aspect-[2/3] rounded-xl overflow-hidden cursor-pointer transition-all duration-500 border border-white/10 shadow-2xl hover:scale-105 hover:-translate-y-2.5 hover:border-netflix-red hover:shadow-[0_20px_40px_rgba(229,9,20,0.4)] group" onclick="navigateParent('/watch?id=${m.id}&type=${type}', event)">
                                 <img src="${poster}" alt="${title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                                     <div class="text-[0.85rem] font-bold text-white leading-tight font-outfit mb-1">${title}</div>
