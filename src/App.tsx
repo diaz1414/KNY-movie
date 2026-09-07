@@ -25,7 +25,6 @@ import { Network } from '@capacitor/network';
 import { triggerAdOnce } from './utils/adRedirect';
 
 import UpdateModal from './components/UpdateModal';
-import AndroidBottomNav from './components/AndroidBottomNav';
 import { useAndroidBack } from './hooks/useAndroidBack';
 
 const AndroidBackHandler: React.FC = () => {
@@ -98,7 +97,6 @@ const App: React.FC = () => {
           {/* Catch-all route for Not Found (404) */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        {isAndroid() && <AndroidBottomNav />}
       </Router>
     </ThemeProvider>
   );
