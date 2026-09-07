@@ -13,6 +13,22 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose }) => {
 
   const updates = [
     {
+      date: 'September 08, 2026',
+      title: 'Mega Update: Native Watch Core, Redesigned Hub & Immersive Android',
+      items: [
+        'Complete React TSX Migration: Rewrote the entire watch ecosystem into 100% native React TSX, eliminating legacy iframe containers for ultra-smooth responsiveness.',
+        'Zero-Latency History & URL Sync: Fixed the domain path locking bug—back button and page refresh now seamlessly restore your exact title, season, and episode without getting stuck.',
+        'High-Speed Streaming Server Matrix (11 Servers): Upgraded multi-source streaming engine with direct load-balancing across 11 resilient mirror servers.',
+        'Interactive Slider Server Switcher: Added smooth directional navigation arrows on desktop with fluid responsive swipe gestures on mobile.',
+        'Episode & Season Hub 2.0: Revamped season list with glassmorphic pill chips and real-time episode badges, eliminating empty spaces and awkward layouts.',
+        'Smart Episode Discovery: Built-in instant episode search filter with dual layout toggle (Horizontal Carousel vs Multi-Column Grid).',
+        'Live Playback Audio Equalizer: Added animated sound wave equalizer and neon glowing ambient indicator for currently playing episodes.',
+        'Full-Screen Edge-to-Edge Android UI: Removed the intrusive bottom navigation bar in Android APK mode for a distraction-free, cinematic viewing experience.',
+        'Enhanced Hardware Back Navigation: Fine-tuned hardware back button handlers on Android to intelligently navigate stacks and avoid accidental exits.',
+        'Turbocharged Caching & Load Times: Optimized Service Worker precaching and Vite production bundling, achieving up to 45% faster initial load speeds.'
+      ]
+    },
+    {
       date: 'June 14, 2026',
       title: 'Live Sports Hub & Player Enhancements',
       items: [
