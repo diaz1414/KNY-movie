@@ -60,5 +60,9 @@ export const navigateWithAdRedirect = (
     window.open(AD_REDIRECT_URL, '_blank', 'noopener,noreferrer');
   }
 
-  window.location.href = targetUrl;
+  if (navigateFn) {
+    navigateFn(targetUrl);
+  } else {
+    window.location.href = targetUrl;
+  }
 };

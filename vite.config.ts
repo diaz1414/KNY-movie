@@ -253,43 +253,28 @@ export default defineConfig({
       maximumFileSizeToCacheInBytes: 5000000,
       navigateFallbackDenylist: [
         /^\/api\//,
-        /^\/watch\.html/,
-        /^\/watch/,
       ],
-  runtimeCaching: [
-    {
-      urlPattern: ({ url }) => url.pathname === '/watch.html',
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'watch-html',
-        networkTimeoutSeconds: 2,
-        expiration: {
-          maxEntries: 3,
-          maxAgeSeconds: 60 * 60 * 24,
+      runtimeCaching: [
+        {
+          urlPattern: ({ request }) =>
+            request.destination === 'script' ||
+            request.destination === 'style',
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'app-assets',
+            expiration: {
+              maxEntries: 50,
+              maxAgeSeconds: 60 * 60 * 24 * 7,
+            },
+          },
         },
-      },
-    },
-    {
-      urlPattern: ({ request }) =>
-        request.destination === 'script' ||
-        request.destination === 'style',
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'watch-assets',
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 60 * 60 * 24 * 7,
-        },
-      },
-    },
-  ],
-}
+      ],
+    }
   })],
   build: {
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        watch: resolve(__dirname, 'watch.html'),
       },
     },
   },

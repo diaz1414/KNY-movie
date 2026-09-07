@@ -35,7 +35,6 @@ const AndroidBackHandler: React.FC = () => {
 
 const App: React.FC = () => {
   const [isAndroidOffline, setIsAndroidOffline] = useState(false);
-  const isWatchRoute = window.location.pathname === '/watch' || window.location.pathname.startsWith('/watch/');
 
   useEffect(() => {
     // Trigger ad redirect once per session on app start
@@ -75,11 +74,11 @@ const App: React.FC = () => {
   return (
     <ThemeProvider>
       {isAndroid() && <UpdateModal />}
-      {!isWatchRoute && <OfflineOverlay />}
-      {!isWatchRoute && <NetflixIntro />}
+      <OfflineOverlay />
+      <NetflixIntro />
       <Router>
         {isAndroid() && <AndroidBackHandler />}
-        {!isWatchRoute && <ScrollToTop />}
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/watch" element={<Watch />} />

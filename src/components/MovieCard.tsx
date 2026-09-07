@@ -39,16 +39,6 @@ const MovieCard: React.FC<{ movie: UnifiedMovie; inRow?: boolean }> = ({ movie, 
 
   const showComingSoon = isComingSoon(movie.releaseDate);
 
-const prefetchWatchPage = () => {
-  if (document.querySelector('link[href="/watch.html"]')) return;
-
-  const link = document.createElement('link');
-  link.rel = 'prefetch';
-  link.href = '/watch.html';
-  link.as = 'document';
-  document.head.appendChild(link);
-};
-
   return (
     <motion.div
   whileHover={{ scale: 1.06, y: -6 }}
@@ -59,8 +49,6 @@ const prefetchWatchPage = () => {
       ? 'w-[var(--card-width)] h-[var(--card-height)] shrink-0' 
       : 'w-full aspect-[2/3]'
   }`}
-  onMouseEnter={prefetchWatchPage}
-  onTouchStart={prefetchWatchPage}
   onClick={handleClick}
 >
       {showComingSoon && (
