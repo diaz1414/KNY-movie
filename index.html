@@ -24,9 +24,12 @@
   <meta name="keywords"
     content="yuk kita nonton, ykn movies, free movie streaming, watch movies online, free tv series, watch hd, online cinema" />
 
+  <link rel="canonical" href="https://movies.ykn.my.id/" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://movies.ykn.my.id" />
+  <meta property="og:url" content="https://movies.ykn.my.id/" />
   <meta property="og:title" content="Yuk Kita Nonton (YKN) - Streaming Movies & TV Series Premium HD FREE" />
   <meta property="og:description"
     content="Watch the latest movies and TV series for free with HD quality on Yuk Kita Nonton (YKN)." />
@@ -34,7 +37,7 @@
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://movies.ykn.my.id" />
+  <meta property="twitter:url" content="https://movies.ykn.my.id/" />
   <meta property="twitter:title" content="Yuk Kita Nonton (YKN) - Streaming Movies & TV Series Premium HD FREE" />
   <meta property="twitter:description"
     content="Watch the latest movies and TV series for free with HD quality on Yuk Kita Nonton (YKN)." />
@@ -42,37 +45,70 @@
 
   <meta name="google-site-verification" content="KrM95wdolGPLzJeYLwvMn3bkRsktg0JPqF_BgB73dz8" />
 
+  <!-- Structured Data: WebSite & Organization Schemas for Rich Snippets -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://movies.ykn.my.id/#website",
+          "url": "https://movies.ykn.my.id/",
+          "name": "Yuk Kita Nonton (YKN Movies)",
+          "description": "Nonton streaming film bioskop terbaru, drama series, dan siaran film HD gratis tanpa iklan mengganggu di Yuk Kita Nonton (YKN).",
+          "inLanguage": "id-ID",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://movies.ykn.my.id/?s={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://movies.ykn.my.id/#organization",
+          "name": "YKN Media",
+          "url": "https://movies.ykn.my.id/",
+          "logo": "https://movies.ykn.my.id/logo.png"
+        }
+      ]
+    }
+  </script>
+
   <style>
     #root:empty {
       background: #000000;
-      height: 100vh;
-      width: 100vw;
+      min-height: 100vh;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
     }
   </style>
 
-  <!-- Disable DevTools in Production -->
-
+  <!-- Disable DevTools in Production (Safe for Googlebot & SEO Crawlers) -->
   <script src="https://cdn.jsdelivr.net/npm/disable-devtool"></script>
   <script>
-    // Only disable if NOT on localhost
-    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      DisableDevtool({
-        clearLog: true,
-        disableMenu: false, // Klik kanan jadi BISA lagi
-        ondevtoolopen: (type) => {
-          // Savage Console Welcome
-          console.log("%c STOP! %c FUCK YOU ", "color: white; background: red; font-size: 50px; font-weight: bold; border-radius: 10px 0 0 10px; padding: 10px;", "color: red; background: black; font-size: 50px; font-weight: bold; border-radius: 0 10px 10px 0; padding: 10px;");
-          console.log("%c\n       .---. \n      /     \\ \n      | ( ) | \n      |     | \n      |     | \n      |     | \n  .---'     '---. \n /  |         |  \\ \n |  |         |  | \n |  |         |  | \n '---.       .---' \n     |       | \n     |       | \n     '-------' \n", "color: #E50914; font-weight: bold; font-size: 14px;");
-          console.log("%c DON'T TOUCH MY CODE! ", "color: #E50914; font-size: 20px; font-weight: 800;");
+    (function () {
+      // 1. Whitelist search crawlers so Googlebot / Bingbot can inspect & index page without obstruction
+      var ua = (navigator.userAgent || '').toLowerCase();
+      var isBot = /googlebot|bingbot|yandex|baiduspider|duckduckbot|slurp|google-inspectiontool|chrome-lighthouse|screaming frog|mediapartners-google/i.test(ua);
+      if (isBot) return;
 
-          document.getElementById('security-alert-modal').classList.add('active');
-          console.clear();
+      // 2. Only disable if NOT on localhost
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        if (typeof DisableDevtool === 'function') {
+          DisableDevtool({
+            clearLog: true,
+            disableMenu: false, // Right-click allowed
+            ondevtoolopen: function (type) {
+              var modal = document.getElementById('security-alert-modal');
+              if (modal) modal.classList.add('active');
+              console.clear();
+            }
+          });
         }
-      });
-    }
+      }
+    })();
 
     function closeSecurityAlert() {
       window.close();
@@ -218,7 +254,38 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Static Crawlable Content for Googlebot & Search Engine Crawlers before JS loads -->
+    <header style="padding: 24px 20px; border-bottom: 1px solid #222; max-width: 1200px; margin: 0 auto; color: #fff; font-family: system-ui, -apple-system, sans-serif;">
+      <h1 style="font-size: 2rem; font-weight: 800; color: #E50914; margin: 0 0 10px 0;">Yuk Kita Nonton (YKN Movies)</h1>
+      <p style="color: #aaa; margin: 0; font-size: 1.1rem;">Streaming Film Bioskop Terbaru, Anime &amp; TV Series Sub Indo Kualitas HD Gratis Tanpa Iklan Pop-up.</p>
+      <nav style="margin-top: 15px; display: flex; gap: 15px; flex-wrap: wrap;">
+        <a href="/movies" style="color: #fff; text-decoration: none; font-weight: 600;">Film Bioskop</a>
+        <a href="/series" style="color: #fff; text-decoration: none; font-weight: 600;">Serial TV &amp; Drama</a>
+        <a href="/popular" style="color: #fff; text-decoration: none; font-weight: 600;">Film Terpopuler</a>
+        <a href="/genre" style="color: #fff; text-decoration: none; font-weight: 600;">Kategori Genre</a>
+        <a href="/live-sports" style="color: #fff; text-decoration: none; font-weight: 600;">Live Sports</a>
+        <a href="https://tv.ykn.my.id" style="color: #E50914; text-decoration: none; font-weight: 600;">YKN TV Live</a>
+      </nav>
+    </header>
+    <main style="max-width: 1200px; margin: 30px auto; padding: 0 20px; color: #ddd; font-family: system-ui, -apple-system, sans-serif;">
+      <section>
+        <h2 style="color: #fff; font-size: 1.4rem;">Nonton Film &amp; Serial TV Online Gratis</h2>
+        <p style="line-height: 1.6; color: #bbb;">Selamat datang di <strong>Yuk Kita Nonton (YKN)</strong>, platform hiburan terlengkap untuk streaming film box office Indonesia dan mancanegara, drama Korea, serial barat, dan anime subtitle Indonesia dengan resolusi full HD 1080p super jernih dan server CDN berkecepatan tinggi.</p>
+        <ul style="line-height: 1.8; color: #aaa; padding-left: 20px;">
+          <li>Koleksi ribuan film bioskop terupdate setiap hari</li>
+          <li>Streaming lancar tanpa buffering dengan dukungan multi-server</li>
+          <li>Subtitle Indonesia (Sub Indo) sinkron &amp; rapi</li>
+          <li>Kompatibel di semua perangkat: HP, Laptop, Tablet, &amp; Smart TV Android</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+  <noscript>
+    <div style="background: #111; color: #fff; padding: 20px; text-align: center; font-family: sans-serif;">
+      <p>Aktifkan JavaScript di browser Anda untuk pengalaman menonton streaming terbaik di <strong>Yuk Kita Nonton (YKN)</strong>.</p>
+    </div>
+  </noscript>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

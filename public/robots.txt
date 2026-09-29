@@ -1,0 +1,27 @@
+# ============================================================
+# Yuk Kita Nonton (YKN Movies) - robots.txt
+# ============================================================
+
+User-agent: *
+Allow: /
+Allow: /movies
+Allow: /series
+Allow: /popular
+Allow: /genre
+Allow: /live-sports
+Allow: /news
+Allow: /about
+Allow: /watch
+
+# Allow Googlebot and legitimate search crawlers full access
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Sitemap
+Sitemap: https://movies.ykn.my.id/sitemap.xml
