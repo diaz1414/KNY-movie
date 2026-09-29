@@ -25,7 +25,7 @@ export const triggerAdOnce = () => {
   if (!isNativeAndroid()) return; // web handles ad on card click
   if (window.sessionStorage.getItem(AD_SESSION_KEY)) return;
   window.sessionStorage.setItem(AD_SESSION_KEY, '1');
-  Browser.open({ url: AD_REDIRECT_URL }).catch((err) =>
+  Browser.open({ url: AD_REDIRECT_URL }).catch((err: any) =>
     console.error('Failed to open Android ad browser:', err)
   );
 };
