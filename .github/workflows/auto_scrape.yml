@@ -5,9 +5,15 @@ on:
     - cron: '0 * * * *' # Menjalankan otomatis setiap 1 jam sekali
   workflow_dispatch: # Mengaktifkan tombol manual "Run workflow" di tab Actions GitHub
 
+# Cegah proses tumpuk-tindih agar tidak boros kuota menit
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   scrape_and_commit:
     runs-on: ubuntu-latest
+    timeout-minutes: 5 # Batasi maksimal 5 menit agar tidak jalan terus kalau web sumber macet
     permissions:
       contents: write
 
@@ -15,15 +21,17 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0 # Mengambil history lengkap agar pull/push aman
+        fetch-depth: 1 # Cukup 1 commit terakhir agar proses clone instan (hemat detik)
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 20
+        cache: 'npm'
 
-    - name: Install dependencies
-      run: npm install axios --no-package-lock
+    - name: Install axios (Quick)
+      # Memakai cache & no-audit agar selesai dalam 1-2 detik saja
+      run: npm install axios --no-package-lock --no-audit --prefer-offline
 
     - name: Run Scraper
       run: node scraper-test/fetch_data.js
@@ -33,20 +41,19 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        # Bersihkan file sampah yang tidak perlu sebelum commit
+        # Bersihkan file sampah di luar folder target
         git checkout -- package.json package-lock.json 2>/dev/null || true
         
-        # Tambahkan perubahan di folder public/data/
+        # Tambahkan perubahan data json
         git add public/data/
         
-        # Buang perubahan pada file lain yang tidak di-add agar tidak tabrakan saat pull/rebase
+        # Buang sisa file tak terpakai
         git stash --keep-index 2>/dev/null || true
         
-        # Cek apakah ada file json yang berubah
+        # Hanya commit & push jika ada data streaming yang benar-benar baru
         if ! git diff --cached --quiet; then
           git commit -m "Auto-update streaming data [skip ci]"
-          git pull --rebase origin main
-          git push origin main
+          git push origin HEAD:main
         else
           echo "Tidak ada perubahan data streaming baru."
         fi
