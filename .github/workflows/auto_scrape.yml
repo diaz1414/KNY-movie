@@ -13,16 +13,17 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Mengambil history lengkap agar pull/push aman
 
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: 18
-        cache: 'npm'
+        node-version: 20
 
     - name: Install dependencies
-      run: npm install axios
+      run: npm install axios --no-package-lock
 
     - name: Run Scraper
       run: node scraper-test/fetch_data.js
@@ -31,6 +32,21 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add public/data/*.json
-        git diff --cached --quiet || (git commit -m "Auto-update streaming data [skip ci]" && git pull --rebase origin main && git push origin HEAD:main)
-
+        
+        # Bersihkan file sampah yang tidak perlu sebelum commit
+        git checkout -- package.json package-lock.json 2>/dev/null || true
+        
+        # Tambahkan perubahan di folder public/data/
+        git add public/data/
+        
+        # Buang perubahan pada file lain yang tidak di-add agar tidak tabrakan saat pull/rebase
+        git stash --keep-index 2>/dev/null || true
+        
+        # Cek apakah ada file json yang berubah
+        if ! git diff --cached --quiet; then
+          git commit -m "Auto-update streaming data [skip ci]"
+          git pull --rebase origin main
+          git push origin main
+        else
+          echo "Tidak ada perubahan data streaming baru."
+        fi
