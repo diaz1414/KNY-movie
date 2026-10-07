@@ -4,6 +4,10 @@ const config: CapacitorConfig = {
   appId: 'com.ykn.app',
   appName: 'Yuk Kita Nonton',
   webDir: 'dist',
+  server: {
+    url: 'https://movies.ykn.my.id',
+    cleartext: true
+  },
   android: {
     allowMixedContent: true,
     buildOptions: {
