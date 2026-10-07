@@ -26,6 +26,7 @@ import { triggerAdOnce } from './utils/adRedirect';
 
 import UpdateModal from './components/UpdateModal';
 import { useAndroidBack } from './hooks/useAndroidBack';
+import { useScreenManager } from './hooks/useScreenManager';
 
 const AndroidBackHandler: React.FC = () => {
   useAndroidBack();
@@ -33,6 +34,7 @@ const AndroidBackHandler: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  useScreenManager();
   const [isAndroidOffline, setIsAndroidOffline] = useState(false);
 
   useEffect(() => {

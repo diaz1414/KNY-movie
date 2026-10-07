@@ -355,12 +355,23 @@ export const LiveVideoPlayer: React.FC<LiveVideoPlayerProps> = ({ servers }) => 
     else container.requestFullscreen().catch(() => {});
   };
 
-  // Fullscreen change listener — removes rounded corners when in fullscreen
+  // Fullscreen change listener — removes rounded corners and locks landscape when in fullscreen
   useEffect(() => {
     const onFsChange = () => {
       const fs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
       setIsFullscreen(fs);
-      if (fs) setShowControls(true);
+      if (fs) {
+        setShowControls(true);
+        const orientation = (screen.orientation || (screen as any).mozOrientation || (screen as any).msOrientation) as any;
+        if (orientation && typeof orientation.lock === 'function') {
+          orientation.lock('landscape').catch(() => {});
+        }
+      } else {
+        const orientation = (screen.orientation || (screen as any).mozOrientation || (screen as any).msOrientation) as any;
+        if (orientation && typeof orientation.unlock === 'function') {
+          try { orientation.unlock(); } catch (e) {}
+        }
+      }
     };
     document.addEventListener('fullscreenchange', onFsChange);
     document.addEventListener('webkitfullscreenchange', onFsChange);

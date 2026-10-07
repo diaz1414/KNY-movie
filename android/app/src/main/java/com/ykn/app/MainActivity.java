@@ -235,16 +235,19 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         
         WebView webView = getBridge().getWebView();
         if (webView == null) {
             return;
         }
+        webView.setKeepScreenOn(true);
         
         // Anti-Redirect & Ad Blocker
         webView.setWebViewClient(new WebViewClient() {
@@ -288,7 +291,7 @@ public class MainActivity extends BridgeActivity {
                 customViewCallback = callback;
                 
                 // Force Landscape
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                 
                 ((FrameLayout) getWindow().getDecorView()).addView(customView, new FrameLayout.LayoutParams(-1, -1));
                 getWindow().getDecorView().setSystemUiVisibility(
