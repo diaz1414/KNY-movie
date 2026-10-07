@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, AlertCircle } from 'lucide-react';
 
-const CURRENT_ANDROID_SHELL_VERSION = '1.0.3'; // Manually track native APK shell version
+const CURRENT_ANDROID_SHELL_VERSION = '2.0.0'; // Manually track native APK shell version
 const VERSION_CHECK_URL = 'https://movies.ykn.my.id/version.json';
 
 interface UpdateInfo {
