@@ -35,52 +35,75 @@ const Home: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Restore state on mount
+  // Restore state on mount (or fresh fetch on reload)
   useEffect(() => {
+    const isReload = () => {
+      try {
+        const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+        if (navEntries && navEntries.length > 0) {
+          return navEntries[0].type === 'reload';
+        }
+        return (performance as any).navigation?.type === 1;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    if (isReload()) {
+      sessionStorage.removeItem('home_state_v2');
+      fetchData();
+      return;
+    }
+
     const savedState = sessionStorage.getItem('home_state_v2');
     if (savedState) {
-      const {
-        popularMovies: savedPop,
-        recentMovies: savedRecent,
-        popularSeries: savedSeries,
-        upcomingMovies: savedUpcoming,
-        topRatedMovies: savedTopRated,
-        exploreMovies: savedExplore,
-        explorePage: savedPage,
-        scrollY
-      } = JSON.parse(savedState);
+      try {
+        const {
+          popularMovies: savedPop,
+          recentMovies: savedRecent,
+          popularSeries: savedSeries,
+          upcomingMovies: savedUpcoming,
+          topRatedMovies: savedTopRated,
+          exploreMovies: savedExplore,
+          explorePage: savedPage,
+          scrollY
+        } = JSON.parse(savedState);
 
-      setPopularMovies(savedPop || []);
-      setRecentMovies(savedRecent || []);
-      setPopularSeries(savedSeries || []);
-      setExploreMovies(savedExplore || []);
-      setExplorePage(savedPage || 1);
-      setLoading(false);
+        setPopularMovies(savedPop || []);
+        setRecentMovies(savedRecent || []);
+        setPopularSeries(savedSeries || []);
+        setExploreMovies(savedExplore || []);
+        setExplorePage(savedPage || 1);
+        setLoading(false);
 
-      if (savedUpcoming && savedUpcoming.length > 0) {
-        setUpcomingMovies(savedUpcoming);
-      } else {
-        // Fallback fetch if upcoming was not stored in session previously
-        movieService.getUpcomingMovies()
-          .then(setUpcomingMovies)
-          .catch(err => console.error("Failed to fetch upcoming fallback", err));
+        if (savedUpcoming && savedUpcoming.length > 0) {
+          setUpcomingMovies(savedUpcoming);
+        } else {
+          movieService.getUpcomingMovies()
+            .then(setUpcomingMovies)
+            .catch(err => console.error("Failed to fetch upcoming fallback", err));
+        }
+
+        if (savedTopRated && savedTopRated.length > 0) {
+          setTopRatedMovies(savedTopRated);
+        } else {
+          movieService.getTopRatedMovies()
+            .then(setTopRatedMovies)
+            .catch(err => console.error("Failed to fetch top rated fallback", err));
+        }
+
+        if (typeof scrollY === 'number' && scrollY > 0) {
+          requestAnimationFrame(() => {
+            window.scrollTo({
+              top: scrollY,
+              behavior: 'instant'
+            });
+          });
+        }
+      } catch (e) {
+        sessionStorage.removeItem('home_state_v2');
+        fetchData();
       }
-
-      if (savedTopRated && savedTopRated.length > 0) {
-        setTopRatedMovies(savedTopRated);
-      } else {
-        // Fallback fetch if top rated was not stored in session previously
-        movieService.getTopRatedMovies()
-          .then(setTopRatedMovies)
-          .catch(err => console.error("Failed to fetch top rated fallback", err));
-      }
-
-      setTimeout(() => {
-        window.scrollTo({
-          top: scrollY,
-          behavior: 'instant'
-        });
-      }, 100);
     } else {
       fetchData();
     }
@@ -147,26 +170,13 @@ const Home: React.FC = () => {
     }
   };
 
+  // Save state for smooth back-navigation restoration
   useEffect(() => {
-    // Scroll handling for state restoration only
-    const handleScroll = () => {
-      if (popularMovies.length > 0) {
-        const current = JSON.parse(sessionStorage.getItem('home_state_v2') || '{}');
-        sessionStorage.setItem('home_state_v2', JSON.stringify({
-          ...current,
-          scrollY: window.scrollY
-        }));
-      }
-    };
+    if (popularMovies.length === 0) return;
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [popularMovies, recentMovies, popularSeries, upcomingMovies, topRatedMovies]);
-
-  // Save state
-  useEffect(() => {
-    const handleSaveState = () => {
-      if (popularMovies.length > 0) {
+    let timeoutId: any = null;
+    const saveState = () => {
+      try {
         sessionStorage.setItem('home_state_v2', JSON.stringify({
           popularMovies,
           recentMovies,
@@ -177,23 +187,26 @@ const Home: React.FC = () => {
           explorePage,
           scrollY: window.scrollY
         }));
+      } catch (e) {
+        // Silently handled: session storage quota
       }
     };
 
-    handleSaveState();
+    saveState();
 
     const handleScroll = () => {
-      if (popularMovies.length > 0) {
-        const current = JSON.parse(sessionStorage.getItem('home_state_v2') || '{}');
-        sessionStorage.setItem('home_state_v2', JSON.stringify({
-          ...current,
-          scrollY: window.scrollY
-        }));
-      }
+      if (timeoutId) return;
+      timeoutId = setTimeout(() => {
+        timeoutId = null;
+        saveState();
+      }, 250);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [popularMovies, recentMovies, popularSeries, upcomingMovies, topRatedMovies, exploreMovies, explorePage]);
 
   // Listen for movie open events from Navbar search

@@ -30,30 +30,52 @@ const Series: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Restore state on mount
+  // Restore state on mount (or fresh fetch on reload)
   useEffect(() => {
+    const isReload = () => {
+      try {
+        const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+        return navEntries?.[0]?.type === 'reload';
+      } catch {
+        return false;
+      }
+    };
+
+    if (isReload()) {
+      sessionStorage.removeItem('series_page_state');
+      fetchInitialData();
+      return;
+    }
+
     const savedState = sessionStorage.getItem('series_page_state');
     if (savedState) {
-      const {
-        movies: savedMovies,
-        heroMovies: savedHero,
-        page: savedPage,
-        hasMore: savedHasMore,
-        scrollY
-      } = JSON.parse(savedState);
+      try {
+        const {
+          movies: savedMovies,
+          heroMovies: savedHero,
+          page: savedPage,
+          hasMore: savedHasMore,
+          scrollY
+        } = JSON.parse(savedState);
 
-      setMovies(savedMovies || []);
-      setHeroMovies(savedHero || []);
-      setPage(savedPage || 1);
-      setHasMore(savedHasMore !== undefined ? savedHasMore : true);
-      setLoading(false);
+        setMovies(savedMovies || []);
+        setHeroMovies(savedHero || []);
+        setPage(savedPage || 1);
+        setHasMore(savedHasMore !== undefined ? savedHasMore : true);
+        setLoading(false);
 
-      setTimeout(() => {
-        window.scrollTo({
-          top: scrollY,
-          behavior: 'instant'
-        });
-      }, 100);
+        if (typeof scrollY === 'number' && scrollY > 0) {
+          requestAnimationFrame(() => {
+            window.scrollTo({
+              top: scrollY,
+              behavior: 'instant'
+            });
+          });
+        }
+      } catch {
+        sessionStorage.removeItem('series_page_state');
+        fetchInitialData();
+      }
     } else {
       fetchInitialData();
     }

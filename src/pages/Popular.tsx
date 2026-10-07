@@ -30,30 +30,52 @@ const Popular: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Restore state on mount
+  // Restore state on mount (or fresh fetch on reload)
   useEffect(() => {
+    const isReload = () => {
+      try {
+        const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+        return navEntries?.[0]?.type === 'reload';
+      } catch {
+        return false;
+      }
+    };
+
+    if (isReload()) {
+      sessionStorage.removeItem('popular_page_state_v2');
+      fetchInitialData();
+      return;
+    }
+
     const savedState = sessionStorage.getItem('popular_page_state_v2');
     if (savedState) {
-      const {
-        movies: savedMovies,
-        heroMovies: savedHero,
-        page: savedPage,
-        hasMore: savedHasMore,
-        scrollY
-      } = JSON.parse(savedState);
+      try {
+        const {
+          movies: savedMovies,
+          heroMovies: savedHero,
+          page: savedPage,
+          hasMore: savedHasMore,
+          scrollY
+        } = JSON.parse(savedState);
 
-      setMovies(savedMovies || []);
-      setHeroMovies(savedHero || []);
-      setPage(savedPage || 1);
-      setHasMore(savedHasMore !== undefined ? savedHasMore : true);
-      setLoading(false);
+        setMovies(savedMovies || []);
+        setHeroMovies(savedHero || []);
+        setPage(savedPage || 1);
+        setHasMore(savedHasMore !== undefined ? savedHasMore : true);
+        setLoading(false);
 
-      setTimeout(() => {
-        window.scrollTo({
-          top: scrollY,
-          behavior: 'instant'
-        });
-      }, 100);
+        if (typeof scrollY === 'number' && scrollY > 0) {
+          requestAnimationFrame(() => {
+            window.scrollTo({
+              top: scrollY,
+              behavior: 'instant'
+            });
+          });
+        }
+      } catch {
+        sessionStorage.removeItem('popular_page_state_v2');
+        fetchInitialData();
+      }
     } else {
       fetchInitialData();
     }
@@ -92,7 +114,7 @@ const Popular: React.FC = () => {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const popular = await movieService.getTopRatedMovies(1);
+      const popular = await movieService.getPopularMovies(1);
       setHeroMovies(popular.slice(0, 7));
       setMovies(popular);
       setPage(1);
@@ -109,7 +131,7 @@ const Popular: React.FC = () => {
     setLoadingMore(true);
     const nextPage = page + 1;
     try {
-      const nextPopular = await movieService.getTopRatedMovies(nextPage);
+      const nextPopular = await movieService.getPopularMovies(nextPage);
       if (nextPopular.length > 0) {
         setMovies((prev) => [...prev, ...nextPopular]);
         setPage(nextPage);

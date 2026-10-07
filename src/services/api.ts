@@ -194,44 +194,31 @@ export const movieService = {
 
   getTopRatedMovies: async (page: number = 1) => {
     try {
-      const currentYear = new Date().getFullYear();
-      const startYear = currentYear - 2; // e.g. 2024 if 2026
-      const startDate = `${startYear}-01-01`;
-
       const [moviesRes, tvRes] = await Promise.all([
-        api.get('/discover/movie', {
-          params: {
-            language: getLangCode(),
-            region: 'US',
-            sort_by: 'vote_average.desc',
-            'vote_count.gte': 300,
-            'primary_release_date.gte': startDate,
-            page
-          }
+        api.get('/movie/top_rated', {
+          params: { language: getLangCode(), region: 'US', page }
         }),
-        api.get('/discover/tv', {
-          params: {
-            language: getLangCode(),
-            sort_by: 'vote_average.desc',
-            'vote_count.gte': 150,
-            'first_air_date.gte': startDate,
-            page
-          }
+        api.get('/tv/top_rated', {
+          params: { language: getLangCode(), page }
         })
       ]);
 
-      const movies = moviesRes.data.results.map((m: any) => ({ ...m, name: undefined }));
-      const tvs = tvRes.data.results;
+      const movies = (moviesRes.data?.results || []).map((m: any) => ({ ...m, name: undefined }));
+      const tvs = tvRes.data?.results || [];
 
-      const combined = [...movies, ...tvs]
-        .map(normalizeTMDB)
-        .sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
+      // Interleave movies & series for a diverse, high-caliber top-rated collection
+      const combined: any[] = [];
+      const maxLen = Math.max(movies.length, tvs.length);
+      for (let i = 0; i < maxLen; i++) {
+        if (i < movies.length) combined.push(movies[i]);
+        if (i < tvs.length) combined.push(tvs[i]);
+      }
 
-      return combined.slice(0, 20);
+      return combined.slice(0, 20).map(normalizeTMDB);
     } catch (err) {
       console.error('Failed to fetch top rated mixed content:', err);
       const res = await api.get('/movie/top_rated', { params: { language: getLangCode(), region: 'US', page } });
-      return res.data.results.map(normalizeTMDB);
+      return (res.data?.results || []).map(normalizeTMDB);
     }
   },
 
