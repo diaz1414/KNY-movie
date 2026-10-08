@@ -2,7 +2,6 @@ package com.ykn.app;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -12,27 +11,25 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.RenderProcessGoneDetail;
-import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.getcapacitor.Bridge;
 import com.getcapacitor.BridgeActivity;
-import com.getcapacitor.BridgeWebChromeClient;
 import com.getcapacitor.BridgeWebViewClient;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends BridgeActivity {
+    private static final String TAG = "YKN_APP";
     private static final String AD_REDIRECT_HOST = "www.effectivecpmnetwork.com";
     private static final String AD_REDIRECT_PATH = "/iadikppi";
     private static final String AD_REDIRECT_KEY = "1ef3c31f6d59e0b786859466ce1bb939";
@@ -40,17 +37,17 @@ public class MainActivity extends BridgeActivity {
     private static boolean androidSessionAdGatePassed = false;
 
     private boolean androidSessionAdGateShowing = false;
-    private SafeBridgeWebChromeClient safeWebChromeClient;
     
     private static final List<String> AD_DOMAINS = Arrays.asList(
         "adsterra.com", "doubleclick.net", "googlesyndication.com",
-        "google-analytics.com", "highperformanceformat.com", "popads.net",
+        "highperformanceformat.com", "popads.net",
         "popcash.net", "exoclick.com", "juicyads.com", "onclickperformance.com",
         "propellerads.com", "creative.ak.kickads.com", "adservice.google",
         "effectivecpmnetwork.com"
     );
 
     private boolean isAllowedAppUrl(String url) {
+        if (url == null) return false;
         if (url.startsWith("capacitor://") || url.startsWith("http://localhost")) {
             return true;
         }
@@ -66,25 +63,30 @@ public class MainActivity extends BridgeActivity {
     }
 
     private boolean isAllowedAdRedirectUrl(String url) {
-        Uri uri = Uri.parse(url);
-        String host = uri.getHost();
-        String path = uri.getPath();
-        String key = uri.getQueryParameter("key");
+        if (url == null) return false;
+        try {
+            Uri uri = Uri.parse(url);
+            String host = uri.getHost();
+            String path = uri.getPath();
+            String key = uri.getQueryParameter("key");
 
-        return "https".equalsIgnoreCase(uri.getScheme()) &&
-            AD_REDIRECT_HOST.equalsIgnoreCase(host) &&
-            AD_REDIRECT_PATH.equals(path) &&
-            AD_REDIRECT_KEY.equals(key);
+            return "https".equalsIgnoreCase(uri.getScheme()) &&
+                AD_REDIRECT_HOST.equalsIgnoreCase(host) &&
+                AD_REDIRECT_PATH.equals(path) &&
+                AD_REDIRECT_KEY.equals(key);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private boolean isBlockedAdUrl(String url) {
+        if (url == null) return false;
         String normalizedUrl = url.toLowerCase();
         for (String domain : AD_DOMAINS) {
             if (normalizedUrl.contains(domain)) {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -94,11 +96,12 @@ public class MainActivity extends BridgeActivity {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         } catch (Exception ignored) {
-            // If Android cannot find a handler, keep the app on the current screen.
+            // Keep app on current screen if handler not found
         }
     }
 
     private boolean handleUrlOverride(String url, boolean isMainFrame) {
+        if (url == null) return false;
         if (isAllowedAppUrl(url)) {
             return false;
         }
@@ -132,13 +135,12 @@ public class MainActivity extends BridgeActivity {
         return view;
     }
 
-    private void showAndroidSessionAdGate(WebView webView) {
+    private void showAndroidSessionAdGate() {
         if (androidSessionAdGatePassed || androidSessionAdGateShowing || isFinishing()) {
             return;
         }
 
         androidSessionAdGateShowing = true;
-        webView.setVisibility(View.INVISIBLE);
 
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -208,7 +210,6 @@ public class MainActivity extends BridgeActivity {
         button.setOnClickListener(view -> {
             androidSessionAdGatePassed = true;
             androidSessionAdGateShowing = false;
-            webView.setVisibility(View.VISIBLE);
             dialog.dismiss();
             openExternalUrl(AD_REDIRECT_URL);
         });
@@ -221,9 +222,6 @@ public class MainActivity extends BridgeActivity {
         dialog.setContentView(card);
         dialog.setOnCancelListener(cancelledDialog -> {
             androidSessionAdGateShowing = false;
-            if (!androidSessionAdGatePassed) {
-                webView.setVisibility(View.INVISIBLE);
-            }
         });
         dialog.show();
 
@@ -268,7 +266,15 @@ public class MainActivity extends BridgeActivity {
             if (request != null && request.getUrl() != null) {
                 String url = request.getUrl().toString();
                 if (isBlockedAdUrl(url)) {
-                    return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream("".getBytes()));
+                    // Safe HTTP 403 Forbidden response to avoid confusing Chromium parser
+                    return new WebResourceResponse(
+                        "text/plain",
+                        "utf-8",
+                        403,
+                        "Forbidden",
+                        Collections.emptyMap(),
+                        new ByteArrayInputStream(new byte[0])
+                    );
                 }
             }
             return super.shouldInterceptRequest(view, request);
@@ -277,113 +283,21 @@ public class MainActivity extends BridgeActivity {
         @Override
         public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
             boolean didCrash = detail != null && detail.didCrash();
-            Log.e("YKN", "WebView render process exited: didCrash=" + didCrash);
-
-            try {
-                if (view != null) {
-                    ViewGroup parent = (ViewGroup) view.getParent();
-                    if (parent != null) {
-                        parent.removeView(view);
-                    }
-                    view.destroy();
-                }
-            } catch (Exception ignored) {}
-
-            try {
-                runOnUiThread(() -> {
-                    try {
-                        recreate();
-                    } catch (Exception ignored) {}
-                });
-            } catch (Exception ignored) {}
-
-            // Returning true prevents the Android OS from killing the host application!
+            Log.w(TAG, "WebView render process exited: didCrash=" + didCrash);
+            // CRITICAL: Returning true tells the Android operating system that the host
+            // application handled the event. This prevents the OS from force-closing the app
+            // and completely stops the "Uninstall WebView updates?" prompt.
             return true;
         }
     }
 
-    private class SafeBridgeWebChromeClient extends BridgeWebChromeClient {
-        private View customView;
-        private WebChromeClient.CustomViewCallback customViewCallback;
-        private int originalOrientation;
-
-        public SafeBridgeWebChromeClient(Bridge bridge) {
-            super(bridge);
-        }
-
-        public boolean isCustomViewShowing() {
-            return customView != null;
-        }
-
-        @Override
-        public void onShowCustomView(View view, CustomViewCallback callback) {
-            try {
-                if (customView != null) {
-                    if (callback != null) {
-                        callback.onCustomViewHidden();
-                    }
-                    return;
-                }
-
-                customView = view;
-                customViewCallback = callback;
-                originalOrientation = getRequestedOrientation();
-
-                if (view.getParent() instanceof ViewGroup) {
-                    ((ViewGroup) view.getParent()).removeView(view);
-                }
-
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-
-                FrameLayout decor = (FrameLayout) getWindow().getDecorView();
-                decor.addView(customView, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                ));
-
-                getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_FULLSCREEN |
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                );
-            } catch (Exception e) {
-                Log.e("YKN", "onShowCustomView error", e);
-                if (callback != null) {
-                    try {
-                        callback.onCustomViewHidden();
-                    } catch (Exception ignored) {}
-                }
-            }
-        }
-
-        @Override
-        public void onHideCustomView() {
-            try {
-                if (customView != null) {
-                    FrameLayout decor = (FrameLayout) getWindow().getDecorView();
-                    decor.removeView(customView);
-                    customView = null;
-                }
-                setRequestedOrientation(originalOrientation);
-                if (customViewCallback != null) {
-                    customViewCallback.onCustomViewHidden();
-                    customViewCallback = null;
-                }
-                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-            } catch (Exception e) {
-                Log.e("YKN", "onHideCustomView error", e);
-            }
-        }
-    }
-
-    private void setupWebView() {
+    private void configureWebView() {
         WebView webView = getBridge().getWebView();
         if (webView == null) {
             return;
         }
 
         webView.setKeepScreenOn(true);
-        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -395,15 +309,13 @@ public class MainActivity extends BridgeActivity {
         settings.setAllowContentAccess(true);
 
         getBridge().setWebViewClient(new SafeBridgeWebViewClient(getBridge()));
-        safeWebChromeClient = new SafeBridgeWebChromeClient(getBridge());
-        webView.setWebChromeClient(safeWebChromeClient);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setupWebView();
+        configureWebView();
     }
 
     @Override
@@ -414,16 +326,7 @@ public class MainActivity extends BridgeActivity {
         WebView webView = getBridge().getWebView();
         if (webView != null) {
             webView.setKeepScreenOn(true);
-            showAndroidSessionAdGate(webView);
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (safeWebChromeClient != null && safeWebChromeClient.isCustomViewShowing()) {
-            safeWebChromeClient.onHideCustomView();
-            return;
-        }
-        super.onBackPressed();
+        showAndroidSessionAdGate();
     }
 }
