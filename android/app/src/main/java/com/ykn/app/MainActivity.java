@@ -2,6 +2,7 @@ package com.ykn.app;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -11,13 +12,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.RenderProcessGoneDetail;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.getcapacitor.Bridge;
@@ -37,6 +42,8 @@ public class MainActivity extends BridgeActivity {
     private static boolean androidSessionAdGatePassed = false;
 
     private boolean androidSessionAdGateShowing = false;
+    private View customFullscreenView;
+    private WebChromeClient.CustomViewCallback customFullscreenCallback;
     
     private static final List<String> AD_DOMAINS = Arrays.asList(
         "adsterra.com", "doubleclick.net", "googlesyndication.com",
@@ -45,6 +52,26 @@ public class MainActivity extends BridgeActivity {
         "propellerads.com", "creative.ak.kickads.com", "adservice.google",
         "effectivecpmnetwork.com"
     );
+
+    public class WebAppInterface {
+        @JavascriptInterface
+        public void lockLandscape() {
+            runOnUiThread(() -> {
+                try {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                } catch (Exception ignored) {}
+            });
+        }
+
+        @JavascriptInterface
+        public void unlockOrientation() {
+            runOnUiThread(() -> {
+                try {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+                } catch (Exception ignored) {}
+            });
+        }
+    }
 
     private boolean isAllowedAppUrl(String url) {
         if (url == null) return false;
@@ -284,9 +311,6 @@ public class MainActivity extends BridgeActivity {
         public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
             boolean didCrash = detail != null && detail.didCrash();
             Log.w(TAG, "WebView render process exited: didCrash=" + didCrash);
-            // CRITICAL: Returning true tells the Android operating system that the host
-            // application handled the event. This prevents the OS from force-closing the app
-            // and completely stops the "Uninstall WebView updates?" prompt.
             return true;
         }
     }
@@ -308,7 +332,110 @@ public class MainActivity extends BridgeActivity {
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
 
+        // Add JavaScript interface for direct JS-to-native orientation control
+        webView.addJavascriptInterface(new WebAppInterface(), "AndroidApp");
+
         getBridge().setWebViewClient(new SafeBridgeWebViewClient(getBridge()));
+
+        final WebChromeClient defaultChromeClient = webView.getWebChromeClient();
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onShowCustomView(View view, CustomViewCallback callback) {
+                try {
+                    if (customFullscreenView != null) {
+                        onHideCustomView();
+                        return;
+                    }
+
+                    customFullscreenView = view;
+                    customFullscreenCallback = callback;
+
+                    // Rotate to landscape automatically
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+
+                    // Immersive sticky fullscreen
+                    getWindow().getDecorView().setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    );
+
+                    if (view.getParent() instanceof ViewGroup) {
+                        ((ViewGroup) view.getParent()).removeView(view);
+                    }
+
+                    FrameLayout decor = (FrameLayout) getWindow().getDecorView();
+                    decor.addView(customFullscreenView, new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    ));
+                } catch (Exception e) {
+                    Log.e(TAG, "Error showing custom view", e);
+                    if (callback != null) {
+                        try {
+                            callback.onCustomViewHidden();
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
+
+            @Override
+            public void onHideCustomView() {
+                try {
+                    if (customFullscreenView != null) {
+                        FrameLayout decor = (FrameLayout) getWindow().getDecorView();
+                        decor.removeView(customFullscreenView);
+                        customFullscreenView = null;
+                    }
+
+                    // Restore to normal user orientation
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+
+                    if (customFullscreenCallback != null) {
+                        customFullscreenCallback.onCustomViewHidden();
+                        customFullscreenCallback = null;
+                    }
+
+                    getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error hiding custom view", e);
+                }
+            }
+
+            @Override
+            public boolean onConsoleMessage(android.webkit.ConsoleMessage consoleMessage) {
+                return defaultChromeClient != null ? defaultChromeClient.onConsoleMessage(consoleMessage) : super.onConsoleMessage(consoleMessage);
+            }
+
+            @Override
+            public boolean onShowFileChooser(WebView webView, android.webkit.ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                return defaultChromeClient != null ? defaultChromeClient.onShowFileChooser(webView, filePathCallback, fileChooserParams) : super.onShowFileChooser(webView, filePathCallback, fileChooserParams);
+            }
+
+            @Override
+            public void onPermissionRequest(android.webkit.PermissionRequest request) {
+                if (defaultChromeClient != null) {
+                    defaultChromeClient.onPermissionRequest(request);
+                } else {
+                    super.onPermissionRequest(request);
+                }
+            }
+
+            @Override
+            public boolean onJsAlert(WebView view, String url, String message, android.webkit.JsResult result) {
+                return defaultChromeClient != null ? defaultChromeClient.onJsAlert(view, url, message, result) : super.onJsAlert(view, url, message, result);
+            }
+
+            @Override
+            public boolean onJsConfirm(WebView view, String url, String message, android.webkit.JsResult result) {
+                return defaultChromeClient != null ? defaultChromeClient.onJsConfirm(view, url, message, result) : super.onJsConfirm(view, url, message, result);
+            }
+
+            @Override
+            public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, android.webkit.JsPromptResult result) {
+                return defaultChromeClient != null ? defaultChromeClient.onJsPrompt(view, url, message, defaultValue, result) : super.onJsPrompt(view, url, message, defaultValue, result);
+            }
+        });
     }
 
     @Override
@@ -328,5 +455,24 @@ public class MainActivity extends BridgeActivity {
             webView.setKeepScreenOn(true);
         }
         showAndroidSessionAdGate();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (customFullscreenView != null) {
+            try {
+                FrameLayout decor = (FrameLayout) getWindow().getDecorView();
+                decor.removeView(customFullscreenView);
+                customFullscreenView = null;
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+                if (customFullscreenCallback != null) {
+                    customFullscreenCallback.onCustomViewHidden();
+                    customFullscreenCallback = null;
+                }
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                return;
+            } catch (Exception ignored) {}
+        }
+        super.onBackPressed();
     }
 }
