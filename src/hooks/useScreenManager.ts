@@ -25,13 +25,17 @@ export const useScreenManager = () => {
       ) as any;
 
       if (isFullscreen) {
-        if (orientation && typeof orientation.lock === 'function') {
+        if ((window as any).AndroidApp?.lockLandscape) {
+          (window as any).AndroidApp.lockLandscape();
+        } else if (orientation && typeof orientation.lock === 'function') {
           orientation.lock('landscape').catch(() => {
             // Silently handled: some browsers or devices may restrict orientation lock
           });
         }
       } else {
-        if (orientation && typeof orientation.unlock === 'function') {
+        if ((window as any).AndroidApp?.unlockOrientation) {
+          (window as any).AndroidApp.unlockOrientation();
+        } else if (orientation && typeof orientation.unlock === 'function') {
           try {
             orientation.unlock();
           } catch (e) {
