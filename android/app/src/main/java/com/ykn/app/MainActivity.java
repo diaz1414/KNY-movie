@@ -9,19 +9,25 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.getcapacitor.Bridge;
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.BridgeWebChromeClient;
+import com.getcapacitor.BridgeWebViewClient;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +40,7 @@ public class MainActivity extends BridgeActivity {
     private static boolean androidSessionAdGatePassed = false;
 
     private boolean androidSessionAdGateShowing = false;
+    private SafeBridgeWebChromeClient safeWebChromeClient;
     
     private static final List<String> AD_DOMAINS = Arrays.asList(
         "adsterra.com", "doubleclick.net", "googlesyndication.com",
@@ -232,81 +239,191 @@ public class MainActivity extends BridgeActivity {
         }
     }
 
+    private class SafeBridgeWebViewClient extends BridgeWebViewClient {
+        public SafeBridgeWebViewClient(Bridge bridge) {
+            super(bridge);
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            if (request != null && request.getUrl() != null) {
+                String url = request.getUrl().toString();
+                if (handleUrlOverride(url, request.isForMainFrame())) {
+                    return true;
+                }
+            }
+            return super.shouldOverrideUrlLoading(view, request);
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            if (url != null && handleUrlOverride(url, true)) {
+                return true;
+            }
+            return super.shouldOverrideUrlLoading(view, url);
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            if (request != null && request.getUrl() != null) {
+                String url = request.getUrl().toString();
+                if (isBlockedAdUrl(url)) {
+                    return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream("".getBytes()));
+                }
+            }
+            return super.shouldInterceptRequest(view, request);
+        }
+
+        @Override
+        public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+            boolean didCrash = detail != null && detail.didCrash();
+            Log.e("YKN", "WebView render process exited: didCrash=" + didCrash);
+
+            try {
+                if (view != null) {
+                    ViewGroup parent = (ViewGroup) view.getParent();
+                    if (parent != null) {
+                        parent.removeView(view);
+                    }
+                    view.destroy();
+                }
+            } catch (Exception ignored) {}
+
+            try {
+                runOnUiThread(() -> {
+                    try {
+                        recreate();
+                    } catch (Exception ignored) {}
+                });
+            } catch (Exception ignored) {}
+
+            // Returning true prevents the Android OS from killing the host application!
+            return true;
+        }
+    }
+
+    private class SafeBridgeWebChromeClient extends BridgeWebChromeClient {
+        private View customView;
+        private WebChromeClient.CustomViewCallback customViewCallback;
+        private int originalOrientation;
+
+        public SafeBridgeWebChromeClient(Bridge bridge) {
+            super(bridge);
+        }
+
+        public boolean isCustomViewShowing() {
+            return customView != null;
+        }
+
+        @Override
+        public void onShowCustomView(View view, CustomViewCallback callback) {
+            try {
+                if (customView != null) {
+                    if (callback != null) {
+                        callback.onCustomViewHidden();
+                    }
+                    return;
+                }
+
+                customView = view;
+                customViewCallback = callback;
+                originalOrientation = getRequestedOrientation();
+
+                if (view.getParent() instanceof ViewGroup) {
+                    ((ViewGroup) view.getParent()).removeView(view);
+                }
+
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+
+                FrameLayout decor = (FrameLayout) getWindow().getDecorView();
+                decor.addView(customView, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                ));
+
+                getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN |
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                );
+            } catch (Exception e) {
+                Log.e("YKN", "onShowCustomView error", e);
+                if (callback != null) {
+                    try {
+                        callback.onCustomViewHidden();
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+
+        @Override
+        public void onHideCustomView() {
+            try {
+                if (customView != null) {
+                    FrameLayout decor = (FrameLayout) getWindow().getDecorView();
+                    decor.removeView(customView);
+                    customView = null;
+                }
+                setRequestedOrientation(originalOrientation);
+                if (customViewCallback != null) {
+                    customViewCallback.onCustomViewHidden();
+                    customViewCallback = null;
+                }
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            } catch (Exception e) {
+                Log.e("YKN", "onHideCustomView error", e);
+            }
+        }
+    }
+
+    private void setupWebView() {
+        WebView webView = getBridge().getWebView();
+        if (webView == null) {
+            return;
+        }
+
+        webView.setKeepScreenOn(true);
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
+        settings.setMediaPlaybackRequiresUserGesture(false);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+
+        getBridge().setWebViewClient(new SafeBridgeWebViewClient(getBridge()));
+        safeWebChromeClient = new SafeBridgeWebChromeClient(getBridge());
+        webView.setWebChromeClient(safeWebChromeClient);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        setupWebView();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        
+
         WebView webView = getBridge().getWebView();
-        if (webView == null) {
+        if (webView != null) {
+            webView.setKeepScreenOn(true);
+            showAndroidSessionAdGate(webView);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (safeWebChromeClient != null && safeWebChromeClient.isCustomViewShowing()) {
+            safeWebChromeClient.onHideCustomView();
             return;
         }
-        webView.setKeepScreenOn(true);
-        
-        // Anti-Redirect & Ad Blocker
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                String url = request.getUrl().toString();
-                return handleUrlOverride(url, request.isForMainFrame());
-            }
-
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                return handleUrlOverride(url, true);
-            }
-
-            @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                String url = request.getUrl().toString();
-                if (isBlockedAdUrl(url)) {
-                    return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream("".getBytes()));
-                }
-                return super.shouldInterceptRequest(view, request);
-            }
-        });
-
-        showAndroidSessionAdGate(webView);
-
-        // Auto-Rotate to Landscape on Fullscreen
-        webView.setWebChromeClient(new WebChromeClient() {
-            private View customView;
-            private WebChromeClient.CustomViewCallback customViewCallback;
-            private int originalOrientation;
-
-            @Override
-            public void onShowCustomView(View view, CustomViewCallback callback) {
-                if (customView != null) {
-                    onHideCustomView();
-                    return;
-                }
-                customView = view;
-                originalOrientation = getRequestedOrientation();
-                customViewCallback = callback;
-                
-                // Force Landscape
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-                
-                ((FrameLayout) getWindow().getDecorView()).addView(customView, new FrameLayout.LayoutParams(-1, -1));
-                getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                );
-            }
-
-            @Override
-            public void onHideCustomView() {
-                ((FrameLayout) getWindow().getDecorView()).removeView(customView);
-                customView = null;
-                setRequestedOrientation(originalOrientation);
-                customViewCallback.onCustomViewHidden();
-                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-            }
-        });
+        super.onBackPressed();
     }
 }
