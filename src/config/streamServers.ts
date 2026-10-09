@@ -2,74 +2,80 @@ export interface StreamServerConfig {
   id: string;
   name: string;
   base: string;
-  getMovieUrl: (movieId: string | number) => string;
-  getTvUrl: (movieId: string | number, season: number, episode: number, isAutoNext?: boolean) => string;
+  getMovieUrl: (movieId: string | number, startAt?: number) => string;
+  getTvUrl: (movieId: string | number, season: number, episode: number, isAutoNext?: boolean, startAt?: number) => string;
   getTvSeriesUrl?: (movieId: string | number) => string;
 }
 
 /**
  * Server Configuration:
- * - Server 1 to 3: Custom Subdomain di Cloudflare (Less ads, white-label, direct autoplay)
- * - Server 4 to 6: Domain Resmi VidSrc Langsung (Direct fallback: vidsrc.sh, vidsrc2.ru, vidsrc.ir)
+ * - Server 1 to 3: Custom Subdomain di Cloudflare (Less ads, white-label, direct autoplay, auto Sub Indo ds_lang=id,en)
+ * - Server 4 to 6: Domain Resmi VidSrc Langsung (Direct fallback: vidsrc.sh, vidsrc2.ru, vidsrc.ir, auto Sub Indo ds_lang=id,en)
  * - Server 7 to 13: Server cadangan lainnya (vidlink, autoembed, vidsrc.cc, multiembed, warezcdn, nontongo, 2embed)
  */
 export const STREAM_SERVERS: StreamServerConfig[] = [
-  // ── 1-3: Custom Domains ──
+  // ── 1-3: Custom Domains (Auto Sub Indo & Resume Support) ──
   {
     id: 'server-1',
     name: 'Server 1 (Custom Primary)',
     base: 'player1.ykn.my.id',
-    getMovieUrl: (id) => `https://player1.ykn.my.id/embed/movie/${id}`,
-    getTvUrl: (id, season, episode, isAutoNext) =>
-      `https://player1.ykn.my.id/embed/tv/${id}/${season}/${episode}${isAutoNext ? '?autonext=1' : ''}`,
-    getTvSeriesUrl: (id) => `https://player1.ykn.my.id/embed/tv/${id}`
+    getMovieUrl: (id, startAt) =>
+      `https://player1.ykn.my.id/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvUrl: (id, season, episode, isAutoNext, startAt) =>
+      `https://player1.ykn.my.id/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvSeriesUrl: (id) => `https://player1.ykn.my.id/embed/tv/${id}?ds_lang=id,en`
   },
   {
     id: 'server-2',
     name: 'Server 2 (Custom Backup)',
     base: 'player2.ykn.my.id',
-    getMovieUrl: (id) => `https://player2.ykn.my.id/embed/movie/${id}`,
-    getTvUrl: (id, season, episode, isAutoNext) =>
-      `https://player2.ykn.my.id/embed/tv/${id}/${season}/${episode}${isAutoNext ? '?autonext=1' : ''}`,
-    getTvSeriesUrl: (id) => `https://player2.ykn.my.id/embed/tv/${id}`
+    getMovieUrl: (id, startAt) =>
+      `https://player2.ykn.my.id/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvUrl: (id, season, episode, isAutoNext, startAt) =>
+      `https://player2.ykn.my.id/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvSeriesUrl: (id) => `https://player2.ykn.my.id/embed/tv/${id}?ds_lang=id,en`
   },
   {
     id: 'server-3',
     name: 'Server 3 (Custom Mirror)',
     base: 'player3.ykn.my.id',
-    getMovieUrl: (id) => `https://player3.ykn.my.id/embed/movie/${id}`,
-    getTvUrl: (id, season, episode, isAutoNext) =>
-      `https://player3.ykn.my.id/embed/tv/${id}/${season}/${episode}${isAutoNext ? '?autonext=1' : ''}`,
-    getTvSeriesUrl: (id) => `https://player3.ykn.my.id/embed/tv/${id}`
+    getMovieUrl: (id, startAt) =>
+      `https://player3.ykn.my.id/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvUrl: (id, season, episode, isAutoNext, startAt) =>
+      `https://player3.ykn.my.id/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvSeriesUrl: (id) => `https://player3.ykn.my.id/embed/tv/${id}?ds_lang=id,en`
   },
 
-  // ── 4-6: VidSrc Official Direct ──
+  // ── 4-6: VidSrc Official Direct (Auto Sub Indo & Resume Support) ──
   {
     id: 'server-4',
     name: 'Server 4 (VidSrc Primary)',
     base: 'vidsrc.sh',
-    getMovieUrl: (id) => `https://vidsrc.sh/embed/movie/${id}`,
-    getTvUrl: (id, season, episode, isAutoNext) =>
-      `https://vidsrc.sh/embed/tv/${id}/${season}/${episode}${isAutoNext ? '?autonext=1' : ''}`,
-    getTvSeriesUrl: (id) => `https://vidsrc.sh/embed/tv/${id}`
+    getMovieUrl: (id, startAt) =>
+      `https://vidsrc.sh/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvUrl: (id, season, episode, isAutoNext, startAt) =>
+      `https://vidsrc.sh/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvSeriesUrl: (id) => `https://vidsrc.sh/embed/tv/${id}?ds_lang=id,en`
   },
   {
     id: 'server-5',
     name: 'Server 5 (VidSrc Backup)',
     base: 'vidsrc2.ru',
-    getMovieUrl: (id) => `https://vidsrc2.ru/embed/movie/${id}`,
-    getTvUrl: (id, season, episode, isAutoNext) =>
-      `https://vidsrc2.ru/embed/tv/${id}/${season}/${episode}${isAutoNext ? '?autonext=1' : ''}`,
-    getTvSeriesUrl: (id) => `https://vidsrc2.ru/embed/tv/${id}`
+    getMovieUrl: (id, startAt) =>
+      `https://vidsrc2.ru/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvUrl: (id, season, episode, isAutoNext, startAt) =>
+      `https://vidsrc2.ru/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvSeriesUrl: (id) => `https://vidsrc2.ru/embed/tv/${id}?ds_lang=id,en`
   },
   {
     id: 'server-6',
     name: 'Server 6 (VidSrc Mirror)',
     base: 'vidsrc.ir',
-    getMovieUrl: (id) => `https://vidsrc.ir/embed/movie/${id}`,
-    getTvUrl: (id, season, episode, isAutoNext) =>
-      `https://vidsrc.ir/embed/tv/${id}/${season}/${episode}${isAutoNext ? '?autonext=1' : ''}`,
-    getTvSeriesUrl: (id) => `https://vidsrc.ir/embed/tv/${id}`
+    getMovieUrl: (id, startAt) =>
+      `https://vidsrc.ir/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvUrl: (id, season, episode, isAutoNext, startAt) =>
+      `https://vidsrc.ir/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvSeriesUrl: (id) => `https://vidsrc.ir/embed/tv/${id}?ds_lang=id,en`
   },
 
   // ── 7-13: Shifted Original Servers ──
@@ -166,58 +172,60 @@ export const buildStreamUrl = (
     currentSeason?: number;
     currentEpisode?: number;
     isAutoNextEnabled?: boolean;
+    startAt?: number;
   }
 ): string => {
   if (!server) return '';
-  const { movieId, isTV, currentSeason = 1, currentEpisode = 1, isAutoNextEnabled = false } = params;
+  const { movieId, isTV, currentSeason = 1, currentEpisode = 1, isAutoNextEnabled = false, startAt } = params;
 
   const matched = STREAM_SERVERS.find((s) => server.base.includes(s.base) || s.base.includes(server.base));
   if (matched) {
     return isTV
-      ? matched.getTvUrl(movieId, currentSeason, currentEpisode, isAutoNextEnabled)
-      : matched.getMovieUrl(movieId);
+      ? matched.getTvUrl(movieId, currentSeason, currentEpisode, isAutoNextEnabled, startAt)
+      : matched.getMovieUrl(movieId, startAt);
   }
 
   // Fallback for official or legacy domains
   const extra = isAutoNextEnabled ? (server.base.includes('vidlink') ? '&autonext=true' : '?autonext=1') : '';
+  const startParam = startAt && startAt > 0 ? `&startAt=${startAt}` : '';
   if (isTV) {
     if (server.base.includes('player1.ykn.my.id')) {
-      return `https://player1.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+      return `https://player1.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
     }
     if (server.base.includes('player2.ykn.my.id')) {
-      return `https://player2.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+      return `https://player2.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
     }
     if (server.base.includes('player3.ykn.my.id')) {
-      return `https://player3.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+      return `https://player3.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
     }
     if (server.base.includes('vidsrc.sh') || server.base.includes('vidsrcme.su')) {
-      return `https://vidsrc.sh/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+      return `https://vidsrc.sh/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
     }
     if (server.base.includes('vidsrc2.ru') || server.base.includes('vidsrcme.ru')) {
-      return `https://vidsrc2.ru/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+      return `https://vidsrc2.ru/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
     }
     if (server.base.includes('vidsrc.ir') || server.base.includes('vidsrc-me.ru')) {
-      return `https://vidsrc.ir/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+      return `https://vidsrc.ir/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
     }
     return server.base;
   } else {
     if (server.base.includes('player1.ykn.my.id')) {
-      return `https://player1.ykn.my.id/embed/movie/${movieId}`;
+      return `https://player1.ykn.my.id/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
     }
     if (server.base.includes('player2.ykn.my.id')) {
-      return `https://player2.ykn.my.id/embed/movie/${movieId}`;
+      return `https://player2.ykn.my.id/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
     }
     if (server.base.includes('player3.ykn.my.id')) {
-      return `https://player3.ykn.my.id/embed/movie/${movieId}`;
+      return `https://player3.ykn.my.id/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
     }
     if (server.base.includes('vidsrc.sh') || server.base.includes('vidsrcme.su')) {
-      return `https://vidsrc.sh/embed/movie/${movieId}`;
+      return `https://vidsrc.sh/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
     }
     if (server.base.includes('vidsrc2.ru') || server.base.includes('vidsrcme.ru')) {
-      return `https://vidsrc2.ru/embed/movie/${movieId}`;
+      return `https://vidsrc2.ru/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
     }
     if (server.base.includes('vidsrc.ir') || server.base.includes('vidsrc-me.ru')) {
-      return `https://vidsrc.ir/embed/movie/${movieId}`;
+      return `https://vidsrc.ir/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
     }
     return server.base;
   }

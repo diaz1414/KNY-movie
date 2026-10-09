@@ -380,44 +380,69 @@ const Home: React.FC = () => {
                   {(() => {
                     const lastWatched = localStorage.getItem('ykn_last_watched');
                     if (!lastWatched) return null;
-                    const item = JSON.parse(lastWatched);
-                    return (
-                      <div className="px-[var(--container-padding)] animate-slide-up">
-                        <div className="flex items-center gap-2.5 mb-6">
-                          <div className="w-1.5 h-6 bg-netflix-red rounded-full shadow-[0_0_15px_rgba(229,9,20,0.5)]"></div>
-                          <h2 className="text-2xl font-black font-outfit text-white tracking-tight uppercase">
-                            Lanjutkan Menonton
-                          </h2>
-                        </div>
+                    try {
+                      const item = JSON.parse(lastWatched);
+                      if (!item || !item.id) return null;
 
-                        <div
-                          onClick={() => navigateWithAdRedirect(`/watch?id=${item.id}${item.type === 'tv' ? `&s=${item.season}&e=${item.episode}` : ''}`, navigate)}
-                          className="group relative w-full md:w-[450px] aspect-[16/9] rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-netflix-red transition-all duration-500 shadow-2xl"
-                        >
-                          <img src={item.poster} alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-16 h-16 rounded-full bg-netflix-red flex items-center justify-center text-white scale-75 group-hover:scale-100 transition-transform duration-500">
-                              <Play fill="white" size={24} className="ml-1" />
-                            </div>
+                      const isSeries = item.type === 'tv' || item.type === 'series';
+                      const startParam = item.progressSeconds && item.progressSeconds > 15 ? `&startAt=${item.progressSeconds}` : '';
+                      const seasonEpisodeParam = isSeries ? `&type=tv&s=${item.season || 1}&e=${item.episode || 1}` : '';
+                      const targetUrl = `/watch?id=${item.id}${seasonEpisodeParam}${startParam}`;
+                      const percentVal = typeof item.percent === 'number' && item.percent > 0 ? Math.min(100, item.percent) : 35;
+
+                      return (
+                        <div className="px-[var(--container-padding)] animate-slide-up">
+                          <div className="flex items-center gap-2.5 mb-6">
+                            <div className="w-1.5 h-6 bg-netflix-red rounded-full shadow-[0_0_15px_rgba(229,9,20,0.5)]"></div>
+                            <h2 className="text-2xl font-black font-outfit text-white tracking-tight uppercase">
+                              Lanjutkan Menonton
+                            </h2>
                           </div>
-                          <div className="absolute bottom-6 left-6 right-6">
-                            <h3 className="text-xl font-black text-white mb-1 group-hover:text-netflix-red transition-colors">{item.title}</h3>
-                            <div className="flex items-center gap-3">
-                              <span className="text-[10px] font-black bg-netflix-red text-white px-2 py-0.5 rounded shadow-lg uppercase">
-                                {item.type}
-                              </span>
-                              {item.type === 'tv' && (
-                                <span className="text-xs font-bold text-white/60">
-                                  Season {item.season} • Episode {item.episode}
+
+                          <div
+                            onClick={() => navigateWithAdRedirect(targetUrl, navigate)}
+                            className="group relative w-full md:w-[450px] aspect-[16/9] rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-netflix-red transition-all duration-500 shadow-2xl"
+                          >
+                            <img src={item.poster} alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="w-16 h-16 rounded-full bg-netflix-red flex items-center justify-center text-white scale-75 group-hover:scale-100 transition-transform duration-500 shadow-[0_0_25px_rgba(229,9,20,0.6)]">
+                                <Play fill="white" size={24} className="ml-1" />
+                              </div>
+                            </div>
+                            <div className="absolute bottom-6 left-6 right-6">
+                              <h3 className="text-xl font-black text-white mb-1.5 group-hover:text-netflix-red transition-colors truncate">
+                                {item.title}
+                              </h3>
+                              <div className="flex items-center gap-3">
+                                <span className="text-[10px] font-black bg-netflix-red text-white px-2 py-0.5 rounded shadow-lg uppercase tracking-wider">
+                                  {item.type}
                                 </span>
-                              )}
+                                {isSeries && (
+                                  <span className="text-xs font-bold text-white/70">
+                                    Season {item.season || 1} • Episode {item.episode || 1}
+                                  </span>
+                                )}
+                                {typeof item.percent === 'number' && item.percent > 0 && (
+                                  <span className="text-xs font-semibold text-zinc-300 ml-auto">
+                                    {item.percent}% selesai
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            {/* Visual Progress Bar Track & Indicator */}
+                            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/20">
+                              <div
+                                className="h-full bg-netflix-red shadow-[0_0_12px_rgba(229,9,20,0.9)] transition-all duration-500"
+                                style={{ width: `${percentVal}%` }}
+                              />
                             </div>
                           </div>
-                          <div className="absolute bottom-0 left-0 h-1 bg-netflix-red w-[70%] shadow-[0_0_10px_rgba(229,9,20,0.8)]" />
                         </div>
-                      </div>
-                    );
+                      );
+                    } catch (e) {
+                      return null;
+                    }
                   })()}
 
 

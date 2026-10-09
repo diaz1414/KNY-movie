@@ -32,7 +32,9 @@ import {
   Star,
   Monitor,
   MoreHorizontal,
-  ArrowUp
+  ArrowUp,
+  RotateCcw,
+  History
 } from 'lucide-react';
 import { SiWhatsapp, SiFacebook, SiX, SiTelegram } from 'react-icons/si';
 
@@ -113,6 +115,17 @@ const parseLocalDate = (dateStr?: string): Date | null => {
   return isNaN(fallback.getTime()) ? null : fallback;
 };
 
+const formatTime = (totalSeconds: number): string => {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const hrs = Math.floor(s / 3600);
+  const mins = Math.floor((s % 3600) / 60);
+  const secs = s % 60;
+  if (hrs > 0) {
+    return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  }
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+};
+
 const Watch: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -179,6 +192,44 @@ const Watch: React.FC = () => {
     }
     return 0;
   });
+
+  // --- RESUME PLAYBACK STATES (VidSrc startAt) ---
+  const startAtParam = useMemo(() => {
+    const val = Number(searchParams.get('startAt'));
+    return !isNaN(val) && val > 0 ? Math.floor(val) : 0;
+  }, [searchParams]);
+
+  const [activeStartAt, setActiveStartAt] = useState<number>(startAtParam);
+  const [savedProgressSeconds, setSavedProgressSeconds] = useState<number>(0);
+  const [showResumeBanner, setShowResumeBanner] = useState<boolean>(false);
+
+  // Sync / check local saved progress when movieId, currentSeason, or currentEpisode changes
+  useEffect(() => {
+    if (!movieId) return;
+    if (startAtParam > 0) {
+      setActiveStartAt(startAtParam);
+      setShowResumeBanner(false);
+      return;
+    }
+
+    try {
+      const savedRaw = localStorage.getItem(`ykn_progress_${movieId}`);
+      if (savedRaw) {
+        const saved = JSON.parse(savedRaw);
+        const matchSeason = isTV ? saved.s === currentSeason : true;
+        const matchEpisode = isTV ? saved.e === currentEpisode : true;
+        if (matchSeason && matchEpisode && saved.progressSeconds && saved.progressSeconds > 15 && (saved.percent || 0) < 95) {
+          setSavedProgressSeconds(saved.progressSeconds);
+          setShowResumeBanner(true);
+          return;
+        }
+      }
+    } catch (e) {
+      /* ignore */
+    }
+    setShowResumeBanner(false);
+    setSavedProgressSeconds(0);
+  }, [movieId, currentSeason, currentEpisode, isTV, startAtParam]);
 
   const [episodesList, setEpisodesList] = useState<TMDBEpisode[]>([]);
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
@@ -350,11 +401,23 @@ const Watch: React.FC = () => {
   useEffect(() => {
     if (liveId || !movieId || !movieDetail) return;
 
-    // Save to localStorage
+    let existingData: any = {};
+    try {
+      const saved = localStorage.getItem(`ykn_progress_${movieId}`);
+      if (saved) existingData = JSON.parse(saved);
+    } catch (e) { /* ignore */ }
+
+    const isSameEpisode = isTV ? (existingData.s === currentSeason && existingData.e === currentEpisode) : true;
+
+    // Save to localStorage (retain existing progressSeconds if same episode)
     const data = {
+      ...existingData,
       s: currentSeason,
       e: currentEpisode,
       server: currentServerIndex,
+      progressSeconds: isSameEpisode ? (existingData.progressSeconds || 0) : 0,
+      durationSeconds: isSameEpisode ? (existingData.durationSeconds || 0) : 0,
+      percent: isSameEpisode ? (existingData.percent || 0) : 0,
       timestamp: Date.now()
     };
     localStorage.setItem(`ykn_progress_${movieId}`, JSON.stringify(data));
@@ -366,6 +429,9 @@ const Watch: React.FC = () => {
       type: isTV ? 'series' : 'movie',
       season: currentSeason,
       episode: currentEpisode,
+      progressSeconds: data.progressSeconds,
+      durationSeconds: data.durationSeconds,
+      percent: data.percent,
       timestamp: Date.now()
     };
     localStorage.setItem('ykn_last_watched', JSON.stringify(globalData));
@@ -397,9 +463,10 @@ const Watch: React.FC = () => {
       isTV,
       currentSeason,
       currentEpisode,
-      isAutoNextEnabled
+      isAutoNextEnabled,
+      startAt: activeStartAt
     });
-  }, [movieId, isTV, currentSeason, currentEpisode, currentServerIndex, isAutoNextEnabled]);
+  }, [movieId, isTV, currentSeason, currentEpisode, currentServerIndex, isAutoNextEnabled, activeStartAt]);
 
   // Check if unreleased (Coming Soon)
   const isComingSoon = useMemo(() => {
@@ -419,6 +486,9 @@ const Watch: React.FC = () => {
     const nextEp = episodesList.find(e => e.episode_number === nextEpNum);
 
     if (nextEp) {
+      setActiveStartAt(0);
+      setShowResumeBanner(false);
+      setSavedProgressSeconds(0);
       setCurrentEpisode(nextEpNum);
       setIsPlayerLoaded(false);
       setPlayerKey(k => k + 1);
@@ -426,6 +496,9 @@ const Watch: React.FC = () => {
       const nextSeasonNum = currentSeason + 1;
       const nextSeason = movieDetail.seasons.find(s => s.season_number === nextSeasonNum);
       if (nextSeason) {
+        setActiveStartAt(0);
+        setShowResumeBanner(false);
+        setSavedProgressSeconds(0);
         setCurrentSeason(nextSeasonNum);
         setCurrentEpisode(1);
         setIsPlayerLoaded(false);
@@ -434,16 +507,65 @@ const Watch: React.FC = () => {
     }
   }, [isTV, episodesList, currentEpisode, movieDetail, currentSeason]);
 
-  // Auto-next postMessage listener from video player
+  // Auto-next postMessage listener from video player & VidSrc PLAYER_EVENT progress tracking
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
       const data = e.data;
-      const isEnded = data && (
+      if (!data) return;
+
+      // Handle VidSrc official PLAYER_EVENT
+      if (data.type === 'PLAYER_EVENT' && data.data) {
+        const { player_status, player_progress, player_duration } = data.data;
+
+        // Save progress if progress reported (> 5s)
+        if (typeof player_progress === 'number' && player_progress > 5 && movieId) {
+          const duration = typeof player_duration === 'number' && player_duration > 0 ? player_duration : 0;
+          const percent = duration > 0 ? Math.min(100, Math.round((player_progress / duration) * 100)) : 0;
+          const progressSec = Math.floor(player_progress);
+
+          const progressData = {
+            s: currentSeason,
+            e: currentEpisode,
+            server: currentServerIndex,
+            progressSeconds: progressSec,
+            durationSeconds: Math.floor(duration),
+            percent,
+            timestamp: Date.now()
+          };
+          localStorage.setItem(`ykn_progress_${movieId}`, JSON.stringify(progressData));
+
+          if (movieDetail) {
+            const globalData = {
+              id: movieId,
+              title: movieDetail.title || movieDetail.name || '',
+              poster: movieDetail.poster_path ? `https://image.tmdb.org/t/p/w300${movieDetail.poster_path}` : '',
+              type: isTV ? 'series' : 'movie',
+              season: currentSeason,
+              episode: currentEpisode,
+              progressSeconds: progressSec,
+              durationSeconds: Math.floor(duration),
+              percent,
+              timestamp: Date.now()
+            };
+            localStorage.setItem('ykn_last_watched', JSON.stringify(globalData));
+          }
+        }
+
+        // Handle completed playback
+        if (player_status === 'completed') {
+          if (isAutoNextEnabled && isTV) {
+            handlePlayNextEpisode();
+          }
+        }
+        return;
+      }
+
+      // Handle other player ended events (VidLink / 2Embed / legacy)
+      const isEnded = (
         data.event === 'ended' ||
         data.type === 'ended' ||
         data === 'vidlink_ended' ||
-        data === 'vidsrc_ended' ||
-        (data.type === 'PLAYER_EVENT' && data.data?.player_status === 'completed')
+        data === 'vidsrc_ended'
       );
       if (isEnded && isAutoNextEnabled && isTV) {
         handlePlayNextEpisode();
@@ -451,7 +573,7 @@ const Watch: React.FC = () => {
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [isAutoNextEnabled, isTV, handlePlayNextEpisode]);
+  }, [isAutoNextEnabled, isTV, handlePlayNextEpisode, movieId, currentSeason, currentEpisode, currentServerIndex, movieDetail]);
 
   // Switch Server
   const handleSelectServer = (idx: number) => {
@@ -464,6 +586,9 @@ const Watch: React.FC = () => {
   // Switch Season
   const handleSelectSeason = (seasonNum: number) => {
     if (seasonNum === currentSeason) return;
+    setActiveStartAt(0);
+    setShowResumeBanner(false);
+    setSavedProgressSeconds(0);
     setCurrentSeason(seasonNum);
     setCurrentEpisode(1);
     setIsPlayerLoaded(false);
@@ -473,6 +598,9 @@ const Watch: React.FC = () => {
   // Switch Episode
   const handleSelectEpisode = (epNum: number) => {
     if (epNum === currentEpisode) return;
+    setActiveStartAt(0);
+    setShowResumeBanner(false);
+    setSavedProgressSeconds(0);
     setCurrentEpisode(epNum);
     setIsPlayerLoaded(false);
     setPlayerKey(k => k + 1);
@@ -801,6 +929,49 @@ const Watch: React.FC = () => {
                   })}
                 </div>
               </section>
+            )}
+
+            {/* Resume Playback Notification Banner */}
+            {showResumeBanner && savedProgressSeconds > 15 && !isComingSoon && (
+              <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-red-950/40 via-zinc-900/90 to-zinc-900/70 border border-netflix-red/30 backdrop-blur-xl flex flex-wrap items-center justify-between gap-4 shadow-2xl animate-slide-up">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-2xl bg-netflix-red/20 border border-netflix-red/40 flex items-center justify-center text-netflix-red shrink-0 shadow-[0_0_15px_rgba(229,9,20,0.3)]">
+                    <History size={20} />
+                  </div>
+                  <div>
+                    <p className="text-xs md:text-sm font-bold text-white leading-tight">
+                      Lanjutkan menonton dari <span className="text-netflix-red font-black tracking-wide">{formatTime(savedProgressSeconds)}</span>?
+                    </p>
+                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                      Progress tersimpan otomatis dari sesi menonton kamu sebelumnya.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                  <button
+                    onClick={() => {
+                      setShowResumeBanner(false);
+                      setActiveStartAt(0);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5 border border-white/5"
+                  >
+                    <RotateCcw size={13} />
+                    <span>Mulai dari Awal</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowResumeBanner(false);
+                      setActiveStartAt(savedProgressSeconds);
+                      setIsPlayerLoaded(false);
+                      setPlayerKey(k => k + 1);
+                    }}
+                    className="px-5 py-2 rounded-xl bg-netflix-red hover:bg-red-700 text-white text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-[0_0_20px_rgba(229,9,20,0.4)] hover:scale-105"
+                  >
+                    <Play size={13} fill="white" />
+                    <span>Lanjutkan ({formatTime(savedProgressSeconds)})</span>
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Video Player Frame */}
