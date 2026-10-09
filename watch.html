@@ -1539,9 +1539,9 @@
                     if (isComingSoon) return;
                     const type = isTV ? 'tv' : 'movie';
                     servers = [
-                        { name: 'Server 1 (Custom Primary)', icon: 'play-circle', url: isTV ? getPlayerUrl('player1.ykn.my.id', currentSeason, currentEp) : `https://player1.ykn.my.id/embed/movie/${movieId}` },
-                        { name: 'Server 2 (Custom Backup)', icon: 'play-circle', url: isTV ? getPlayerUrl('player2.ykn.my.id', currentSeason, currentEp) : `https://player2.ykn.my.id/embed/movie/${movieId}` },
-                        { name: 'Server 3 (Custom Mirror)', icon: 'play-circle', url: isTV ? getPlayerUrl('player3.ykn.my.id', currentSeason, currentEp) : `https://player3.ykn.my.id/embed/movie/${movieId}` },
+                        { name: 'Server 1 (YKN Primary)', icon: 'play-circle', url: isTV ? getPlayerUrl('player1ykn.codai.site', currentSeason, currentEp) : `https://player1ykn.codai.site/embed/movie/${movieId}` },
+                        { name: 'Server 2 (YKN Backup)', icon: 'play-circle', url: isTV ? getPlayerUrl('player2ykn.codai.site', currentSeason, currentEp) : `https://player2ykn.codai.site/embed/movie/${movieId}` },
+                        { name: 'Server 3 (YKN Mirror)', icon: 'play-circle', url: isTV ? getPlayerUrl('player3ykn.codai.site', currentSeason, currentEp) : `https://player3ykn.codai.site/embed/movie/${movieId}` },
                         { name: 'Server 4 (VidSrc Primary)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrc.sh', currentSeason, currentEp) : `https://vidsrc.sh/embed/movie/${movieId}` },
                         { name: 'Server 5 (VidSrc Backup)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrc2.ru', currentSeason, currentEp) : `https://vidsrc2.ru/embed/movie/${movieId}` },
                         { name: 'Server 6 (VidSrc Mirror)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrc.ir', currentSeason, currentEp) : `https://vidsrc.ir/embed/movie/${movieId}` },
