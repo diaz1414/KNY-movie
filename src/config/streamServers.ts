@@ -17,7 +17,7 @@ export const STREAM_SERVERS: StreamServerConfig[] = [
   // ── 1-3: Custom Domains (Auto Sub Indo & Resume Support) ──
   {
     id: 'server-1',
-    name: 'Server 1 (Custom Primary)',
+    name: 'Server 1 (YKN Primary)',
     base: 'player1.ykn.my.id',
     getMovieUrl: (id, startAt) =>
       `https://player1.ykn.my.id/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
@@ -27,7 +27,7 @@ export const STREAM_SERVERS: StreamServerConfig[] = [
   },
   {
     id: 'server-2',
-    name: 'Server 2 (Custom Backup)',
+    name: 'Server 2 (YKN Backup)',
     base: 'player2.ykn.my.id',
     getMovieUrl: (id, startAt) =>
       `https://player2.ykn.my.id/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
@@ -37,7 +37,7 @@ export const STREAM_SERVERS: StreamServerConfig[] = [
   },
   {
     id: 'server-3',
-    name: 'Server 3 (Custom Mirror)',
+    name: 'Server 3 (YKN Mirror)',
     base: 'player3.ykn.my.id',
     getMovieUrl: (id, startAt) =>
       `https://player3.ykn.my.id/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
