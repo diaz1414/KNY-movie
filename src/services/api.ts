@@ -326,7 +326,7 @@ export const movieService = {
           trailerKey: trailerVideo?.key,
           originalLanguage: movie.original_language,
           streamSources: [
-            { name: 'Server 1 (Primary)', url: `https://vidsrcme.su/embed/movie/${cleanId}` },
+            { name: 'Server 1 (Primary)', url: `https://vidsrc.sh/embed/movie/${cleanId}` },
             { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/movie/${cleanId}` },
             { name: 'Server 3 (Mirror)', url: `https://vidsrc-me.ru/embed/tv/${cleanId}` }, // tv endpoint inside if fallback is used? Actually keep movie
             { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/movie/${cleanId}` },
