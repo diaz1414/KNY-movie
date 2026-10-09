@@ -9,16 +9,44 @@ export interface StreamServerConfig {
 
 /**
  * Server Configuration:
- * - Server 1 to 3 updated to official active VidSrc domains (https://vidsrc.sh/vidsrc/docs/):
- *   Server 1: vidsrc.sh
- *   Server 2: vidsrc2.ru
- *   Server 3: vidsrc.ir
- * - Server 4 to 10 retained as original.
+ * - Server 1 to 3: Custom Subdomain di Cloudflare (Less ads, white-label, direct autoplay)
+ * - Server 4 to 6: Domain Resmi VidSrc Langsung (Direct fallback: vidsrc.sh, vidsrc2.ru, vidsrc.ir)
+ * - Server 7 to 13: Server cadangan lainnya (vidlink, autoembed, vidsrc.cc, multiembed, warezcdn, nontongo, 2embed)
  */
 export const STREAM_SERVERS: StreamServerConfig[] = [
+  // ── 1-3: Custom Domains ──
   {
     id: 'server-1',
-    name: 'Server 1 (Primary)',
+    name: 'Server 1 (Custom Primary)',
+    base: 'player1.ykn.my.id',
+    getMovieUrl: (id) => `https://player1.ykn.my.id/embed/movie/${id}`,
+    getTvUrl: (id, season, episode, isAutoNext) =>
+      `https://player1.ykn.my.id/embed/tv/${id}/${season}/${episode}${isAutoNext ? '?autonext=1' : ''}`,
+    getTvSeriesUrl: (id) => `https://player1.ykn.my.id/embed/tv/${id}`
+  },
+  {
+    id: 'server-2',
+    name: 'Server 2 (Custom Backup)',
+    base: 'player2.ykn.my.id',
+    getMovieUrl: (id) => `https://player2.ykn.my.id/embed/movie/${id}`,
+    getTvUrl: (id, season, episode, isAutoNext) =>
+      `https://player2.ykn.my.id/embed/tv/${id}/${season}/${episode}${isAutoNext ? '?autonext=1' : ''}`,
+    getTvSeriesUrl: (id) => `https://player2.ykn.my.id/embed/tv/${id}`
+  },
+  {
+    id: 'server-3',
+    name: 'Server 3 (Custom Mirror)',
+    base: 'player3.ykn.my.id',
+    getMovieUrl: (id) => `https://player3.ykn.my.id/embed/movie/${id}`,
+    getTvUrl: (id, season, episode, isAutoNext) =>
+      `https://player3.ykn.my.id/embed/tv/${id}/${season}/${episode}${isAutoNext ? '?autonext=1' : ''}`,
+    getTvSeriesUrl: (id) => `https://player3.ykn.my.id/embed/tv/${id}`
+  },
+
+  // ── 4-6: VidSrc Official Direct ──
+  {
+    id: 'server-4',
+    name: 'Server 4 (VidSrc Primary)',
     base: 'vidsrc.sh',
     getMovieUrl: (id) => `https://vidsrc.sh/embed/movie/${id}`,
     getTvUrl: (id, season, episode, isAutoNext) =>
@@ -26,8 +54,8 @@ export const STREAM_SERVERS: StreamServerConfig[] = [
     getTvSeriesUrl: (id) => `https://vidsrc.sh/embed/tv/${id}`
   },
   {
-    id: 'server-2',
-    name: 'Server 2 (Backup)',
+    id: 'server-5',
+    name: 'Server 5 (VidSrc Backup)',
     base: 'vidsrc2.ru',
     getMovieUrl: (id) => `https://vidsrc2.ru/embed/movie/${id}`,
     getTvUrl: (id, season, episode, isAutoNext) =>
@@ -35,17 +63,19 @@ export const STREAM_SERVERS: StreamServerConfig[] = [
     getTvSeriesUrl: (id) => `https://vidsrc2.ru/embed/tv/${id}`
   },
   {
-    id: 'server-3',
-    name: 'Server 3 (Mirror)',
+    id: 'server-6',
+    name: 'Server 6 (VidSrc Mirror)',
     base: 'vidsrc.ir',
     getMovieUrl: (id) => `https://vidsrc.ir/embed/movie/${id}`,
     getTvUrl: (id, season, episode, isAutoNext) =>
       `https://vidsrc.ir/embed/tv/${id}/${season}/${episode}${isAutoNext ? '?autonext=1' : ''}`,
     getTvSeriesUrl: (id) => `https://vidsrc.ir/embed/tv/${id}`
   },
+
+  // ── 7-13: Shifted Original Servers ──
   {
-    id: 'server-4',
-    name: 'Server 4 (HD Stream)',
+    id: 'server-7',
+    name: 'Server 7 (HD Stream)',
     base: 'vidlink.pro',
     getMovieUrl: (id) => `https://vidlink.pro/movie/${id}`,
     getTvUrl: (id, season, episode, isAutoNext) =>
@@ -53,8 +83,8 @@ export const STREAM_SERVERS: StreamServerConfig[] = [
     getTvSeriesUrl: (id) => `https://vidlink.pro/tv/${id}`
   },
   {
-    id: 'server-5',
-    name: 'Server 5 (Regional)',
+    id: 'server-8',
+    name: 'Server 8 (Regional)',
     base: 'autoembed.co',
     getMovieUrl: (id) => `https://autoembed.co/movie/tmdb/${id}`,
     getTvUrl: (id, season, episode, isAutoNext) =>
@@ -62,8 +92,8 @@ export const STREAM_SERVERS: StreamServerConfig[] = [
     getTvSeriesUrl: (id) => `https://autoembed.co/tv/tmdb/${id}`
   },
   {
-    id: 'server-6',
-    name: 'Server 6 (Global)',
+    id: 'server-9',
+    name: 'Server 9 (Global)',
     base: 'vidsrc.cc',
     getMovieUrl: (id) => `https://vidsrc.cc/v2/embed/movie/${id}`,
     getTvUrl: (id, season, episode, isAutoNext) =>
@@ -71,8 +101,8 @@ export const STREAM_SERVERS: StreamServerConfig[] = [
     getTvSeriesUrl: (id) => `https://vidsrc.cc/v2/embed/tv/${id}`
   },
   {
-    id: 'server-7',
-    name: 'Server 7 (Super)',
+    id: 'server-10',
+    name: 'Server 10 (Super)',
     base: 'multiembed.mov',
     getMovieUrl: (id) => `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
     getTvUrl: (id, season, episode, isAutoNext) =>
@@ -80,8 +110,8 @@ export const STREAM_SERVERS: StreamServerConfig[] = [
     getTvSeriesUrl: (id) => `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`
   },
   {
-    id: 'server-8',
-    name: 'Server 8 (Extended)',
+    id: 'server-11',
+    name: 'Server 11 (Extended)',
     base: 'warezcdn.com',
     getMovieUrl: (id) => `https://embed.warezcdn.com/movie/${id}`,
     getTvUrl: (id, season, episode, isAutoNext) =>
@@ -89,8 +119,8 @@ export const STREAM_SERVERS: StreamServerConfig[] = [
     getTvSeriesUrl: (id) => `https://embed.warezcdn.com/tv/${id}`
   },
   {
-    id: 'server-9',
-    name: 'Server 9 (Direct)',
+    id: 'server-12',
+    name: 'Server 12 (Direct)',
     base: 'nontongo.win',
     getMovieUrl: (id) => `https://www.nontongo.win/embed/movie/${id}`,
     getTvUrl: (id, season, episode, isAutoNext) =>
@@ -98,8 +128,8 @@ export const STREAM_SERVERS: StreamServerConfig[] = [
     getTvSeriesUrl: (id) => `https://www.nontongo.win/embed/tv/${id}`
   },
   {
-    id: 'server-10',
-    name: 'Server 10 (Alternative)',
+    id: 'server-13',
+    name: 'Server 13 (Alternative)',
     base: '2embed.cc',
     getMovieUrl: (id) => `https://www.2embed.cc/embed/${id}`,
     getTvUrl: (id, season, episode, isAutoNext) =>
@@ -148,16 +178,46 @@ export const buildStreamUrl = (
       : matched.getMovieUrl(movieId);
   }
 
-  // Fallback for legacy domains or custom bases
+  // Fallback for official or legacy domains
   const extra = isAutoNextEnabled ? (server.base.includes('vidlink') ? '&autonext=true' : '?autonext=1') : '';
   if (isTV) {
-    if (server.base.includes('vidsrcme.su') || server.base.includes('vidsrcme.ru') || server.base.includes('vidsrc-me.ru')) {
-      return `https://${server.base}/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+    if (server.base.includes('player1.ykn.my.id')) {
+      return `https://player1.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+    }
+    if (server.base.includes('player2.ykn.my.id')) {
+      return `https://player2.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+    }
+    if (server.base.includes('player3.ykn.my.id')) {
+      return `https://player3.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+    }
+    if (server.base.includes('vidsrc.sh') || server.base.includes('vidsrcme.su')) {
+      return `https://vidsrc.sh/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+    }
+    if (server.base.includes('vidsrc2.ru') || server.base.includes('vidsrcme.ru')) {
+      return `https://vidsrc2.ru/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
+    }
+    if (server.base.includes('vidsrc.ir') || server.base.includes('vidsrc-me.ru')) {
+      return `https://vidsrc.ir/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
     }
     return server.base;
   } else {
-    if (server.base.includes('vidsrcme.su') || server.base.includes('vidsrcme.ru') || server.base.includes('vidsrc-me.ru')) {
-      return `https://${server.base}/embed/movie/${movieId}`;
+    if (server.base.includes('player1.ykn.my.id')) {
+      return `https://player1.ykn.my.id/embed/movie/${movieId}`;
+    }
+    if (server.base.includes('player2.ykn.my.id')) {
+      return `https://player2.ykn.my.id/embed/movie/${movieId}`;
+    }
+    if (server.base.includes('player3.ykn.my.id')) {
+      return `https://player3.ykn.my.id/embed/movie/${movieId}`;
+    }
+    if (server.base.includes('vidsrc.sh') || server.base.includes('vidsrcme.su')) {
+      return `https://vidsrc.sh/embed/movie/${movieId}`;
+    }
+    if (server.base.includes('vidsrc2.ru') || server.base.includes('vidsrcme.ru')) {
+      return `https://vidsrc2.ru/embed/movie/${movieId}`;
+    }
+    if (server.base.includes('vidsrc.ir') || server.base.includes('vidsrc-me.ru')) {
+      return `https://vidsrc.ir/embed/movie/${movieId}`;
     }
     return server.base;
   }
