@@ -189,14 +189,14 @@ export const buildStreamUrl = (
   const extra = isAutoNextEnabled ? (server.base.includes('vidlink') ? '&autonext=true' : '?autonext=1') : '';
   const startParam = startAt && startAt > 0 ? `&startAt=${startAt}` : '';
   if (isTV) {
-    if (server.base.includes('player1.ykn.my.id')) {
-      return `https://player1.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
+    if (server.base.includes('player1ykn.codai.site') || server.base.includes('player1.ykn.my.id')) {
+      return `https://player1ykn.codai.site/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
     }
-    if (server.base.includes('player2.ykn.my.id')) {
-      return `https://player2.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
+    if (server.base.includes('player2ykn.codai.site') || server.base.includes('player2.ykn.my.id')) {
+      return `https://player2ykn.codai.site/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
     }
-    if (server.base.includes('player3.ykn.my.id')) {
-      return `https://player3.ykn.my.id/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
+    if (server.base.includes('player3ykn.codai.site') || server.base.includes('player3.ykn.my.id')) {
+      return `https://player3ykn.codai.site/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
     }
     if (server.base.includes('vidsrc.sh') || server.base.includes('vidsrcme.su')) {
       return `https://vidsrc.sh/embed/tv/${movieId}/${currentSeason}/${currentEpisode}?ds_lang=id,en${extra}${startParam}`;
@@ -209,14 +209,14 @@ export const buildStreamUrl = (
     }
     return server.base;
   } else {
-    if (server.base.includes('player1.ykn.my.id')) {
-      return `https://player1.ykn.my.id/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
+    if (server.base.includes('player1ykn.codai.site') || server.base.includes('player1.ykn.my.id')) {
+      return `https://player1ykn.codai.site/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
     }
-    if (server.base.includes('player2.ykn.my.id')) {
-      return `https://player2.ykn.my.id/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
+    if (server.base.includes('player2ykn.codai.site') || server.base.includes('player2.ykn.my.id')) {
+      return `https://player2ykn.codai.site/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
     }
-    if (server.base.includes('player3.ykn.my.id')) {
-      return `https://player3.ykn.my.id/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
+    if (server.base.includes('player3ykn.codai.site') || server.base.includes('player3.ykn.my.id')) {
+      return `https://player3ykn.codai.site/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
     }
     if (server.base.includes('vidsrc.sh') || server.base.includes('vidsrcme.su')) {
       return `https://vidsrc.sh/embed/movie/${movieId}?ds_lang=id,en${startParam}`;
