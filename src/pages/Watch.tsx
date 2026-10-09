@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { getStreamById, type PlayableStream } from '../services/streamService';
+import { STREAM_SERVERS, buildStreamUrl } from '../config/streamServers';
 import { LiveVideoPlayer } from '../components/live/LiveVideoPlayer';
 import Footer from '../components/Footer';
 import {
@@ -95,18 +96,7 @@ interface TMDBRecommendation {
   vote_average: number;
 }
 
-const SERVER_CONFIG = [
-  { name: 'Server 1 (Primary)', base: 'vidsrcme.su' },
-  { name: 'Server 2 (Backup)', base: 'vidsrcme.ru' },
-  { name: 'Server 3 (Mirror)', base: 'vidsrc-me.ru' },
-  { name: 'Server 4 (HD Stream)', base: 'vidlink.pro' },
-  { name: 'Server 5 (Regional)', base: 'autoembed.co' },
-  { name: 'Server 6 (Global)', base: 'vidsrc.cc' },
-  { name: 'Server 7 (Super)', base: 'multiembed.mov' },
-  { name: 'Server 8 (Extended)', base: 'warezcdn.com' },
-  { name: 'Server 9 (Direct)', base: 'nontongo.win' },
-  { name: 'Server 10 (Alternative)', base: '2embed.cc' }
-];
+const SERVER_CONFIG = STREAM_SERVERS;
 
 const parseLocalDate = (dateStr?: string): Date | null => {
   if (!dateStr) return null;
@@ -402,34 +392,13 @@ const Watch: React.FC = () => {
   const playerUrl = useMemo(() => {
     if (!movieId) return '';
     const serverObj = SERVER_CONFIG[currentServerIndex] || SERVER_CONFIG[0];
-    const serverBase = serverObj.base;
-    const extra = isAutoNextEnabled ? (serverBase.includes('vidlink') ? '&autonext=true' : '?autonext=1') : '';
-
-    if (isTV) {
-      if (serverBase.includes('vidsrcme.su')) return `https://vidsrcme.su/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
-      if (serverBase.includes('vidsrcme.ru')) return `https://vidsrcme.ru/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
-      if (serverBase.includes('vidsrc-me.ru')) return `https://vidsrc-me.ru/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
-      if (serverBase.includes('vidlink.pro')) return `https://vidlink.pro/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
-      if (serverBase.includes('autoembed.co')) return `https://autoembed.co/tv/tmdb/${movieId}-${currentSeason}-${currentEpisode}${extra}`;
-      if (serverBase.includes('vidsrc.cc')) return `https://vidsrc.cc/v2/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
-      if (serverBase.includes('multiembed.mov')) return `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1&s=${currentSeason}&e=${currentEpisode}${extra}`;
-      if (serverBase.includes('warezcdn.com')) return `https://embed.warezcdn.com/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
-      if (serverBase.includes('nontongo.win')) return `https://www.nontongo.win/embed/tv/${movieId}/${currentSeason}/${currentEpisode}${extra}`;
-      if (serverBase.includes('2embed.cc')) return `https://www.2embed.cc/embedtv/${movieId}&s=${currentSeason}&e=${currentEpisode}${extra}`;
-      return serverBase;
-    } else {
-      if (serverBase.includes('vidsrcme.su')) return `https://vidsrcme.su/embed/movie/${movieId}`;
-      if (serverBase.includes('vidsrcme.ru')) return `https://vidsrcme.ru/embed/movie/${movieId}`;
-      if (serverBase.includes('vidsrc-me.ru')) return `https://vidsrc-me.ru/embed/movie/${movieId}`;
-      if (serverBase.includes('vidlink.pro')) return `https://vidlink.pro/movie/${movieId}`;
-      if (serverBase.includes('autoembed.co')) return `https://autoembed.co/movie/tmdb/${movieId}`;
-      if (serverBase.includes('vidsrc.cc')) return `https://vidsrc.cc/v2/embed/movie/${movieId}`;
-      if (serverBase.includes('multiembed.mov')) return `https://multiembed.mov/directstream.php?video_id=${movieId}&tmdb=1`;
-      if (serverBase.includes('warezcdn.com')) return `https://embed.warezcdn.com/movie/${movieId}`;
-      if (serverBase.includes('nontongo.win')) return `https://www.nontongo.win/embed/movie/${movieId}`;
-      if (serverBase.includes('2embed.cc')) return `https://www.2embed.cc/embed/${movieId}`;
-      return serverBase;
-    }
+    return buildStreamUrl(serverObj, {
+      movieId,
+      isTV,
+      currentSeason,
+      currentEpisode,
+      isAutoNextEnabled
+    });
   }, [movieId, isTV, currentSeason, currentEpisode, currentServerIndex, isAutoNextEnabled]);
 
   // Check if unreleased (Coming Soon)
@@ -469,7 +438,13 @@ const Watch: React.FC = () => {
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
       const data = e.data;
-      const isEnded = data && (data.event === 'ended' || data.type === 'ended' || data === 'vidlink_ended' || data === 'vidsrc_ended');
+      const isEnded = data && (
+        data.event === 'ended' ||
+        data.type === 'ended' ||
+        data === 'vidlink_ended' ||
+        data === 'vidsrc_ended' ||
+        (data.type === 'PLAYER_EVENT' && data.data?.player_status === 'completed')
+      );
       if (isEnded && isAutoNextEnabled && isTV) {
         handlePlayNextEpisode();
       }

@@ -1397,6 +1397,9 @@
 
                 function getPlayerUrl(serverBase, sNum, eNum) {
                     const extra = isAutoNextEnabled ? (serverBase.includes('vidlink') ? '&autonext=true' : '?autonext=1') : '';
+                    if (serverBase.includes('vidsrc.sh')) return `https://vidsrc.sh/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
+                    if (serverBase.includes('vidsrc2.ru')) return `https://vidsrc2.ru/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
+                    if (serverBase.includes('vidsrc.ir')) return `https://vidsrc.ir/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
                     if (serverBase.includes('vidsrcme.su')) return `https://vidsrcme.su/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
                     if (serverBase.includes('vidsrcme.ru')) return `https://vidsrcme.ru/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
                     if (serverBase.includes('vidsrc-me.ru')) return `https://vidsrc-me.ru/embed/tv/${movieId}/${sNum}/${eNum}${extra}`;
@@ -1496,7 +1499,13 @@
                 window.addEventListener('message', (e) => {
                     // Supported event patterns from various providers
                     const data = e.data;
-                    const isEnded = (data.event === 'ended' || data.type === 'ended' || data === 'vidlink_ended' || data === 'vidsrc_ended');
+                    const isEnded = data && (
+                        data.event === 'ended' ||
+                        data.type === 'ended' ||
+                        data === 'vidlink_ended' ||
+                        data === 'vidsrc_ended' ||
+                        (data.type === 'PLAYER_EVENT' && data.data?.player_status === 'completed')
+                    );
 
                     if (isEnded && isAutoNextEnabled) {
                         console.log("Auto Next triggered by player event");
@@ -1509,9 +1518,9 @@
                     if (isComingSoon) return;
                     const type = isTV ? 'tv' : 'movie';
                     servers = [
-                        { name: 'Server 1 (Primary)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrcme.su', currentSeason, currentEp) : `https://vidsrcme.su/embed/movie/${movieId}` },
-                        { name: 'Server 2 (Backup)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrcme.ru', currentSeason, currentEp) : `https://vidsrcme.ru/embed/movie/${movieId}` },
-                        { name: 'Server 3 (Mirror)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrc-me.ru', currentSeason, currentEp) : `https://vidsrc-me.ru/embed/movie/${movieId}` },
+                        { name: 'Server 1 (Primary)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrc.sh', currentSeason, currentEp) : `https://vidsrc.sh/embed/movie/${movieId}` },
+                        { name: 'Server 2 (Backup)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrc2.ru', currentSeason, currentEp) : `https://vidsrc2.ru/embed/movie/${movieId}` },
+                        { name: 'Server 3 (Mirror)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrc.ir', currentSeason, currentEp) : `https://vidsrc.ir/embed/movie/${movieId}` },
                         { name: 'Server 4 (HD Stream)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidlink.pro', currentSeason, currentEp) : `https://vidlink.pro/movie/${movieId}` },
                         { name: 'Server 5 (Regional)', icon: 'play-circle', url: isTV ? getPlayerUrl('autoembed.co', currentSeason, currentEp) : `https://autoembed.co/movie/tmdb/${movieId}` },
                         { name: 'Server 6 (Global)', icon: 'play-circle', url: isTV ? getPlayerUrl('vidsrc.cc', currentSeason, currentEp) : `https://vidsrc.cc/v2/embed/movie/${movieId}` },

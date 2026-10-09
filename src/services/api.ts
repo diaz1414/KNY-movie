@@ -1,6 +1,7 @@
 import axios from 'axios';
 import i18n from '../i18n';
 import { isSupabaseEnabled, supabase } from './supabase';
+import { getMovieStreamSources, getTvStreamSources } from '../config/streamServers';
 
 const getLangCode = () => {
   const lng = i18n.language || 'en';
@@ -274,14 +275,7 @@ export const movieService = {
           voteCount: tv.vote_count,
           trailerKey: trailerVideo?.key,
           originalLanguage: tv.original_language,
-          streamSources: [
-            { name: 'Server 1 (Primary)', url: `https://vidsrc.sh/embed/tv/${cleanId}` }, 
-            { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/tv/${cleanId}` },
-            { name: 'Server 3 (Mirror)', url: `https://vidsrc2.ru/embed/tv/${cleanId}` },
-            { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/tv/${cleanId}` },
-            { name: 'Server 5 (Regional)', url: `https://autoembed.co/tv/tmdb/${cleanId}` },
-            { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/tv/${cleanId}` }
-          ]
+          streamSources: getTvStreamSources(cleanId)
         };
       } catch (err) {
         console.error("Failed to fetch TMDB tv details", err);
@@ -325,19 +319,7 @@ export const movieService = {
           voteCount: movie.vote_count,
           trailerKey: trailerVideo?.key,
           originalLanguage: movie.original_language,
-          streamSources: [
-            { name: 'Server 1 (Primary)', url: `https://vidsrc.sh/embed/movie/${cleanId}` },
-            { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/movie/${cleanId}` },
-            { name: 'Server 3 (Mirror)', url: `https://vidsrc2.ru/embed/tv/${cleanId}` }, // tv endpoint inside if fallback is used? Actually keep movie
-            { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/movie/${cleanId}` },
-            { name: 'Server 5 (Regional)', url: `https://autoembed.co/movie/tmdb/${cleanId}` },
-            { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/movie/${cleanId}` },
-            { name: 'Server 7 (SuperEmbed)', url: `https://multiembed.mov/directstream.php?video_id=${cleanId}&tmdb=1` },
-            { name: 'Server 8 (WarezCDN)', url: `https://embed.warezcdn.com/movie/${cleanId}` },
-            { name: 'Server 9 (NontonGo)', url: `https://www.nontongo.win/embed/movie/${cleanId}` },
-            { name: 'Server 10 (2Embed)', url: `https://www.2embed.cc/embed/${cleanId}` },
-            { name: 'Server Indo (Mino)', url: `https://minochinos.com/embed/${cleanId}` }
-          ]
+          streamSources: getMovieStreamSources(cleanId)
         };
       } catch (e) {
         if (!type) {
@@ -377,14 +359,7 @@ export const movieService = {
               voteCount: tv.vote_count,
               trailerKey: trailerVideo?.key,
               originalLanguage: tv.original_language,
-              streamSources: [
-                { name: 'Server 1 (Primary)', url: `https://vidsrc.sh/embed/tv/${cleanId}` },
-                { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/tv/${cleanId}` },
-                { name: 'Server 3 (Mirror)', url: `https://vidsrc2.ru/embed/tv/${cleanId}` },
-                { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/tv/${cleanId}` },
-                { name: 'Server 5 (Regional)', url: `https://autoembed.co/tv/tmdb/${cleanId}` },
-                { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/tv/${cleanId}` }
-              ]
+              streamSources: getTvStreamSources(cleanId)
             };
           } catch (err) {
             console.error("Failed to fetch TMDB tv fallback details", err);
