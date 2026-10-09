@@ -145,13 +145,15 @@ const Navbar: React.FC = () => {
         variants={{
           top: {
             backgroundColor: 'rgba(0, 0, 0, 0)',
-            height: '90px',
+            height: 'calc(84px + env(safe-area-inset-top, 0px))',
+            paddingTop: 'env(safe-area-inset-top, 0px)',
             backdropFilter: 'blur(0px) saturate(100%)',
             borderBottom: '1px solid rgba(255, 255, 255, 0)',
           },
           scrolled: {
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            height: '70px',
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            height: 'calc(68px + env(safe-area-inset-top, 0px))',
+            paddingTop: 'env(safe-area-inset-top, 0px)',
             backdropFilter: 'blur(20px) saturate(180%)',
             borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           }
@@ -207,7 +209,7 @@ const Navbar: React.FC = () => {
             ref={searchRef} 
             className={`${
               searchOpen 
-                ? 'absolute inset-0 bg-black z-[1002] flex items-center px-[var(--container-padding)] md:relative md:inset-auto md:bg-transparent md:px-0 md:z-auto w-full md:w-auto' 
+                ? 'absolute inset-0 bg-black z-[1002] flex items-center px-[var(--container-padding)] pt-[env(safe-area-inset-top,0px)] md:relative md:inset-auto md:bg-transparent md:px-0 md:pt-0 md:z-auto w-full md:w-auto' 
                 : 'hidden md:flex'
             } items-center`}
           >
@@ -432,10 +434,10 @@ const Navbar: React.FC = () => {
             className="fixed inset-0 bg-black z-[10000] md:hidden overflow-y-auto"
           >
             {/* Close Button Header */}
-            <div className="sticky top-0 right-0 p-8 flex justify-end">
+            <div className="sticky top-0 right-0 p-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] flex justify-end">
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform"
+                className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform cursor-pointer"
               >
                 <X size={28} />
               </button>

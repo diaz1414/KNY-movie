@@ -666,7 +666,7 @@ const Watch: React.FC = () => {
     return (
       <main className="fixed inset-0 z-[9999] bg-black text-white flex flex-col font-sans">
         {/* Top Header Navigation */}
-        <header className="flex items-center justify-between p-4 bg-zinc-950/80 border-b border-white/5 select-none shrink-0 z-50">
+        <header className="flex items-center justify-between p-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] bg-zinc-950/80 border-b border-white/5 select-none shrink-0 z-50">
           <div className="flex items-center gap-3">
             <button
               onClick={handleBack}
@@ -831,7 +831,7 @@ const Watch: React.FC = () => {
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%),linear-gradient(to_bottom,rgba(0,0,0,0.8)_0%,transparent_50%,rgba(0,0,0,0.95)_100%)] pointer-events-none" />
 
       {/* Main Container */}
-      <div className="container mx-auto max-w-[1440px] p-4 md:p-8 pb-32">
+      <div className="container mx-auto max-w-[1440px] p-4 md:p-8 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-32">
         {/* Navigation Back Button */}
         <nav className="mb-8">
           <button

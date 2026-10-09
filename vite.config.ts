@@ -226,7 +226,7 @@ export default defineConfig({
       name: 'Yuk Kita Nonton (YKN)',
       short_name: 'YKN',
       description: 'Streaming Film & Serial Premium',
-      theme_color: '#E50914',
+      theme_color: '#000000',
       background_color: '#000000',
       display: 'standalone',
       orientation: 'portrait',
