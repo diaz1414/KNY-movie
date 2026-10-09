@@ -19,7 +19,12 @@
     --glass-bg: rgba(20, 20, 20, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
     
-    --navbar-height: 80px;
+    --sat: env(safe-area-inset-top, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+
+    --navbar-height: calc(80px + env(safe-area-inset-top, 0px));
     --container-padding: 4%;
     --card-width: 220px;
     --card-height: 330px;
@@ -27,7 +32,6 @@
     --scrollbar-thumb: rgba(255, 255, 255, 0.15);
     --scrollbar-thumb-hover: #E50914;
   }
-
 
   @media (max-width: 1024px) {
     :root {
@@ -38,7 +42,7 @@
 
   @media (max-width: 768px) {
     :root {
-      --navbar-height: 60px;
+      --navbar-height: calc(64px + env(safe-area-inset-top, 0px));
       --container-padding: 6%;
       --card-width: 160px;
       --card-height: 240px;
