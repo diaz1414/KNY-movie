@@ -275,9 +275,9 @@ export const movieService = {
           trailerKey: trailerVideo?.key,
           originalLanguage: tv.original_language,
           streamSources: [
-            { name: 'Server 1 (Primary)', url: `https://vidsrc.sh/embed/tv/${cleanId}` },
+            { name: 'Server 1 (Primary)', url: `https://vidsrc.sh/embed/tv/${cleanId}` }, 
             { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/tv/${cleanId}` },
-            { name: 'Server 3 (Mirror)', url: `https://vaplayer.ru/embed/tv/${cleanId}` },
+            { name: 'Server 3 (Mirror)', url: `https://vidsrc2.ru/embed/tv/${cleanId}` },
             { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/tv/${cleanId}` },
             { name: 'Server 5 (Regional)', url: `https://autoembed.co/tv/tmdb/${cleanId}` },
             { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/tv/${cleanId}` }
@@ -328,7 +328,7 @@ export const movieService = {
           streamSources: [
             { name: 'Server 1 (Primary)', url: `https://vidsrc.sh/embed/movie/${cleanId}` },
             { name: 'Server 2 (Backup)', url: `https://vidsrcme.ru/embed/movie/${cleanId}` },
-            { name: 'Server 3 (Mirror)', url: `https://vaplayer.ru/embed/tv/${cleanId}` }, // tv endpoint inside if fallback is used? Actually keep movie
+            { name: 'Server 3 (Mirror)', url: `https://vidsrc2.ru/embed/tv/${cleanId}` }, // tv endpoint inside if fallback is used? Actually keep movie
             { name: 'Server 4 (HD Stream)', url: `https://vidlink.pro/movie/${cleanId}` },
             { name: 'Server 5 (Regional)', url: `https://autoembed.co/movie/tmdb/${cleanId}` },
             { name: 'Server 6 (Global)', url: `https://vidsrc.cc/v2/embed/movie/${cleanId}` },
