@@ -14,36 +14,36 @@ export interface StreamServerConfig {
  * - Server 7 to 13: Server cadangan lainnya (vidlink, autoembed, vidsrc.cc, multiembed, warezcdn, nontongo, 2embed)
  */
 export const STREAM_SERVERS: StreamServerConfig[] = [
-  // ── 1-3: Custom Domains (Auto Sub Indo & Resume Support) ──
+  // ── 1-3: Custom Shield Domains (codai.site - Auto Sub Indo & Resume Support) ──
   {
     id: 'server-1',
     name: 'Server 1 (YKN Primary)',
-    base: 'player1.ykn.my.id',
+    base: 'player1ykn.codai.site',
     getMovieUrl: (id, startAt) =>
-      `https://player1.ykn.my.id/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+      `https://player1ykn.codai.site/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
     getTvUrl: (id, season, episode, isAutoNext, startAt) =>
-      `https://player1.ykn.my.id/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
-    getTvSeriesUrl: (id) => `https://player1.ykn.my.id/embed/tv/${id}?ds_lang=id,en`
+      `https://player1ykn.codai.site/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvSeriesUrl: (id) => `https://player1ykn.codai.site/embed/tv/${id}?ds_lang=id,en`
   },
   {
     id: 'server-2',
     name: 'Server 2 (YKN Backup)',
-    base: 'player2.ykn.my.id',
+    base: 'player2ykn.codai.site',
     getMovieUrl: (id, startAt) =>
-      `https://player2.ykn.my.id/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+      `https://player2ykn.codai.site/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
     getTvUrl: (id, season, episode, isAutoNext, startAt) =>
-      `https://player2.ykn.my.id/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
-    getTvSeriesUrl: (id) => `https://player2.ykn.my.id/embed/tv/${id}?ds_lang=id,en`
+      `https://player2ykn.codai.site/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvSeriesUrl: (id) => `https://player2ykn.codai.site/embed/tv/${id}?ds_lang=id,en`
   },
   {
     id: 'server-3',
     name: 'Server 3 (YKN Mirror)',
-    base: 'player3.ykn.my.id',
+    base: 'player3ykn.codai.site',
     getMovieUrl: (id, startAt) =>
-      `https://player3.ykn.my.id/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+      `https://player3ykn.codai.site/embed/movie/${id}?ds_lang=id,en${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
     getTvUrl: (id, season, episode, isAutoNext, startAt) =>
-      `https://player3.ykn.my.id/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
-    getTvSeriesUrl: (id) => `https://player3.ykn.my.id/embed/tv/${id}?ds_lang=id,en`
+      `https://player3ykn.codai.site/embed/tv/${id}/${season}/${episode}?ds_lang=id,en${isAutoNext ? '&autonext=1' : ''}${startAt && startAt > 0 ? `&startAt=${startAt}` : ''}`,
+    getTvSeriesUrl: (id) => `https://player3ykn.codai.site/embed/tv/${id}?ds_lang=id,en`
   },
 
   // ── 4-6: VidSrc Official Direct (Auto Sub Indo & Resume Support) ──
