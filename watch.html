@@ -137,6 +137,24 @@
         .modal-btn:active {
             transform: scale(0.98);
         }
+
+        /* Fullscreen normalization to prevent mobile asymmetric clipping */
+        :fullscreen,
+        ::backdrop,
+        iframe:fullscreen,
+        div:fullscreen,
+        ::-webkit-full-screen {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: #000 !important;
+        }
     </style>
     <script>
         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
@@ -489,7 +507,7 @@
             -->
 
             <!-- Video Player -->
-            <div class="player-frame relative w-full aspect-video bg-black rounded-3xl overflow-hidden border border-white/8 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.9)] mb-20 transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] md:rounded-3xl max-md:rounded-none max-md:w-[calc(100%+3rem)] max-md:-ml-6 animate-slide-up [animation-delay:0.4s]"
+            <div class="player-frame relative w-full aspect-video bg-black rounded-2xl md:rounded-3xl overflow-hidden border border-white/8 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.9)] mb-10 transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] animate-slide-up [animation-delay:0.4s]"
                 id="player-wrapper">
                 <div
                     class="player-loader absolute inset-0 flex flex-col items-center justify-center bg-[#020202] z-[5] opacity-0 pointer-events-none transition-opacity duration-500 backdrop-blur-sm">
